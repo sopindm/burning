@@ -1,3 +1,6 @@
 [submodule "lisp"]
 	path = lisp
 	url = git@github.com:sopindm/burning-lisp.git
+[submodule "testing"]
+	path = testing
+	url = git@github.com:sopindm/burning-testing.git

@@ -1,0 +1,33 @@
+(in-package #:burning-btr-test)
+
+(in-case errors-test)
+
+(defun !btr-error= (err string)
+  (!condition (error err)
+	      btr-error
+	      (btr-error-string string)))
+
+(deftest messages-test
+  (!btr-error= (make-condition 'wrong-xml-node-name :got "bla" :expected "blabla") 
+	       (lines "Wrong XML node name - bla, expected blabla."))
+  (!btr-error= (make-condition 'entity-with-same-name-already-exists :name "me")
+	       (lines "File me already in repository."))
+  (!btr-error= (make-condition 'no-action-specified-error)
+	       (lines "Error - no action specified."))
+  (!btr-error= (make-condition 'too-much-actions-specified-error :actions '("act1" "act2" "act3"))
+	       (lines "Error - specified more than one action: act1, act2, act3."))
+  (!btr-error= (make-condition 'no-run-function-error :action "some action")
+	       (lines "No run function was specified for some action."))
+  (!btr-error= (make-condition 'repository-already-exists-error :path (path-from-string "way/to.hell"))
+	       (lines "Path way/to.hell already in repository."))
+  (!btr-error= (make-condition 'repository-does-not-exist-error :path (path-from-string "way/to.heaven"))
+	       (lines "Path way/to.heaven isn't in repository."))
+  (!btr-error= (make-condition 'path-is-not-in-repository-error :path (path-from-string "my/own.way")
+			       :repository-path (path-from-string "main.stream"))
+	       (lines "Entity my/own.way isn't in repository main.stream."))
+  (!btr-error= (make-condition 'file-is-not-in-repository-error :path (path-from-string "dead/end.road")
+			       :repository-path (path-from-string "right.way"))
+	       (lines "File dead/end.road isn't in repository right.way."))
+  (!btr-error= (make-condition 'directory-is-not-empty-error :path (path-from-string "life/")
+			       :repository-path (path-from-string "death/"))
+	       (lines "Directory life/ in repository death/ is not empty.")))

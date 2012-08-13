@@ -1,0 +1,8 @@
+echo "Testing CLISP..."
+abspath=$(cd ${0%/*} && echo $PWD/${0##*/})
+path_only=`dirname "$abspath"`
+
+clisp --silent -i ~/.clisprc $path_only'/test.lisp'
+
+echo "Done"
+echo ""

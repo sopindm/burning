@@ -1,0 +1,4 @@
+abspath=$(cd ${0%/*} && echo $PWD/${0##*/})
+path_only=`dirname "$abspath"`
+
+ls $path_only/scripts/testing/test-* | cat | while read line; do sh $line; done;

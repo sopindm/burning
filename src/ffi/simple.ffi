@@ -1,0 +1,10 @@
+(:package #:burning-ffi-test)
+
+(:library "ffi_test")
+
+(:class "int_holder" (:constructor "make_holder" ()) (:destructor "delete_holder"))
+(:function ("hld_holded" :int) ((holder int-holder)))
+(:function ("hld_set_holded" :void) ((holder int-holder) (value :int)))
+
+(:class "mega_holder" (:inherit "int_holder"))
+(:function ("make_mega_holder" int-holder) ())

@@ -1,0 +1,8 @@
+echo "Testing ClozureCL..."
+abspath=$(cd ${0%/*} && echo $PWD/${0##*/})
+path_only=`dirname "$abspath"`
+
+ccl --load $path_only'/test.lisp'
+
+echo "Done"
+echo ""

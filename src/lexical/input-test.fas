@@ -1,0 +1,417 @@
+(|SYSTEM|::|VERSION| '(20080430.))
+#0Y_ #0Y |CHARSET|::|UTF-8|
+#Y(#:|1 1 (IN-PACKAGE :BURNING-LEXICAL-TEST)-1|
+   #17Y(00 00 00 00 00 00 00 00 20 01 DA 31 F6 0F 01 19 01)
+   ("BURNING-LEXICAL-TEST" |COMMON-LISP|::|*PACKAGE*|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|3 3 (DEFCASE INPUT-TEST)-2-1|
+   #22Y(00 00 00 00 00 00 00 00 20 01 6B 00 DB 7B 01 30 02 0F 00 3E 19 01)
+   (|BURNING-TESTING|::|*TEST-CASES*| |BURNING-LEXICAL-TEST|::|INPUT-TEST|
+    |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|3 3 (DEFCASE INPUT-TEST)-2-2|
+   #18Y(00 00 00 00 00 00 00 00 20 01 DA DB 63 32 A2 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|INPUT-TEST| |BURNING-TESTING|::|TESTS|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|3 3 (DEFCASE INPUT-TEST)-2-3|
+   #44Y(00 00 00 00 00 00 00 00 20 01 6B 00 99 01 DC DD 63 DE 63 DF B3 E0 E1 63
+        E2 63 E3 64 7B 06 33 02 23 37 07 16 01 DC 38 02 32 3A 19 01)
+   (|CLOS|::|<STANDARD-CLASS>| |CLOS|::|ENSURE-CLASS|
+    |BURNING-LEXICAL-TEST|::|INPUT-TEST| :|DIRECT-SUPERCLASSES| :|DIRECT-SLOTS|
+    :|METACLASS| (:|FIXED-SLOT-LOCATIONS| |COMMON-LISP|::|NIL|)
+    :|DIRECT-DEFAULT-INITARGS| :|DOCUMENTATION| :|GENERIC-ACCESSORS|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|5 12 (DEFTEST INPUT-TEST SIMPLE-EOF-TEST ...)-3-1|
+   #31Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 72 9E DC 7B 01 70 03 DA DB AE
+        32 A2 16 01 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|INPUT-TEST| |BURNING-TESTING|::|TESTS|
+    |BURNING-LEXICAL-TEST|::|SIMPLE-EOF-TEST| |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|5 12 (DEFTEST INPUT-TEST SIMPLE-EOF-TEST ...)-3-2|
+   #43Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 8F 9E 03 DA 2F 02 DA DD DE 63
+        DF E0 E1 E2 E3 E4 38 02 72 3A 7B 01 7B 08 2D 03 0B 19 01)
+   (|BURNING-LEXICAL-TEST|::|SIMPLE-EOF-TEST| |SYSTEM|::|TRACED-DEFINITION|
+    |SYSTEM|::|UNTRACE1|
+    #Y(#:|5 12 (DEFTEST INPUT-TEST SIMPLE-EOF-TEST ...)-3-2-1|
+       #15Y(00 00 00 00 01 00 00 00 20 02 DA C6 5D 19 02)
+       (#Y(#:|5 12 (DEFTEST INPUT-TEST SIMPLE-EOF-TEST ...)-3-2-1-1|
+           #161Y(03 00 01 00 01 00 00 00 20 02 DA 6B 01 DC DD 33 03 15 02 10 04
+                 DF 38 02 72 8D 53 12 AE 6F 06 88 07 0A 00 0F 04 E2 6B 01 E3 33
+                 02 15 3E 54 67 00 00 00 2F 0A 55 16 01 E5 38 02 72 8D 53 1A AE
+                 6F 06 6F 07 AC 00 22 0D 00 0F 04 E6 6B 01 E7 AF 01 02 33 05 15
+                 16 01 3E 54 67 00 00 00 2F 0A 55 16 01 E8 38 02 72 8D 53 1B AE
+                 6F 06 AC 6F 07 AC 00 22 0D 00 0F 04 E9 6B 01 EA AF 01 02 33 05
+                 15 16 02 3E 54 67 00 00 00 2F 0A 55 16 01 6B 04 EB 30 12 0E 04
+                 1C 04 00 11 19 02 ED 6B 01 33 01 15 1B 75)
+           (#Y(#:|5 12 (DEFTEST INPUT-TEST SIMPLE-EOF-TEST ...)-3-2-1-1-1|
+               #34Y(00 00 00 00 03 00 00 00 21 19 DA B1 38 02 31 95 AF B1 31 90
+                    DB B1 31 94 AE B1 31 90 B0 31 97 9E 19 05)
+               ("Running test " #\.)
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            |COMMON-LISP|::|*STANDARD-OUTPUT*|
+            |BURNING-LEXICAL-TEST|::|INPUT-TEST|
+            |BURNING-LEXICAL-TEST|::|SIMPLE-EOF-TEST|
+            |BURNING-TESTING|::|*TEST-RESULT*| ""
+            |BURNING-LEXICAL|::|MAKE-ITERATOR| |BURNING-LEXICAL|::|EOF-P|
+            #Y(#:|5 12 (DEFTEST INPUT-TEST SIMPLE-EOF-TEST ...)-3-2-1-1-2|
+               #23Y(00 00 00 00 02 00 00 00 21 18 AE B0 31 90 DA B0 38 02 31 95
+                    9E 19 04)
+               (" is nil.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|EOF-P|
+             (|BURNING-LEXICAL|::|MAKE-ITERATOR| |BURNING-LEXICAL-TEST|::|IN|))
+            |COMMON-LISP|::|CLOSE| "some string"
+            #Y(#:|5 12 (DEFTEST INPUT-TEST SIMPLE-EOF-TEST ...)-3-2-1-1-3|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|EOF-P|
+             (|BURNING-LEXICAL|::|MAKE-ITERATOR| |BURNING-LEXICAL-TEST|::|IN|))
+            "other string"
+            #Y(#:|5 12 (DEFTEST INPUT-TEST SIMPLE-EOF-TEST ...)-3-2-1-1-4|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|EOF-P| |BURNING-LEXICAL-TEST|::|ITER|)
+            "Test INPUT-TEST.SIMPLE-EOF-TEST"
+            |BURNING-TESTING|::|REPORT-RESULT|
+            #Y(#:|5 12 (DEFTEST INPUT-TEST SIMPLE-EOF-TEST ...)-3-2-1-1-5|
+               #19Y(00 00 00 00 01 00 00 00 21 17 DA AF 38 02 31 95 9E 19 03)
+               ("OK.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)))
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        (|COMMON-LISP|::|T|))
+       (|COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|))
+    :|QUALIFIERS| :|LAMBDA-LIST| (|BURNING-TESTING|::|A-CASE|)
+    |CLOS|::|SIGNATURE|
+    #(1. 0. |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|
+      |COMMON-LISP|::|NIL|)
+    :|SPECIALIZERS| |BURNING-LEXICAL-TEST|::|INPUT-TEST|
+    |CLOS|::|DO-DEFMETHOD|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|14 20 (DEFTEST INPUT-TEST GET-TEST ...)-4-1|
+   #31Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 72 9E DC 7B 01 70 03 DA DB AE
+        32 A2 16 01 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|INPUT-TEST| |BURNING-TESTING|::|TESTS|
+    |BURNING-LEXICAL-TEST|::|GET-TEST| |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|14 20 (DEFTEST INPUT-TEST GET-TEST ...)-4-2|
+   #43Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 8F 9E 03 DA 2F 02 DA DD DE 63
+        DF E0 E1 E2 E3 E4 38 02 72 3A 7B 01 7B 08 2D 03 0B 19 01)
+   (|BURNING-LEXICAL-TEST|::|GET-TEST| |SYSTEM|::|TRACED-DEFINITION|
+    |SYSTEM|::|UNTRACE1|
+    #Y(#:|14 20 (DEFTEST INPUT-TEST GET-TEST ...)-4-2-1|
+       #15Y(00 00 00 00 01 00 00 00 20 02 DA C6 5D 19 02)
+       (#Y(#:|14 20 (DEFTEST INPUT-TEST GET-TEST ...)-4-2-1-1|
+           #146Y(03 00 01 00 01 00 00 00 20 02 DA 6B 01 DC DD 33 03 15 02 10 04
+                 DF 38 02 72 8D 53 80 57 AE 6F 06 AC 6F 07 AC 24 08 0D 00 0F 04
+                 E3 6B 01 E4 AF E2 E2 33 05 15 16 01 AC 6F 07 AC 24 0B 0D 00 0F
+                 04 E6 6B 01 E7 AF E5 E5 33 05 15 16 01 AC 6F 07 AC 24 0E 0D 00
+                 0F 04 E9 6B 01 EA AF E8 E8 33 05 15 16 01 AC 88 11 0A 00 0F 04
+                 EC 6B 01 ED 33 02 15 16 01 3E 54 67 00 00 00 2F 14 55 16 01 6B
+                 04 EF 30 16 0E 04 1C 04 00 11 19 02 F1 6B 01 33 01 15 1B 75)
+           (#Y(#:|14 20 (DEFTEST INPUT-TEST GET-TEST ...)-4-2-1-1-1|
+               #34Y(00 00 00 00 03 00 00 00 21 19 DA B1 38 02 31 95 AF B1 31 90
+                    DB B1 31 94 AE B1 31 90 B0 31 97 9E 19 05)
+               ("Running test " #\.)
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            |COMMON-LISP|::|*STANDARD-OUTPUT*|
+            |BURNING-LEXICAL-TEST|::|INPUT-TEST|
+            |BURNING-LEXICAL-TEST|::|GET-TEST|
+            |BURNING-TESTING|::|*TEST-RESULT*| "bla"
+            |BURNING-LEXICAL|::|MAKE-ITERATOR| |BURNING-LEXICAL|::|GET-NEXT|
+            #\b
+            #Y(#:|14 20 (DEFTEST INPUT-TEST GET-TEST ...)-4-2-1-1-2|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|GET-NEXT| |BURNING-LEXICAL-TEST|::|I|) #\l
+            #Y(#:|14 20 (DEFTEST INPUT-TEST GET-TEST ...)-4-2-1-1-3|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|GET-NEXT| |BURNING-LEXICAL-TEST|::|I|) #\a
+            #Y(#:|14 20 (DEFTEST INPUT-TEST GET-TEST ...)-4-2-1-1-4|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|GET-NEXT| |BURNING-LEXICAL-TEST|::|I|)
+            |BURNING-LEXICAL|::|EOF-P|
+            #Y(#:|14 20 (DEFTEST INPUT-TEST GET-TEST ...)-4-2-1-1-5|
+               #23Y(00 00 00 00 02 00 00 00 21 18 AE B0 31 90 DA B0 38 02 31 95
+                    9E 19 04)
+               (" is nil.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|EOF-P| |BURNING-LEXICAL-TEST|::|I|)
+            |COMMON-LISP|::|CLOSE| "Test INPUT-TEST.GET-TEST"
+            |BURNING-TESTING|::|REPORT-RESULT|
+            #Y(#:|14 20 (DEFTEST INPUT-TEST GET-TEST ...)-4-2-1-1-6|
+               #19Y(00 00 00 00 01 00 00 00 21 17 DA AF 38 02 31 95 9E 19 03)
+               ("OK.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)))
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        (|COMMON-LISP|::|T|))
+       (|COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|))
+    :|QUALIFIERS| :|LAMBDA-LIST| (|BURNING-TESTING|::|A-CASE|)
+    |CLOS|::|SIGNATURE|
+    #(1. 0. |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|
+      |COMMON-LISP|::|NIL|)
+    :|SPECIALIZERS| |BURNING-LEXICAL-TEST|::|INPUT-TEST|
+    |CLOS|::|DO-DEFMETHOD|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|22 27 (DEFTEST INPUT-TEST READ-OVER-BUFFER ...)-5-1|
+   #31Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 72 9E DC 7B 01 70 03 DA DB AE
+        32 A2 16 01 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|INPUT-TEST| |BURNING-TESTING|::|TESTS|
+    |BURNING-LEXICAL-TEST|::|READ-OVER-BUFFER| |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|22 27 (DEFTEST INPUT-TEST READ-OVER-BUFFER ...)-5-2|
+   #43Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 8F 9E 03 DA 2F 02 DA DD DE 63
+        DF E0 E1 E2 E3 E4 38 02 72 3A 7B 01 7B 08 2D 03 0B 19 01)
+   (|BURNING-LEXICAL-TEST|::|READ-OVER-BUFFER| |SYSTEM|::|TRACED-DEFINITION|
+    |SYSTEM|::|UNTRACE1|
+    #Y(#:|22 27 (DEFTEST INPUT-TEST READ-OVER-BUFFER ...)-5-2-1|
+       #15Y(00 00 00 00 01 00 00 00 20 02 DA C6 5D 19 02)
+       (#Y(#:|22 27 (DEFTEST INPUT-TEST READ-OVER-BUFFER ...)-5-2-1-1|
+           #125Y(03 00 01 00 01 00 00 00 20 02 DA 6B 01 DC DD 33 03 15 02 10 04
+                 DF 38 02 72 8D 53 80 42 AE E0 70 07 AC 6F 08 AC 24 09 0D 00 0F
+                 04 E4 6B 01 E5 AF E3 E3 33 05 15 16 01 AC 6F 08 AC 24 09 0D 00
+                 0F 04 E6 6B 01 E7 AF E3 E3 33 05 15 16 01 AC 88 0E 0A 00 0F 04
+                 E9 6B 01 EA 33 02 15 16 01 3E 54 67 00 00 00 2F 11 55 16 01 6B
+                 04 EC 30 13 0E 04 1C 04 00 11 19 02 EE 6B 01 33 01 15 1B 75)
+           (#Y(#:|22 27 (DEFTEST INPUT-TEST READ-OVER-BUFFER ...)-5-2-1-1-1|
+               #34Y(00 00 00 00 03 00 00 00 21 19 DA B1 38 02 31 95 AF B1 31 90
+                    DB B1 31 94 AE B1 31 90 B0 31 97 9E 19 05)
+               ("Running test " #\.)
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            |COMMON-LISP|::|*STANDARD-OUTPUT*|
+            |BURNING-LEXICAL-TEST|::|INPUT-TEST|
+            |BURNING-LEXICAL-TEST|::|READ-OVER-BUFFER|
+            |BURNING-TESTING|::|*TEST-RESULT*| "bb" 1.
+            |BURNING-LEXICAL|::|MAKE-ITERATOR| |BURNING-LEXICAL|::|GET-NEXT|
+            #\b
+            #Y(#:|22 27 (DEFTEST INPUT-TEST READ-OVER-BUFFER ...)-5-2-1-1-2|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|GET-NEXT| |BURNING-LEXICAL-TEST|::|ITERATOR|)
+            #Y(#:|22 27 (DEFTEST INPUT-TEST READ-OVER-BUFFER ...)-5-2-1-1-3|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|GET-NEXT| |BURNING-LEXICAL-TEST|::|ITERATOR|)
+            |BURNING-LEXICAL|::|EOF-P|
+            #Y(#:|22 27 (DEFTEST INPUT-TEST READ-OVER-BUFFER ...)-5-2-1-1-4|
+               #23Y(00 00 00 00 02 00 00 00 21 18 AE B0 31 90 DA B0 38 02 31 95
+                    9E 19 04)
+               (" is nil.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|EOF-P| |BURNING-LEXICAL-TEST|::|ITERATOR|)
+            |COMMON-LISP|::|CLOSE| "Test INPUT-TEST.READ-OVER-BUFFER"
+            |BURNING-TESTING|::|REPORT-RESULT|
+            #Y(#:|22 27 (DEFTEST INPUT-TEST READ-OVER-BUFFER ...)-5-2-1-1-5|
+               #19Y(00 00 00 00 01 00 00 00 21 17 DA AF 38 02 31 95 9E 19 03)
+               ("OK.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)))
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        (|COMMON-LISP|::|T|))
+       (|COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|))
+    :|QUALIFIERS| :|LAMBDA-LIST| (|BURNING-TESTING|::|A-CASE|)
+    |CLOS|::|SIGNATURE|
+    #(1. 0. |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|
+      |COMMON-LISP|::|NIL|)
+    :|SPECIALIZERS| |BURNING-LEXICAL-TEST|::|INPUT-TEST|
+    |CLOS|::|DO-DEFMETHOD|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|29 40 (DEFTEST INPUT-TEST RESET-TEST ...)-6-1|
+   #31Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 72 9E DC 7B 01 70 03 DA DB AE
+        32 A2 16 01 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|INPUT-TEST| |BURNING-TESTING|::|TESTS|
+    |BURNING-LEXICAL-TEST|::|RESET-TEST| |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|29 40 (DEFTEST INPUT-TEST RESET-TEST ...)-6-2|
+   #43Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 8F 9E 03 DA 2F 02 DA DD DE 63
+        DF E0 E1 E2 E3 E4 38 02 72 3A 7B 01 7B 08 2D 03 0B 19 01)
+   (|BURNING-LEXICAL-TEST|::|RESET-TEST| |SYSTEM|::|TRACED-DEFINITION|
+    |SYSTEM|::|UNTRACE1|
+    #Y(#:|29 40 (DEFTEST INPUT-TEST RESET-TEST ...)-6-2-1|
+       #15Y(00 00 00 00 01 00 00 00 20 02 DA C6 5D 19 02)
+       (#Y(#:|29 40 (DEFTEST INPUT-TEST RESET-TEST ...)-6-2-1-1|
+           #231Y(03 00 01 00 01 00 00 00 20 02 DA 6B 01 DC DD 33 03 15 02 10 04
+                 DF 38 02 72 8D 53 80 AB AE E0 70 07 AC 6F 08 AC 24 09 0D 00 0F
+                 04 E4 6B 01 E5 AF E3 E3 33 05 15 16 01 AC 6F 08 AC 24 09 0D 00
+                 0F 04 E6 6B 01 E7 AF E3 E3 33 05 15 16 01 AC 6F 08 AC 24 09 0D
+                 00 0F 04 E8 6B 01 E9 AF E3 E3 33 05 15 16 01 AC 88 10 0A 00 0F
+                 04 EB 6B 01 EC 33 02 15 AC 2F 13 AC 6F 08 AC 24 09 0D 00 0F 04
+                 EE 6B 01 EF AF E3 E3 33 05 15 16 01 AC 6F 08 AC 24 09 0D 00 0F
+                 04 F0 6B 01 F1 AF E3 E3 33 05 15 16 01 AC 6F 08 AC 24 09 0D 00
+                 0F 04 F2 6B 01 F3 AF E3 E3 33 05 15 16 01 AC 88 10 0A 00 0F 04
+                 F4 6B 01 F5 33 02 15 16 01 3E 54 67 00 00 00 2F 1C 55 16 01 6B
+                 04 F7 30 1E 0E 04 1C 04 00 11 19 02 65 1F 6B 01 33 01 15 1B
+                 74)
+           (#Y(#:|29 40 (DEFTEST INPUT-TEST RESET-TEST ...)-6-2-1-1-1|
+               #34Y(00 00 00 00 03 00 00 00 21 19 DA B1 38 02 31 95 AF B1 31 90
+                    DB B1 31 94 AE B1 31 90 B0 31 97 9E 19 05)
+               ("Running test " #\.)
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            |COMMON-LISP|::|*STANDARD-OUTPUT*|
+            |BURNING-LEXICAL-TEST|::|INPUT-TEST|
+            |BURNING-LEXICAL-TEST|::|RESET-TEST|
+            |BURNING-TESTING|::|*TEST-RESULT*| "bbb" 1.
+            |BURNING-LEXICAL|::|MAKE-ITERATOR| |BURNING-LEXICAL|::|GET-NEXT|
+            #\b
+            #Y(#:|29 40 (DEFTEST INPUT-TEST RESET-TEST ...)-6-2-1-1-2|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|GET-NEXT| |BURNING-LEXICAL-TEST|::|ITERATOR|)
+            #Y(#:|29 40 (DEFTEST INPUT-TEST RESET-TEST ...)-6-2-1-1-3|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|GET-NEXT| |BURNING-LEXICAL-TEST|::|ITERATOR|)
+            #Y(#:|29 40 (DEFTEST INPUT-TEST RESET-TEST ...)-6-2-1-1-4|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|GET-NEXT| |BURNING-LEXICAL-TEST|::|ITERATOR|)
+            |BURNING-LEXICAL|::|EOF-P|
+            #Y(#:|29 40 (DEFTEST INPUT-TEST RESET-TEST ...)-6-2-1-1-5|
+               #23Y(00 00 00 00 02 00 00 00 21 18 AE B0 31 90 DA B0 38 02 31 95
+                    9E 19 04)
+               (" is nil.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|EOF-P| |BURNING-LEXICAL-TEST|::|ITERATOR|)
+            |BURNING-LEXICAL|::|RESET|
+            #Y(#:|29 40 (DEFTEST INPUT-TEST RESET-TEST ...)-6-2-1-1-6|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|GET-NEXT| |BURNING-LEXICAL-TEST|::|ITERATOR|)
+            #Y(#:|29 40 (DEFTEST INPUT-TEST RESET-TEST ...)-6-2-1-1-7|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|GET-NEXT| |BURNING-LEXICAL-TEST|::|ITERATOR|)
+            #Y(#:|29 40 (DEFTEST INPUT-TEST RESET-TEST ...)-6-2-1-1-8|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|GET-NEXT| |BURNING-LEXICAL-TEST|::|ITERATOR|)
+            #Y(#:|29 40 (DEFTEST INPUT-TEST RESET-TEST ...)-6-2-1-1-9|
+               #23Y(00 00 00 00 02 00 00 00 21 18 AE B0 31 90 DA B0 38 02 31 95
+                    9E 19 04)
+               (" is nil.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|EOF-P| |BURNING-LEXICAL-TEST|::|ITERATOR|)
+            |COMMON-LISP|::|CLOSE| "Test INPUT-TEST.RESET-TEST"
+            |BURNING-TESTING|::|REPORT-RESULT|
+            #Y(#:|29 40 (DEFTEST INPUT-TEST RESET-TEST ...)-6-2-1-1-10|
+               #19Y(00 00 00 00 01 00 00 00 21 17 DA AF 38 02 31 95 9E 19 03)
+               ("OK.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)))
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        (|COMMON-LISP|::|T|))
+       (|COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|))
+    :|QUALIFIERS| :|LAMBDA-LIST| (|BURNING-TESTING|::|A-CASE|)
+    |CLOS|::|SIGNATURE|
+    #(1. 0. |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|
+      |COMMON-LISP|::|NIL|)
+    :|SPECIALIZERS| |BURNING-LEXICAL-TEST|::|INPUT-TEST|
+    |CLOS|::|DO-DEFMETHOD|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|42 51 (DEFTEST INPUT-TEST COMMIT-TEST ...)-7-1|
+   #31Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 72 9E DC 7B 01 70 03 DA DB AE
+        32 A2 16 01 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|INPUT-TEST| |BURNING-TESTING|::|TESTS|
+    |BURNING-LEXICAL-TEST|::|COMMIT-TEST| |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|42 51 (DEFTEST INPUT-TEST COMMIT-TEST ...)-7-2|
+   #43Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 8F 9E 03 DA 2F 02 DA DD DE 63
+        DF E0 E1 E2 E3 E4 38 02 72 3A 7B 01 7B 08 2D 03 0B 19 01)
+   (|BURNING-LEXICAL-TEST|::|COMMIT-TEST| |SYSTEM|::|TRACED-DEFINITION|
+    |SYSTEM|::|UNTRACE1|
+    #Y(#:|42 51 (DEFTEST INPUT-TEST COMMIT-TEST ...)-7-2-1|
+       #15Y(00 00 00 00 01 00 00 00 20 02 DA C6 5D 19 02)
+       (#Y(#:|42 51 (DEFTEST INPUT-TEST COMMIT-TEST ...)-7-2-1-1|
+           #139Y(03 00 01 00 01 00 00 00 20 02 DA 6B 01 DC DD 33 03 15 02 10 04
+                 DF 38 02 72 8D 53 80 50 AE E0 70 07 AC 2F 08 AC 2F 08 AC 2F 08
+                 AC 6F 09 AC E4 8E 14 0D 00 0F 04 E5 6B 01 E6 AF E4 E4 33 05 15
+                 16 01 AC 6F 09 AC E7 8E 14 0D 00 0F 04 E8 6B 01 E9 AF E7 E7 33
+                 05 15 16 01 AC 2F 10 AC 88 11 0A 00 0F 04 EC 6B 01 ED 33 02 15
+                 16 01 3E 54 67 00 00 00 2F 14 55 16 01 6B 04 EF 30 16 0E 04 1C
+                 04 00 11 19 02 F1 6B 01 33 01 15 1B 75)
+           (#Y(#:|42 51 (DEFTEST INPUT-TEST COMMIT-TEST ...)-7-2-1-1-1|
+               #34Y(00 00 00 00 03 00 00 00 21 19 DA B1 38 02 31 95 AF B1 31 90
+                    DB B1 31 94 AE B1 31 90 B0 31 97 9E 19 05)
+               ("Running test " #\.)
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            |COMMON-LISP|::|*STANDARD-OUTPUT*|
+            |BURNING-LEXICAL-TEST|::|INPUT-TEST|
+            |BURNING-LEXICAL-TEST|::|COMMIT-TEST|
+            |BURNING-TESTING|::|*TEST-RESULT*| "bbb" 1.
+            |BURNING-LEXICAL|::|MAKE-ITERATOR| |BURNING-LEXICAL|::|GET-NEXT|
+            |BURNING-LEXICAL|::|COMMIT| "bbb"
+            #Y(#:|42 51 (DEFTEST INPUT-TEST COMMIT-TEST ...)-7-2-1-1-2|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|COMMIT| |BURNING-LEXICAL-TEST|::|ITERATOR|) ""
+            #Y(#:|42 51 (DEFTEST INPUT-TEST COMMIT-TEST ...)-7-2-1-1-3|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|COMMIT| |BURNING-LEXICAL-TEST|::|ITERATOR|)
+            |BURNING-LEXICAL|::|RESET| |BURNING-LEXICAL|::|EOF-P|
+            #Y(#:|42 51 (DEFTEST INPUT-TEST COMMIT-TEST ...)-7-2-1-1-4|
+               #23Y(00 00 00 00 02 00 00 00 21 18 AE B0 31 90 DA B0 38 02 31 95
+                    9E 19 04)
+               (" is nil.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|EOF-P| |BURNING-LEXICAL-TEST|::|ITERATOR|)
+            |COMMON-LISP|::|CLOSE| "Test INPUT-TEST.COMMIT-TEST"
+            |BURNING-TESTING|::|REPORT-RESULT|
+            #Y(#:|42 51 (DEFTEST INPUT-TEST COMMIT-TEST ...)-7-2-1-1-5|
+               #19Y(00 00 00 00 01 00 00 00 21 17 DA AF 38 02 31 95 9E 19 03)
+               ("OK.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)))
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        (|COMMON-LISP|::|T|))
+       (|COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|))
+    :|QUALIFIERS| :|LAMBDA-LIST| (|BURNING-TESTING|::|A-CASE|)
+    |CLOS|::|SIGNATURE|
+    #(1. 0. |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|
+      |COMMON-LISP|::|NIL|)
+    :|SPECIALIZERS| |BURNING-LEXICAL-TEST|::|INPUT-TEST|
+    |CLOS|::|DO-DEFMETHOD|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))

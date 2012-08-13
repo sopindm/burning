@@ -1,0 +1,870 @@
+(|SYSTEM|::|VERSION| '(20080430.))
+#0Y_ #0Y |CHARSET|::|UTF-8|
+#Y(#:|1 1 (IN-PACKAGE :BURNING-LEXICAL-TEST)-1|
+   #17Y(00 00 00 00 00 00 00 00 20 01 DA 31 F6 0F 01 19 01)
+   ("BURNING-LEXICAL-TEST" |COMMON-LISP|::|*PACKAGE*|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|3 3 (DEFCASE REGLANG-TEST)-2-1|
+   #22Y(00 00 00 00 00 00 00 00 20 01 6B 00 DB 7B 01 30 02 0F 00 3E 19 01)
+   (|BURNING-TESTING|::|*TEST-CASES*| |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+    |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|3 3 (DEFCASE REGLANG-TEST)-2-2|
+   #18Y(00 00 00 00 00 00 00 00 20 01 DA DB 63 32 A2 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|REGLANG-TEST| |BURNING-TESTING|::|TESTS|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|3 3 (DEFCASE REGLANG-TEST)-2-3|
+   #44Y(00 00 00 00 00 00 00 00 20 01 6B 00 99 01 DC DD 63 DE 63 DF B3 E0 E1 63
+        E2 63 E3 64 7B 06 33 02 23 37 07 16 01 DC 38 02 32 3A 19 01)
+   (|CLOS|::|<STANDARD-CLASS>| |CLOS|::|ENSURE-CLASS|
+    |BURNING-LEXICAL-TEST|::|REGLANG-TEST| :|DIRECT-SUPERCLASSES|
+    :|DIRECT-SLOTS| :|METACLASS| (:|FIXED-SLOT-LOCATIONS| |COMMON-LISP|::|NIL|)
+    :|DIRECT-DEFAULT-INITARGS| :|DOCUMENTATION| :|GENERIC-ACCESSORS|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|5 6 (DEFUN CHAR-NODE (CHAR) ...)-3|
+   #20Y(00 00 00 00 00 00 00 00 20 01 DA 2F 01 DA DC 32 9C C5 19 01)
+   (|BURNING-LEXICAL-TEST|::|CHAR-NODE| |SYSTEM|::|REMOVE-OLD-DEFINITIONS|
+    #Y(|BURNING-LEXICAL-TEST|::|CHAR-NODE|
+       #16Y(00 00 00 00 01 00 00 00 26 02 AD AE 30 00 19 02)
+       (|BURNING-LEXICAL|::|RANGE-NODE|)
+       (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)
+       (|COMMON-LISP|::|CHAR|) |COMMON-LISP|::|NIL| 1))
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|8 11 (DEFUN NOT-A-REGULAR-EXPRESSION-ERROR (EXPRESSION) ...)-4|
+   #20Y(00 00 00 00 00 00 00 00 20 01 DA 2F 01 DA DC 32 9C C5 19 01)
+   (|BURNING-LEXICAL-TEST|::|NOT-A-REGULAR-EXPRESSION-ERROR|
+    |SYSTEM|::|REMOVE-OLD-DEFINITIONS|
+    #Y(|BURNING-LEXICAL-TEST|::|NOT-A-REGULAR-EXPRESSION-ERROR|
+       #25Y(00 00 00 00 01 00 00 00 26 02 38 02 72 8F AC DA B0 2D 03 01 AC 32
+            90 19 03)
+       (#Y(|BURNING-LEXICAL-TEST|::|NOT-A-REGULAR-EXPRESSION-ERROR-1|
+           #23Y(00 00 00 00 02 00 00 00 21 18 DA B0 38 02 31 95 AE B0 31 90 9E
+                19 04)
+           ("Regular expression must be a list. ")
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        |COMMON-LISP|::|FORMAT|)
+       (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)
+       (|BURNING-LEXICAL|::|EXPRESSION|) |COMMON-LISP|::|NIL| 1))
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|13 21 (DEFUN WRONG-TYPE-ERROR (FUNCTION-NAME POSITION EXPECTED-TYPE ...) ...)-5|
+   #20Y(00 00 00 00 00 00 00 00 20 01 DA 2F 01 DA DC 32 9C C5 19 01)
+   (|BURNING-LEXICAL-TEST|::|WRONG-TYPE-ERROR|
+    |SYSTEM|::|REMOVE-OLD-DEFINITIONS|
+    #Y(|BURNING-LEXICAL-TEST|::|WRONG-TYPE-ERROR|
+       #32Y(00 00 00 00 04 00 00 00 26 05 38 02 72 8F AC DA B2 B4 38 10 71 91
+            B3 B3 2D 06 01 AC 32 90 19 06)
+       (#Y(|BURNING-LEXICAL-TEST|::|WRONG-TYPE-ERROR-1|
+           #51Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95 B0
+                B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95 AE B3
+                31 90 DD B3 31 94 9E 19 07)
+           ("-th argument for " " must be " ", not " #\.)
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        |COMMON-LISP|::|FORMAT|)
+       (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)
+       (|BURNING-LEXICAL-TEST|::|FUNCTION-NAME| |COMMON-LISP|::|POSITION|
+        |BURNING-LEXICAL-TEST|::|EXPECTED-TYPE| |COMMON-LISP|::|TYPE|)
+       |COMMON-LISP|::|NIL| 1))
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|23 25 (DEFTEST REGLANG-TEST CHAR-TEST ...)-6-1|
+   #31Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 72 9E DC 7B 01 70 03 DA DB AE
+        32 A2 16 01 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|REGLANG-TEST| |BURNING-TESTING|::|TESTS|
+    |BURNING-LEXICAL-TEST|::|CHAR-TEST| |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|23 25 (DEFTEST REGLANG-TEST CHAR-TEST ...)-6-2|
+   #43Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 8F 9E 03 DA 2F 02 DA DD DE 63
+        DF E0 E1 E2 E3 E4 38 02 72 3A 7B 01 7B 08 2D 03 0B 19 01)
+   (|BURNING-LEXICAL-TEST|::|CHAR-TEST| |SYSTEM|::|TRACED-DEFINITION|
+    |SYSTEM|::|UNTRACE1|
+    #Y(#:|23 25 (DEFTEST REGLANG-TEST CHAR-TEST ...)-6-2-1|
+       #15Y(00 00 00 00 01 00 00 00 20 02 DA C6 5D 19 02)
+       (#Y(#:|23 25 (DEFTEST REGLANG-TEST CHAR-TEST ...)-6-2-1-1|
+           #68Y(00 00 00 00 01 00 00 00 20 02 DA 6B 01 DC DD 33 03 15 02 10 04
+                DF 6F 06 DF 6F 07 AD AD 8A 08 0D 00 0F 04 E3 6B 01 E4 B0 E5 B1
+                33 05 15 16 02 6B 04 E6 30 0D 0E 04 1C 04 00 11 19 02 E8 6B 01
+                33 01 15 1B 75)
+           (#Y(#:|23 25 (DEFTEST REGLANG-TEST CHAR-TEST ...)-6-2-1-1-1|
+               #34Y(00 00 00 00 03 00 00 00 21 19 DA B1 38 02 31 95 AF B1 31 90
+                    DB B1 31 94 AE B1 31 90 B0 31 97 9E 19 05)
+               ("Running test " #\.)
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            |COMMON-LISP|::|*STANDARD-OUTPUT*|
+            |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+            |BURNING-LEXICAL-TEST|::|CHAR-TEST|
+            |BURNING-TESTING|::|*TEST-RESULT*| #\a :|CHAR|
+            |BURNING-LEXICAL-TEST|::|CHAR-NODE| |BURNING-LEXICAL|::|NODE=|
+            #Y(#:|23 25 (DEFTEST REGLANG-TEST CHAR-TEST ...)-6-2-1-1-2|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (:|CHAR| #\a) (|BURNING-LEXICAL-TEST|::|CHAR-NODE| #\a)
+            "Test REGLANG-TEST.CHAR-TEST" |BURNING-TESTING|::|REPORT-RESULT|
+            #Y(#:|23 25 (DEFTEST REGLANG-TEST CHAR-TEST ...)-6-2-1-1-3|
+               #19Y(00 00 00 00 01 00 00 00 21 17 DA AF 38 02 31 95 9E 19 03)
+               ("OK.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)))
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        (|COMMON-LISP|::|T|))
+       (|COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|))
+    :|QUALIFIERS| :|LAMBDA-LIST| (|BURNING-TESTING|::|A-CASE|)
+    |CLOS|::|SIGNATURE|
+    #(1. 0. |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|
+      |COMMON-LISP|::|NIL|)
+    :|SPECIALIZERS| |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+    |CLOS|::|DO-DEFMETHOD|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|27 29 (DEFTEST REGLANG-TEST RANGE-TEST ...)-7-1|
+   #31Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 72 9E DC 7B 01 70 03 DA DB AE
+        32 A2 16 01 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|REGLANG-TEST| |BURNING-TESTING|::|TESTS|
+    |BURNING-LEXICAL-TEST|::|RANGE-TEST| |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|27 29 (DEFTEST REGLANG-TEST RANGE-TEST ...)-7-2|
+   #43Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 8F 9E 03 DA 2F 02 DA DD DE 63
+        DF E0 E1 E2 E3 E4 38 02 72 3A 7B 01 7B 08 2D 03 0B 19 01)
+   (|BURNING-LEXICAL-TEST|::|RANGE-TEST| |SYSTEM|::|TRACED-DEFINITION|
+    |SYSTEM|::|UNTRACE1|
+    #Y(#:|27 29 (DEFTEST REGLANG-TEST RANGE-TEST ...)-7-2-1|
+       #15Y(00 00 00 00 01 00 00 00 20 02 DA C6 5D 19 02)
+       (#Y(#:|27 29 (DEFTEST REGLANG-TEST RANGE-TEST ...)-7-2-1-1|
+           #70Y(00 00 00 00 01 00 00 00 20 02 DA 6B 01 DC DD 33 03 15 02 10 04
+                DF E0 70 07 DF E0 70 08 AD AD 8A 09 0D 00 0F 04 E4 6B 01 E5 B0
+                E6 B1 33 05 15 16 02 6B 04 E7 30 0E 0E 04 1C 04 00 11 19 02 E9
+                6B 01 33 01 15 1B 75)
+           (#Y(#:|27 29 (DEFTEST REGLANG-TEST RANGE-TEST ...)-7-2-1-1-1|
+               #34Y(00 00 00 00 03 00 00 00 21 19 DA B1 38 02 31 95 AF B1 31 90
+                    DB B1 31 94 AE B1 31 90 B0 31 97 9E 19 05)
+               ("Running test " #\.)
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            |COMMON-LISP|::|*STANDARD-OUTPUT*|
+            |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+            |BURNING-LEXICAL-TEST|::|RANGE-TEST|
+            |BURNING-TESTING|::|*TEST-RESULT*| #\a #\b :|RANGE|
+            |BURNING-LEXICAL|::|RANGE-NODE| |BURNING-LEXICAL|::|NODE=|
+            #Y(#:|27 29 (DEFTEST REGLANG-TEST RANGE-TEST ...)-7-2-1-1-2|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (:|RANGE| #\a #\b) (|BURNING-LEXICAL|::|RANGE-NODE| #\a #\b)
+            "Test REGLANG-TEST.RANGE-TEST" |BURNING-TESTING|::|REPORT-RESULT|
+            #Y(#:|27 29 (DEFTEST REGLANG-TEST RANGE-TEST ...)-7-2-1-1-3|
+               #19Y(00 00 00 00 01 00 00 00 21 17 DA AF 38 02 31 95 9E 19 03)
+               ("OK.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)))
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        (|COMMON-LISP|::|T|))
+       (|COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|))
+    :|QUALIFIERS| :|LAMBDA-LIST| (|BURNING-TESTING|::|A-CASE|)
+    |CLOS|::|SIGNATURE|
+    #(1. 0. |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|
+      |COMMON-LISP|::|NIL|)
+    :|SPECIALIZERS| |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+    |CLOS|::|DO-DEFMETHOD|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|31 33 (DEFTEST REGLANG-TEST OR-TEST ...)-8-1|
+   #31Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 72 9E DC 7B 01 70 03 DA DB AE
+        32 A2 16 01 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|REGLANG-TEST| |BURNING-TESTING|::|TESTS|
+    |BURNING-LEXICAL-TEST|::|OR-TEST| |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|31 33 (DEFTEST REGLANG-TEST OR-TEST ...)-8-2|
+   #43Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 8F 9E 03 DA 2F 02 DA DD DE 63
+        DF E0 E1 E2 E3 E4 38 02 72 3A 7B 01 7B 08 2D 03 0B 19 01)
+   (|BURNING-LEXICAL-TEST|::|OR-TEST| |SYSTEM|::|TRACED-DEFINITION|
+    |SYSTEM|::|UNTRACE1|
+    #Y(#:|31 33 (DEFTEST REGLANG-TEST OR-TEST ...)-8-2-1|
+       #15Y(00 00 00 00 01 00 00 00 20 02 DA C6 5D 19 02)
+       (#Y(#:|31 33 (DEFTEST REGLANG-TEST OR-TEST ...)-8-2-1-1|
+           #80Y(00 00 00 00 01 00 00 00 20 02 DA 6B 01 DC DD 33 03 15 02 10 04
+                DF 6F 06 E1 E2 70 09 70 0A DF 6F 0B E1 E2 70 0C 70 0D AD AD 8A
+                0E 0D 00 0F 04 E9 6B 01 EA B0 EB B1 33 05 15 16 02 6B 04 EC 30
+                13 0E 04 1C 04 00 11 19 02 EE 6B 01 33 01 15 1B 75)
+           (#Y(#:|31 33 (DEFTEST REGLANG-TEST OR-TEST ...)-8-2-1-1-1|
+               #34Y(00 00 00 00 03 00 00 00 21 19 DA B1 38 02 31 95 AF B1 31 90
+                    DB B1 31 94 AE B1 31 90 B0 31 97 9E 19 05)
+               ("Running test " #\.)
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            |COMMON-LISP|::|*STANDARD-OUTPUT*|
+            |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+            |BURNING-LEXICAL-TEST|::|OR-TEST|
+            |BURNING-TESTING|::|*TEST-RESULT*| #\a :|CHAR| #\b #\c :|RANGE|
+            :|OR| |BURNING-LEXICAL|::|CHARACTER-NODE|
+            |BURNING-LEXICAL|::|RANGE-NODE| |BURNING-LEXICAL|::|OR-NODE|
+            |BURNING-LEXICAL|::|NODE=|
+            #Y(#:|31 33 (DEFTEST REGLANG-TEST OR-TEST ...)-8-2-1-1-2|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (:|OR| (:|CHAR| #\a) (:|RANGE| #\b #\c))
+            (|BURNING-LEXICAL|::|OR-NODE|
+             (|BURNING-LEXICAL|::|CHARACTER-NODE| #\a)
+             (|BURNING-LEXICAL|::|RANGE-NODE| #\b #\c))
+            "Test REGLANG-TEST.OR-TEST" |BURNING-TESTING|::|REPORT-RESULT|
+            #Y(#:|31 33 (DEFTEST REGLANG-TEST OR-TEST ...)-8-2-1-1-3|
+               #19Y(00 00 00 00 01 00 00 00 21 17 DA AF 38 02 31 95 9E 19 03)
+               ("OK.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)))
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        (|COMMON-LISP|::|T|))
+       (|COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|))
+    :|QUALIFIERS| :|LAMBDA-LIST| (|BURNING-TESTING|::|A-CASE|)
+    |CLOS|::|SIGNATURE|
+    #(1. 0. |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|
+      |COMMON-LISP|::|NIL|)
+    :|SPECIALIZERS| |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+    |CLOS|::|DO-DEFMETHOD|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|35 37 (DEFTEST REGLANG-TEST EMPTY-TEST ...)-9-1|
+   #31Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 72 9E DC 7B 01 70 03 DA DB AE
+        32 A2 16 01 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|REGLANG-TEST| |BURNING-TESTING|::|TESTS|
+    |BURNING-LEXICAL-TEST|::|EMPTY-TEST| |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|35 37 (DEFTEST REGLANG-TEST EMPTY-TEST ...)-9-2|
+   #43Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 8F 9E 03 DA 2F 02 DA DD DE 63
+        DF E0 E1 E2 E3 E4 38 02 72 3A 7B 01 7B 08 2D 03 0B 19 01)
+   (|BURNING-LEXICAL-TEST|::|EMPTY-TEST| |SYSTEM|::|TRACED-DEFINITION|
+    |SYSTEM|::|UNTRACE1|
+    #Y(#:|35 37 (DEFTEST REGLANG-TEST EMPTY-TEST ...)-9-2-1|
+       #15Y(00 00 00 00 01 00 00 00 20 02 DA C6 5D 19 02)
+       (#Y(#:|35 37 (DEFTEST REGLANG-TEST EMPTY-TEST ...)-9-2-1-1|
+           #68Y(00 00 00 00 01 00 00 00 20 02 DA 6B 01 DC DD 33 03 15 02 10 04
+                2E 05 14 2E 06 14 AD AD 8A 07 0D 00 0F 04 E2 6B 01 E3 B0 E4 B1
+                33 05 15 16 02 6B 04 E5 30 0C 0E 04 1C 04 00 11 19 02 E7 6B 01
+                33 01 15 1B 75)
+           (#Y(#:|35 37 (DEFTEST REGLANG-TEST EMPTY-TEST ...)-9-2-1-1-1|
+               #34Y(00 00 00 00 03 00 00 00 21 19 DA B1 38 02 31 95 AF B1 31 90
+                    DB B1 31 94 AE B1 31 90 B0 31 97 9E 19 05)
+               ("Running test " #\.)
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            |COMMON-LISP|::|*STANDARD-OUTPUT*|
+            |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+            |BURNING-LEXICAL-TEST|::|EMPTY-TEST|
+            |BURNING-TESTING|::|*TEST-RESULT*| :|EMPTY|
+            |BURNING-LEXICAL|::|EMPTY-NODE| |BURNING-LEXICAL|::|NODE=|
+            #Y(#:|35 37 (DEFTEST REGLANG-TEST EMPTY-TEST ...)-9-2-1-1-2|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (:|EMPTY|) (|BURNING-LEXICAL|::|EMPTY-NODE|)
+            "Test REGLANG-TEST.EMPTY-TEST" |BURNING-TESTING|::|REPORT-RESULT|
+            #Y(#:|35 37 (DEFTEST REGLANG-TEST EMPTY-TEST ...)-9-2-1-1-3|
+               #19Y(00 00 00 00 01 00 00 00 21 17 DA AF 38 02 31 95 9E 19 03)
+               ("OK.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)))
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        (|COMMON-LISP|::|T|))
+       (|COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|))
+    :|QUALIFIERS| :|LAMBDA-LIST| (|BURNING-TESTING|::|A-CASE|)
+    |CLOS|::|SIGNATURE|
+    #(1. 0. |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|
+      |COMMON-LISP|::|NIL|)
+    :|SPECIALIZERS| |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+    |CLOS|::|DO-DEFMETHOD|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|39 67 (DEFTEST REGLANG-TEST TO-RANGE-SET-TEST ...)-10-1|
+   #31Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 72 9E DC 7B 01 70 03 DA DB AE
+        32 A2 16 01 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|REGLANG-TEST| |BURNING-TESTING|::|TESTS|
+    |BURNING-LEXICAL-TEST|::|TO-RANGE-SET-TEST| |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|39 67 (DEFTEST REGLANG-TEST TO-RANGE-SET-TEST ...)-10-2|
+   #43Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 8F 9E 03 DA 2F 02 DA DD DE 63
+        DF E0 E1 E2 E3 E4 38 02 72 3A 7B 01 7B 08 2D 03 0B 19 01)
+   (|BURNING-LEXICAL-TEST|::|TO-RANGE-SET-TEST| |SYSTEM|::|TRACED-DEFINITION|
+    |SYSTEM|::|UNTRACE1|
+    #Y(#:|39 67 (DEFTEST REGLANG-TEST TO-RANGE-SET-TEST ...)-10-2-1|
+       #15Y(00 00 00 00 01 00 00 00 20 02 DA C6 5D 19 02)
+       (#Y(#:|39 67 (DEFTEST REGLANG-TEST TO-RANGE-SET-TEST ...)-10-2-1-1|
+           #365Y(00 00 00 00 01 00 00 00 20 02 DA 6B 01 DC DD 33 03 15 02 10 04
+                 DF 6F 06 6F 07 AC E2 8E 14 0D 00 0F 04 E3 6B 01 E4 AF E5 E2 33
+                 05 15 16 01 DF E6 70 0D 6F 07 AC E8 8E 14 0D 00 0F 04 E9 6B 01
+                 EA AF EB E8 33 05 15 16 01 DF EC 70 0D ED E6 70 0D 70 14 6F 07
+                 AC EF 8E 14 0D 00 0F 04 F0 6B 01 F1 AF F2 EF 33 05 15 16 01 ED
+                 E6 70 0D DF EC 70 0D 70 14 6F 07 AC F3 8E 14 0D 00 0F 04 F4 6B
+                 01 F5 AF F6 F3 33 05 15 16 01 DF F7 70 0D EC ED 70 0D 70 14 6F
+                 07 AC 65 1E 8E 14 11 00 0F 04 65 1F 6B 01 65 20 AF 65 21 65 1E
+                 33 05 15 16 01 DF ED 70 0D 65 22 65 23 70 0D 70 14 EC F7 70 0D
+                 65 22 65 24 70 0D 65 25 65 26 70 0D 70 14 70 14 70 14 6F 07 AC
+                 65 27 8E 14 11 00 0F 04 65 28 6B 01 65 29 AF 65 2A 65 27 33 05
+                 15 16 01 DF EC 70 0D F7 ED 70 0D 70 14 6F 07 AC 65 2B 8E 14 11
+                 00 0F 04 65 2C 6B 01 65 2D AF 65 2E 65 2B 33 05 15 16 01 2E 2F
+                 14 6F 07 AC 63 8E 14 10 00 0F 04 65 30 6B 01 65 31 AF 65 32 63
+                 33 05 15 16 01 DF EC 70 0D ED E6 70 0D 70 14 EC ED 70 0D 70 14
+                 6F 07 AC 65 33 8E 14 11 00 0F 04 65 34 6B 01 65 35 AF 65 36 65
+                 33 33 05 15 16 01 6B 04 65 37 30 38 0E 04 1C 04 00 11 19 02 65
+                 39 6B 01 33 01 15 1B 74)
+           (#Y(#:|39 67 (DEFTEST REGLANG-TEST TO-RANGE-SET-TEST ...)-10-2-1-1-1|
+               #34Y(00 00 00 00 03 00 00 00 21 19 DA B1 38 02 31 95 AF B1 31 90
+                    DB B1 31 94 AE B1 31 90 B0 31 97 9E 19 05)
+               ("Running test " #\.)
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            |COMMON-LISP|::|*STANDARD-OUTPUT*|
+            |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+            |BURNING-LEXICAL-TEST|::|TO-RANGE-SET-TEST|
+            |BURNING-TESTING|::|*TEST-RESULT*| #\a
+            |BURNING-LEXICAL|::|CHARACTER-NODE|
+            |BURNING-LEXICAL|::|TO-RANGE-SET| #1=((#\a . #\a))
+            #Y(#:|39 67 (DEFTEST REGLANG-TEST TO-RANGE-SET-TEST ...)-10-2-1-1-2|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|TO-RANGE-SET|
+             (|BURNING-LEXICAL|::|CHARACTER-NODE| #\a))
+            '#1# #\e |BURNING-LEXICAL|::|RANGE-NODE| #2=((#\a . #\e))
+            #Y(#:|39 67 (DEFTEST REGLANG-TEST TO-RANGE-SET-TEST ...)-10-2-1-1-3|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|TO-RANGE-SET|
+             (|BURNING-LEXICAL|::|RANGE-NODE| #\a #\e))
+            '#2# #\b #\d |BURNING-LEXICAL|::|OR-NODE|
+            #3=((#\a . #\b) (#\d . #\e))
+            #Y(#:|39 67 (DEFTEST REGLANG-TEST TO-RANGE-SET-TEST ...)-10-2-1-1-4|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|TO-RANGE-SET|
+             (|BURNING-LEXICAL|::|OR-NODE|
+              (|BURNING-LEXICAL|::|RANGE-NODE| #\a #\b)
+              (|BURNING-LEXICAL|::|RANGE-NODE| #\d #\e)))
+            '#3# #4=((#\a . #\b) (#\d . #\e))
+            #Y(#:|39 67 (DEFTEST REGLANG-TEST TO-RANGE-SET-TEST ...)-10-2-1-1-5|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|TO-RANGE-SET|
+             (|BURNING-LEXICAL|::|OR-NODE|
+              (|BURNING-LEXICAL|::|RANGE-NODE| #\d #\e)
+              (|BURNING-LEXICAL|::|RANGE-NODE| #\a #\b)))
+            '#4# #\c #5=((#\a . #\d))
+            #Y(#:|39 67 (DEFTEST REGLANG-TEST TO-RANGE-SET-TEST ...)-10-2-1-1-6|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|TO-RANGE-SET|
+             (|BURNING-LEXICAL|::|OR-NODE|
+              (|BURNING-LEXICAL|::|RANGE-NODE| #\a #\c)
+              (|BURNING-LEXICAL|::|RANGE-NODE| #\b #\d)))
+            '#5# #\f #\h #\l #\o #\z #6=((#\a . #\d) (#\f . #\l) (#\o . #\z))
+            #Y(#:|39 67 (DEFTEST REGLANG-TEST TO-RANGE-SET-TEST ...)-10-2-1-1-7|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|TO-RANGE-SET|
+             (|BURNING-LEXICAL|::|OR-NODE|
+              (|BURNING-LEXICAL|::|OR-NODE|
+               (|BURNING-LEXICAL|::|RANGE-NODE| #\a #\d)
+               (|BURNING-LEXICAL|::|RANGE-NODE| #\f #\h))
+              (|BURNING-LEXICAL|::|OR-NODE|
+               (|BURNING-LEXICAL|::|RANGE-NODE| #\b #\c)
+               (|BURNING-LEXICAL|::|OR-NODE|
+                (|BURNING-LEXICAL|::|RANGE-NODE| #\f #\l)
+                (|BURNING-LEXICAL|::|RANGE-NODE| #\o #\z)))))
+            '#6# #7=((#\a . #\d))
+            #Y(#:|39 67 (DEFTEST REGLANG-TEST TO-RANGE-SET-TEST ...)-10-2-1-1-8|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|TO-RANGE-SET|
+             (|BURNING-LEXICAL|::|OR-NODE|
+              (|BURNING-LEXICAL|::|RANGE-NODE| #\a #\b)
+              (|BURNING-LEXICAL|::|RANGE-NODE| #\c #\d)))
+            '#7# |BURNING-LEXICAL|::|EMPTY-NODE|
+            #Y(#:|39 67 (DEFTEST REGLANG-TEST TO-RANGE-SET-TEST ...)-10-2-1-1-9|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|TO-RANGE-SET|
+             (|BURNING-LEXICAL|::|EMPTY-NODE|))
+            '|COMMON-LISP|::|NIL| #8=((#\a . #\e))
+            #Y(#:|39 67 (DEFTEST REGLANG-TEST TO-RANGE-SET-TEST ...)-10-2-1-1-10|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|TO-RANGE-SET|
+             (|BURNING-LEXICAL|::|OR-NODE|
+              (|BURNING-LEXICAL|::|OR-NODE|
+               (|BURNING-LEXICAL|::|RANGE-NODE| #\a #\b)
+               (|BURNING-LEXICAL|::|RANGE-NODE| #\d #\e))
+              (|BURNING-LEXICAL|::|RANGE-NODE| #\b #\d)))
+            '#8# "Test REGLANG-TEST.TO-RANGE-SET-TEST"
+            |BURNING-TESTING|::|REPORT-RESULT|
+            #Y(#:|39 67 (DEFTEST REGLANG-TEST TO-RANGE-SET-TEST ...)-10-2-1-1-11|
+               #19Y(00 00 00 00 01 00 00 00 21 17 DA AF 38 02 31 95 9E 19 03)
+               ("OK.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)))
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        (|COMMON-LISP|::|T|))
+       (|COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|))
+    :|QUALIFIERS| :|LAMBDA-LIST| (|BURNING-TESTING|::|A-CASE|)
+    |CLOS|::|SIGNATURE|
+    #(1. 0. |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|
+      |COMMON-LISP|::|NIL|)
+    :|SPECIALIZERS| |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+    |CLOS|::|DO-DEFMETHOD|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|69 80 (DEFTEST REGLANG-TEST NOT-TEST ...)-11-1|
+   #31Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 72 9E DC 7B 01 70 03 DA DB AE
+        32 A2 16 01 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|REGLANG-TEST| |BURNING-TESTING|::|TESTS|
+    |BURNING-LEXICAL-TEST|::|NOT-TEST| |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|69 80 (DEFTEST REGLANG-TEST NOT-TEST ...)-11-2|
+   #43Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 8F 9E 03 DA 2F 02 DA DD DE 63
+        DF E0 E1 E2 E3 E4 38 02 72 3A 7B 01 7B 08 2D 03 0B 19 01)
+   (|BURNING-LEXICAL-TEST|::|NOT-TEST| |SYSTEM|::|TRACED-DEFINITION|
+    |SYSTEM|::|UNTRACE1|
+    #Y(#:|69 80 (DEFTEST REGLANG-TEST NOT-TEST ...)-11-2-1|
+       #15Y(00 00 00 00 01 00 00 00 20 02 DA C6 5D 19 02)
+       (#Y(#:|69 80 (DEFTEST REGLANG-TEST NOT-TEST ...)-11-2-1-1|
+           #144Y(00 00 00 00 01 00 00 00 20 02 DA 6B 01 DC DD 33 03 15 02 10 04
+                 DF E0 70 07 E2 E3 70 07 70 0A E5 E6 E7 70 07 E8 E9 70 07 70 0A
+                 6E 03 10 E8 E8 70 11 EC E9 70 11 E6 E6 70 11 ED E7 70 11 70 14
+                 70 14 70 14 AD AD 8A 15 0D 00 0F 04 F0 6B 01 F1 B0 F2 B1 33 05
+                 15 16 02 E6 F3 70 07 E0 ED 70 07 70 0A AC 6F 10 6F 10 AC AE 8A
+                 15 0D 00 0F 04 F4 6B 01 F5 AF F6 B2 33 05 15 16 02 6B 04 F7 30
+                 1E 0E 04 1C 04 00 11 19 02 65 1F 6B 01 33 01 15 1B 74)
+           (#Y(#:|69 80 (DEFTEST REGLANG-TEST NOT-TEST ...)-11-2-1-1-1|
+               #34Y(00 00 00 00 03 00 00 00 21 19 DA B1 38 02 31 95 AF B1 31 90
+                    DB B1 31 94 AE B1 31 90 B0 31 97 9E 19 05)
+               ("Running test " #\.)
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            |COMMON-LISP|::|*STANDARD-OUTPUT*|
+            |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+            |BURNING-LEXICAL-TEST|::|NOT-TEST|
+            |BURNING-TESTING|::|*TEST-RESULT*| #\b #\f :|RANGE| #\B #\F :|OR|
+            :|FULL-RANGE| #\a #\z #\A #\Z :|NOT|
+            |BURNING-LEXICAL|::|RANGE-NODE| #\G #\g
+            |BURNING-LEXICAL|::|OR-NODE| |BURNING-LEXICAL|::|NODE=|
+            #Y(#:|69 80 (DEFTEST REGLANG-TEST NOT-TEST ...)-11-2-1-1-2|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (:|NOT| (:|OR| (:|RANGE| #\b #\f) (:|RANGE| #\B #\F)) :|FULL-RANGE|
+             (:|OR| (:|RANGE| #\a #\z) (:|RANGE| #\A #\Z)))
+            (|BURNING-LEXICAL|::|OR-NODE|
+             (|BURNING-LEXICAL|::|RANGE-NODE| #\A #\A)
+             (|BURNING-LEXICAL|::|OR-NODE|
+              (|BURNING-LEXICAL|::|RANGE-NODE| #\G #\Z)
+              (|BURNING-LEXICAL|::|OR-NODE|
+               (|BURNING-LEXICAL|::|RANGE-NODE| #\a #\a)
+               (|BURNING-LEXICAL|::|RANGE-NODE| #\g #\z))))
+            #\d
+            #Y(#:|69 80 (DEFTEST REGLANG-TEST NOT-TEST ...)-11-2-1-1-3|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (:|NOT| (:|NOT| |BURNING-LEXICAL-TEST|::|NODE|))
+            |BURNING-LEXICAL-TEST|::|NODE| "Test REGLANG-TEST.NOT-TEST"
+            |BURNING-TESTING|::|REPORT-RESULT|
+            #Y(#:|69 80 (DEFTEST REGLANG-TEST NOT-TEST ...)-11-2-1-1-4|
+               #19Y(00 00 00 00 01 00 00 00 21 17 DA AF 38 02 31 95 9E 19 03)
+               ("OK.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)))
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        (|COMMON-LISP|::|T|))
+       (|COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|))
+    :|QUALIFIERS| :|LAMBDA-LIST| (|BURNING-TESTING|::|A-CASE|)
+    |CLOS|::|SIGNATURE|
+    #(1. 0. |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|
+      |COMMON-LISP|::|NIL|)
+    :|SPECIALIZERS| |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+    |CLOS|::|DO-DEFMETHOD|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|82 94 (DEFTEST REGLANG-TEST LETTER-TEST ...)-12-1|
+   #31Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 72 9E DC 7B 01 70 03 DA DB AE
+        32 A2 16 01 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|REGLANG-TEST| |BURNING-TESTING|::|TESTS|
+    |BURNING-LEXICAL-TEST|::|LETTER-TEST| |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|82 94 (DEFTEST REGLANG-TEST LETTER-TEST ...)-12-2|
+   #43Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 8F 9E 03 DA 2F 02 DA DD DE 63
+        DF E0 E1 E2 E3 E4 38 02 72 3A 7B 01 7B 08 2D 03 0B 19 01)
+   (|BURNING-LEXICAL-TEST|::|LETTER-TEST| |SYSTEM|::|TRACED-DEFINITION|
+    |SYSTEM|::|UNTRACE1|
+    #Y(#:|82 94 (DEFTEST REGLANG-TEST LETTER-TEST ...)-12-2-1|
+       #15Y(00 00 00 00 01 00 00 00 20 02 DA C6 5D 19 02)
+       (#Y(#:|82 94 (DEFTEST REGLANG-TEST LETTER-TEST ...)-12-2-1-1|
+           #182Y(00 00 00 00 01 00 00 00 20 02 DA 6B 01 DC DD 33 03 15 02 10 04
+                 2E 05 14 E0 E1 70 08 E3 E4 70 08 70 0B AD AD 8A 0C 0D 00 0F 04
+                 E7 6B 01 E8 B0 E9 B1 33 05 15 16 02 EA 64 70 05 E0 E1 70 08 AD
+                 AD 8A 0C 0D 00 0F 04 EB 6B 01 EC B0 ED B1 33 05 15 16 02 EE 64
+                 70 05 E3 E4 70 08 AD AD 8A 0C 0D 00 0F 04 EF 6B 01 F0 B0 F1 B1
+                 33 05 15 16 02 F2 F3 70 05 E0 E1 70 08 E3 E4 70 08 70 0B F4 F5
+                 70 08 F6 F7 70 08 70 0B 70 0B AD AD 8A 0C 10 00 0F 04 65 1E 6B
+                 01 65 1F B0 65 20 B1 33 05 15 16 02 6B 04 65 21 30 22 0E 04 1C
+                 04 00 11 19 02 65 23 6B 01 33 01 15 1B 74)
+           (#Y(#:|82 94 (DEFTEST REGLANG-TEST LETTER-TEST ...)-12-2-1-1-1|
+               #34Y(00 00 00 00 03 00 00 00 21 19 DA B1 38 02 31 95 AF B1 31 90
+                    DB B1 31 94 AE B1 31 90 B0 31 97 9E 19 05)
+               ("Running test " #\.)
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            |COMMON-LISP|::|*STANDARD-OUTPUT*|
+            |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+            |BURNING-LEXICAL-TEST|::|LETTER-TEST|
+            |BURNING-TESTING|::|*TEST-RESULT*| :|LETTER| #\a #\z
+            |BURNING-LEXICAL|::|RANGE-NODE| #\A #\Z
+            |BURNING-LEXICAL|::|OR-NODE| |BURNING-LEXICAL|::|NODE=|
+            #Y(#:|82 94 (DEFTEST REGLANG-TEST LETTER-TEST ...)-12-2-1-1-2|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (:|LETTER|)
+            (|BURNING-LEXICAL|::|OR-NODE|
+             (|BURNING-LEXICAL|::|RANGE-NODE| #\a #\z)
+             (|BURNING-LEXICAL|::|RANGE-NODE| #\A #\Z))
+            :|NO-UPPER|
+            #Y(#:|82 94 (DEFTEST REGLANG-TEST LETTER-TEST ...)-12-2-1-1-3|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (:|LETTER| :|NO-UPPER| |COMMON-LISP|::|T|)
+            (|BURNING-LEXICAL|::|RANGE-NODE| #\a #\z) :|NO-LOWER|
+            #Y(#:|82 94 (DEFTEST REGLANG-TEST LETTER-TEST ...)-12-2-1-1-4|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (:|LETTER| :|NO-LOWER| |COMMON-LISP|::|T|)
+            (|BURNING-LEXICAL|::|RANGE-NODE| #\A #\Z) :|LANGUAGES|
+            #1=(|BURNING-LEXICAL|::|EN| |BURNING-LEXICAL|::|RU|)
+            #\CYRILLIC_SMALL_LETTER_A #\CYRILLIC_SMALL_LETTER_YA
+            #\CYRILLIC_CAPITAL_LETTER_A #\CYRILLIC_CAPITAL_LETTER_YA
+            #Y(#:|82 94 (DEFTEST REGLANG-TEST LETTER-TEST ...)-12-2-1-1-5|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (:|LETTER| :|LANGUAGES| '#1#)
+            (|BURNING-LEXICAL|::|OR-NODE|
+             (|BURNING-LEXICAL|::|OR-NODE|
+              (|BURNING-LEXICAL|::|RANGE-NODE| #\a #\z)
+              (|BURNING-LEXICAL|::|RANGE-NODE| #\A #\Z))
+             (|BURNING-LEXICAL|::|OR-NODE|
+              (|BURNING-LEXICAL|::|RANGE-NODE| #\CYRILLIC_SMALL_LETTER_A
+               #\CYRILLIC_SMALL_LETTER_YA)
+              (|BURNING-LEXICAL|::|RANGE-NODE| #\CYRILLIC_CAPITAL_LETTER_A
+               #\CYRILLIC_CAPITAL_LETTER_YA)))
+            "Test REGLANG-TEST.LETTER-TEST" |BURNING-TESTING|::|REPORT-RESULT|
+            #Y(#:|82 94 (DEFTEST REGLANG-TEST LETTER-TEST ...)-12-2-1-1-6|
+               #19Y(00 00 00 00 01 00 00 00 21 17 DA AF 38 02 31 95 9E 19 03)
+               ("OK.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)))
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        (|COMMON-LISP|::|T|))
+       (|COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|))
+    :|QUALIFIERS| :|LAMBDA-LIST| (|BURNING-TESTING|::|A-CASE|)
+    |CLOS|::|SIGNATURE|
+    #(1. 0. |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|
+      |COMMON-LISP|::|NIL|)
+    :|SPECIALIZERS| |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+    |CLOS|::|DO-DEFMETHOD|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|96 99 (DEFTEST REGLANG-TEST POSITIVE-TEST ...)-13-1|
+   #31Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 72 9E DC 7B 01 70 03 DA DB AE
+        32 A2 16 01 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|REGLANG-TEST| |BURNING-TESTING|::|TESTS|
+    |BURNING-LEXICAL-TEST|::|POSITIVE-TEST| |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|96 99 (DEFTEST REGLANG-TEST POSITIVE-TEST ...)-13-2|
+   #43Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 8F 9E 03 DA 2F 02 DA DD DE 63
+        DF E0 E1 E2 E3 E4 38 02 72 3A 7B 01 7B 08 2D 03 0B 19 01)
+   (|BURNING-LEXICAL-TEST|::|POSITIVE-TEST| |SYSTEM|::|TRACED-DEFINITION|
+    |SYSTEM|::|UNTRACE1|
+    #Y(#:|96 99 (DEFTEST REGLANG-TEST POSITIVE-TEST ...)-13-2-1|
+       #15Y(00 00 00 00 01 00 00 00 20 02 DA C6 5D 19 02)
+       (#Y(#:|96 99 (DEFTEST REGLANG-TEST POSITIVE-TEST ...)-13-2-1-1|
+           #77Y(00 00 00 00 01 00 00 00 20 02 DA 6B 01 DC DD 33 03 15 02 10 04
+                DF 6F 06 6F 07 DF 6F 08 DF 6F 08 6F 09 70 0A AD AD 8A 0B 0D 00
+                0F 04 E6 6B 01 E7 B0 E8 B1 33 05 15 16 02 6B 04 E9 30 10 0E 04
+                1C 04 00 11 19 02 EB 6B 01 33 01 15 1B 75)
+           (#Y(#:|96 99 (DEFTEST REGLANG-TEST POSITIVE-TEST ...)-13-2-1-1-1|
+               #34Y(00 00 00 00 03 00 00 00 21 19 DA B1 38 02 31 95 AF B1 31 90
+                    DB B1 31 94 AE B1 31 90 B0 31 97 9E 19 05)
+               ("Running test " #\.)
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            |COMMON-LISP|::|*STANDARD-OUTPUT*|
+            |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+            |BURNING-LEXICAL-TEST|::|POSITIVE-TEST|
+            |BURNING-TESTING|::|*TEST-RESULT*| #\a :|CHAR| :|POSITIVE|
+            |BURNING-LEXICAL|::|CHARACTER-NODE| |BURNING-LEXICAL|::|STAR-NODE|
+            |BURNING-LEXICAL|::|AND-NODE| |BURNING-LEXICAL|::|NODE=|
+            #Y(#:|96 99 (DEFTEST REGLANG-TEST POSITIVE-TEST ...)-13-2-1-1-2|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (:|POSITIVE| (:|CHAR| #\a))
+            (|BURNING-LEXICAL|::|AND-NODE|
+             (|BURNING-LEXICAL|::|CHARACTER-NODE| #\a)
+             (|BURNING-LEXICAL|::|STAR-NODE|
+              (|BURNING-LEXICAL|::|CHARACTER-NODE| #\a)))
+            "Test REGLANG-TEST.POSITIVE-TEST"
+            |BURNING-TESTING|::|REPORT-RESULT|
+            #Y(#:|96 99 (DEFTEST REGLANG-TEST POSITIVE-TEST ...)-13-2-1-1-3|
+               #19Y(00 00 00 00 01 00 00 00 21 17 DA AF 38 02 31 95 9E 19 03)
+               ("OK.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)))
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        (|COMMON-LISP|::|T|))
+       (|COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|))
+    :|QUALIFIERS| :|LAMBDA-LIST| (|BURNING-TESTING|::|A-CASE|)
+    |CLOS|::|SIGNATURE|
+    #(1. 0. |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|
+      |COMMON-LISP|::|NIL|)
+    :|SPECIALIZERS| |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+    |CLOS|::|DO-DEFMETHOD|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|101 111 (DEFTEST REGLANG-TEST REPEAT-TEST ...)-14-1|
+   #31Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 72 9E DC 7B 01 70 03 DA DB AE
+        32 A2 16 01 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|REGLANG-TEST| |BURNING-TESTING|::|TESTS|
+    |BURNING-LEXICAL-TEST|::|REPEAT-TEST| |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|101 111 (DEFTEST REGLANG-TEST REPEAT-TEST ...)-14-2|
+   #43Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 8F 9E 03 DA 2F 02 DA DD DE 63
+        DF E0 E1 E2 E3 E4 38 02 72 3A 7B 01 7B 08 2D 03 0B 19 01)
+   (|BURNING-LEXICAL-TEST|::|REPEAT-TEST| |SYSTEM|::|TRACED-DEFINITION|
+    |SYSTEM|::|UNTRACE1|
+    #Y(#:|101 111 (DEFTEST REGLANG-TEST REPEAT-TEST ...)-14-2-1|
+       #15Y(00 00 00 00 01 00 00 00 20 02 DA C6 5D 19 02)
+       (#Y(#:|101 111 (DEFTEST REGLANG-TEST REPEAT-TEST ...)-14-2-1-1|
+           #170Y(00 00 00 00 01 00 00 00 20 02 DA 6B 01 DC DD 33 03 15 02 10 04
+                 DF 6F 06 E1 E1 6E 03 08 DF 6F 09 DF 6F 09 DF 6F 09 70 0A 70 0A
+                 AD AD 8A 0B 0D 00 0F 04 E6 6B 01 E7 B0 E8 B1 33 05 15 16 02 DF
+                 6F 06 E9 EA 6E 03 08 2E 11 14 DF 6F 09 70 12 2E 11 14 DF 6F 09
+                 70 12 70 0A AD AD 8A 0B 0D 00 0F 04 ED 6B 01 EE B0 EF B1 33 05
+                 15 16 02 DF 6F 06 F0 EA 6E 03 08 DF 6F 09 2E 11 14 DF 6F 09 70
+                 12 70 0A AD AD 8A 0B 0D 00 0F 04 F1 6B 01 F2 B0 F3 B1 33 05 15
+                 16 02 6B 04 F4 30 1B 0E 04 1C 04 00 11 19 02 F6 6B 01 33 01 15
+                 1B 75)
+           (#Y(#:|101 111 (DEFTEST REGLANG-TEST REPEAT-TEST ...)-14-2-1-1-1|
+               #34Y(00 00 00 00 03 00 00 00 21 19 DA B1 38 02 31 95 AF B1 31 90
+                    DB B1 31 94 AE B1 31 90 B0 31 97 9E 19 05)
+               ("Running test " #\.)
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            |COMMON-LISP|::|*STANDARD-OUTPUT*|
+            |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+            |BURNING-LEXICAL-TEST|::|REPEAT-TEST|
+            |BURNING-TESTING|::|*TEST-RESULT*| #\a :|CHAR| 3. :|REPEAT|
+            |BURNING-LEXICAL|::|CHARACTER-NODE| |BURNING-LEXICAL|::|AND-NODE|
+            |BURNING-LEXICAL|::|NODE=|
+            #Y(#:|101 111 (DEFTEST REGLANG-TEST REPEAT-TEST ...)-14-2-1-1-2|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (:|REPEAT| (:|CHAR| #\a) 3. 3.)
+            (|BURNING-LEXICAL|::|AND-NODE|
+             (|BURNING-LEXICAL|::|CHARACTER-NODE| #\a)
+             (|BURNING-LEXICAL|::|AND-NODE|
+              (|BURNING-LEXICAL|::|CHARACTER-NODE| #\a)
+              (|BURNING-LEXICAL|::|CHARACTER-NODE| #\a)))
+            0. 2. |BURNING-LEXICAL|::|EMPTY-NODE| |BURNING-LEXICAL|::|OR-NODE|
+            #Y(#:|101 111 (DEFTEST REGLANG-TEST REPEAT-TEST ...)-14-2-1-1-3|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (:|REPEAT| (:|CHAR| #\a) 0. 2.)
+            (|BURNING-LEXICAL|::|AND-NODE|
+             (|BURNING-LEXICAL|::|OR-NODE| (|BURNING-LEXICAL|::|EMPTY-NODE|)
+              (|BURNING-LEXICAL|::|CHARACTER-NODE| #\a))
+             (|BURNING-LEXICAL|::|OR-NODE| (|BURNING-LEXICAL|::|EMPTY-NODE|)
+              (|BURNING-LEXICAL|::|CHARACTER-NODE| #\a)))
+            1.
+            #Y(#:|101 111 (DEFTEST REGLANG-TEST REPEAT-TEST ...)-14-2-1-1-4|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (:|REPEAT| (:|CHAR| #\a) 1. 2.)
+            (|BURNING-LEXICAL|::|AND-NODE|
+             (|BURNING-LEXICAL|::|CHARACTER-NODE| #\a)
+             (|BURNING-LEXICAL|::|OR-NODE| (|BURNING-LEXICAL|::|EMPTY-NODE|)
+              (|BURNING-LEXICAL|::|CHARACTER-NODE| #\a)))
+            "Test REGLANG-TEST.REPEAT-TEST" |BURNING-TESTING|::|REPORT-RESULT|
+            #Y(#:|101 111 (DEFTEST REGLANG-TEST REPEAT-TEST ...)-14-2-1-1-5|
+               #19Y(00 00 00 00 01 00 00 00 21 17 DA AF 38 02 31 95 9E 19 03)
+               ("OK.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)))
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        (|COMMON-LISP|::|T|))
+       (|COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|))
+    :|QUALIFIERS| :|LAMBDA-LIST| (|BURNING-TESTING|::|A-CASE|)
+    |CLOS|::|SIGNATURE|
+    #(1. 0. |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|
+      |COMMON-LISP|::|NIL|)
+    :|SPECIALIZERS| |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+    |CLOS|::|DO-DEFMETHOD|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|113 116 (DEFTEST REGLANG-TEST MAKE-LEXEME-TEST ...)-15-1|
+   #31Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 72 9E DC 7B 01 70 03 DA DB AE
+        32 A2 16 01 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|REGLANG-TEST| |BURNING-TESTING|::|TESTS|
+    |BURNING-LEXICAL-TEST|::|MAKE-LEXEME-TEST| |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|113 116 (DEFTEST REGLANG-TEST MAKE-LEXEME-TEST ...)-15-2|
+   #43Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 8F 9E 03 DA 2F 02 DA DD DE 63
+        DF E0 E1 E2 E3 E4 38 02 72 3A 7B 01 7B 08 2D 03 0B 19 01)
+   (|BURNING-LEXICAL-TEST|::|MAKE-LEXEME-TEST| |SYSTEM|::|TRACED-DEFINITION|
+    |SYSTEM|::|UNTRACE1|
+    #Y(#:|113 116 (DEFTEST REGLANG-TEST MAKE-LEXEME-TEST ...)-15-2-1|
+       #15Y(00 00 00 00 01 00 00 00 20 02 DA C6 5D 19 02)
+       (#Y(#:|113 116 (DEFTEST REGLANG-TEST MAKE-LEXEME-TEST ...)-15-2-1-1|
+           #87Y(00 00 00 00 01 00 00 00 20 02 DA 6B 01 DC DD 33 03 15 02 10 04
+                DF 2E 06 14 2E 06 14 70 07 E2 64 6E 04 09 AC 6F 0A 2E 0B 14 2E
+                0B 14 70 0C AD AD 8A 0D 0D 00 0F 04 E8 6B 01 E9 B0 EA B1 33 05
+                15 16 03 6B 04 EB 30 12 0E 04 1C 04 00 11 19 02 ED 6B 01 33 01
+                15 1B 75)
+           (#Y(#:|113 116 (DEFTEST REGLANG-TEST MAKE-LEXEME-TEST ...)-15-2-1-1-1|
+               #34Y(00 00 00 00 03 00 00 00 21 19 DA B1 38 02 31 95 AF B1 31 90
+                    DB B1 31 94 AE B1 31 90 B0 31 97 9E 19 05)
+               ("Running test " #\.)
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            |COMMON-LISP|::|*STANDARD-OUTPUT*|
+            |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+            |BURNING-LEXICAL-TEST|::|MAKE-LEXEME-TEST|
+            |BURNING-TESTING|::|*TEST-RESULT*|
+            |BURNING-LEXICAL-TEST|::|BLA-BLA| :|EMPTY| :|AND| :|MINIMAL|
+            |BURNING-LEXICAL|::|MAKE-LEXEME|
+            |BURNING-LEXICAL|::|LEXEME-EXPRESSION|
+            |BURNING-LEXICAL|::|EMPTY-NODE| |BURNING-LEXICAL|::|AND-NODE|
+            |BURNING-LEXICAL|::|NODE=|
+            #Y(#:|113 116 (DEFTEST REGLANG-TEST MAKE-LEXEME-TEST ...)-15-2-1-1-2|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|BURNING-LEXICAL|::|LEXEME-EXPRESSION|
+             |BURNING-LEXICAL|::|LEXEME|)
+            (|BURNING-LEXICAL|::|AND-NODE| (|BURNING-LEXICAL|::|EMPTY-NODE|)
+             (|BURNING-LEXICAL|::|EMPTY-NODE|))
+            "Test REGLANG-TEST.MAKE-LEXEME-TEST"
+            |BURNING-TESTING|::|REPORT-RESULT|
+            #Y(#:|113 116 (DEFTEST REGLANG-TEST MAKE-LEXEME-TEST ...)-15-2-1-1-3|
+               #19Y(00 00 00 00 01 00 00 00 21 17 DA AF 38 02 31 95 9E 19 03)
+               ("OK.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)))
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        (|COMMON-LISP|::|T|))
+       (|COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|))
+    :|QUALIFIERS| :|LAMBDA-LIST| (|BURNING-TESTING|::|A-CASE|)
+    |CLOS|::|SIGNATURE|
+    #(1. 0. |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|
+      |COMMON-LISP|::|NIL|)
+    :|SPECIALIZERS| |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+    |CLOS|::|DO-DEFMETHOD|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|118 122 (DEFTEST REGLANG-TEST DEFLEXEME-TEST ...)-16-1|
+   #31Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 72 9E DC 7B 01 70 03 DA DB AE
+        32 A2 16 01 3E 19 01)
+   (|BURNING-LEXICAL-TEST|::|REGLANG-TEST| |BURNING-TESTING|::|TESTS|
+    |BURNING-LEXICAL-TEST|::|DEFLEXEME-TEST| |COMMON-LISP|::|UNION|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+#Y(#:|118 122 (DEFTEST REGLANG-TEST DEFLEXEME-TEST ...)-16-2|
+   #43Y(00 00 00 00 00 00 00 00 20 01 DA DB 38 01 8F 9E 03 DA 2F 02 DA DD DE 63
+        DF E0 E1 E2 E3 E4 38 02 72 3A 7B 01 7B 08 2D 03 0B 19 01)
+   (|BURNING-LEXICAL-TEST|::|DEFLEXEME-TEST| |SYSTEM|::|TRACED-DEFINITION|
+    |SYSTEM|::|UNTRACE1|
+    #Y(#:|118 122 (DEFTEST REGLANG-TEST DEFLEXEME-TEST ...)-16-2-1|
+       #15Y(00 00 00 00 01 00 00 00 20 02 DA C6 5D 19 02)
+       (#Y(#:|118 122 (DEFTEST REGLANG-TEST DEFLEXEME-TEST ...)-16-2-1-1|
+           #92Y(00 00 00 00 01 00 00 00 20 02 DA 6B 01 DC DD 33 03 15 02 10 04
+                DF 38 01 71 61 AC E0 8E 14 0D 00 0F 04 E1 6B 01 E2 AF E3 E0 33
+                05 15 16 01 E4 38 01 71 61 AC E5 8E 14 0D 00 0F 04 E6 6B 01 E7
+                AF E8 E5 33 05 15 16 01 6B 04 E9 30 10 0E 04 1C 04 00 11 19 02
+                EB 6B 01 33 01 15 1B 75)
+           (#Y(#:|118 122 (DEFTEST REGLANG-TEST DEFLEXEME-TEST ...)-16-2-1-1-1|
+               #34Y(00 00 00 00 03 00 00 00 21 19 DA B1 38 02 31 95 AF B1 31 90
+                    DB B1 31 94 AE B1 31 90 B0 31 97 9E 19 05)
+               ("Running test " #\.)
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            |COMMON-LISP|::|*STANDARD-OUTPUT*|
+            |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+            |BURNING-LEXICAL-TEST|::|DEFLEXEME-TEST|
+            |BURNING-TESTING|::|*TEST-RESULT*|
+            #1=(|BURNING-LEXICAL|::|DEFLEXEME| |COMMON-LISP|::|IF| ("if"))
+            #2=(|COMMON-LISP|::|SETF|
+                (|COMMON-LISP|::|GET| '|COMMON-LISP|::|IF|
+                 '|BURNING-LEXICAL|::|LEXEME|)
+                (|BURNING-LEXICAL|::|MAKE-LEXEME| '|COMMON-LISP|::|IF| ("if")))
+            #Y(#:|118 122 (DEFTEST REGLANG-TEST DEFLEXEME-TEST ...)-16-2-1-1-2|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|COMMON-LISP|::|MACROEXPAND-1| '#1#) '#2#
+            #3=(|BURNING-LEXICAL|::|DEFLEXEME| |COMMON-LISP|::|IF| ("if")
+                :|MINIMAL| |COMMON-LISP|::|T|)
+            #4=(|COMMON-LISP|::|SETF|
+                (|COMMON-LISP|::|GET| '|COMMON-LISP|::|IF|
+                 '|BURNING-LEXICAL|::|LEXEME|)
+                (|BURNING-LEXICAL|::|MAKE-LEXEME| '|COMMON-LISP|::|IF| ("if")
+                 :|MINIMAL| |COMMON-LISP|::|T|))
+            #Y(#:|118 122 (DEFTEST REGLANG-TEST DEFLEXEME-TEST ...)-16-2-1-1-3|
+               #53Y(00 00 00 00 05 00 00 00 21 00 B1 B3 31 90 DA B3 38 02 31 95
+                    B0 B3 31 90 DB B3 38 02 31 95 AF B3 31 90 DC B3 38 02 31 95
+                    AE B3 31 90 DD B3 38 02 31 95 9E 19 07)
+               (" is " ".Expected " " which is " ".\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+            (|COMMON-LISP|::|MACROEXPAND-1| '#3#) '#4#
+            "Test REGLANG-TEST.DEFLEXEME-TEST"
+            |BURNING-TESTING|::|REPORT-RESULT|
+            #Y(#:|118 122 (DEFTEST REGLANG-TEST DEFLEXEME-TEST ...)-16-2-1-1-4|
+               #19Y(00 00 00 00 01 00 00 00 21 17 DA AF 38 02 31 95 9E 19 03)
+               ("OK.\n")
+               (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|)))
+           (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))
+        (|COMMON-LISP|::|T|))
+       (|COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|))
+    :|QUALIFIERS| :|LAMBDA-LIST| (|BURNING-TESTING|::|A-CASE|)
+    |CLOS|::|SIGNATURE|
+    #(1. 0. |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL| |COMMON-LISP|::|NIL|
+      |COMMON-LISP|::|NIL|)
+    :|SPECIALIZERS| |BURNING-LEXICAL-TEST|::|REGLANG-TEST|
+    |CLOS|::|DO-DEFMETHOD|)
+   (|COMMON-LISP|::|T| |COMMON-LISP|::|T| |COMMON-LISP|::|T|))

@@ -1,0 +1,8 @@
+echo "Testing ABCL..."
+abspath=$(cd ${0%/*} && echo $PWD/${0##*/})
+path_only=`dirname "$abspath"`
+
+abcl --noinform --load $path_only'/test.lisp'
+
+echo "Done"
+echo ""

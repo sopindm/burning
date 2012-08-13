@@ -1,0 +1,28 @@
+;; This buffer is for notes you don't want to save, and for Lisp evaluation.
+;; If you want to create a file, visit that file with C-x C-f,
+;; then enter the text in that file's own buffer.
+
+##chapter Multithreading
+##section Intro
+
+#p
+Burning provides threads implementation built on a tom of boreaux-threads (and reimplements its features for
+some implementatoins.
+#-
+
+#p Currently supported implementations (fully):
+   #list 
+     clozurecl
+     sbcl
+#-
+
+Support of clisp is also possible, but current version (2.49) has bug in #term{exemption exemptions} implementation,
+so it doesn't pass our tests,
+#-
+
+#p
+Other implementations, supported by bordeaux-threads, a possible supported too, but we don't tested library on them.
+#-
+
+##-section
+##-chapter

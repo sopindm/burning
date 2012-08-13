@@ -1,0 +1,129 @@
+Command Line and Configuration
+  Supports key, flag and action argument types                            +
+  Automatically adds --help action                                        +
+  Supports integer, float and string argument types                       +
+  Supports argument arrays                                                +
+  Supports configuration files in .ini and .xml formats                   -
+  Supports correctness check for general cases (range of variable,        +
+                                                correctness of filename)  +
+Report generator
+  Supports easy way of gathering work information             +
+  Supports timing of subintervals and loops                   +
+  Supports OpenCL timing                                      -
+  Generates reports in XML formats                            +
+
+XML
+
+Core
+  List functions
+    append1, conc1
+    make-list
+    group
+    filter
+
+  Mapping
+    mappend
+    mapcars
+
+  Destructive reader macro
+
+  memoize
+  compose
+
+  left-recursive
+
+  generalized variables utilities
+  reallocating arrays
+  pattern matching
+  anaforics
+  function builders
+  lazy evaluation (streams?)
+  recursion makers
+  reader-macros
+  destructuring
+  loops
+
+Threads
+  Implementations
+    clisp     -/+
+    sbcl      +
+    clozurecl +
+    ecl       -
+    abcl      -
+  Base threading features  +
+  Mutexes                  +
+  Semaphores               +
+  Conditional variables    +
+  Atomic operations        -
+  Shared variables         +
+  Monitors                 +
+  Chains                   +
+  Error conditions         -
+
+FFI
+  Lisps
+    clisp      +
+    sbcl       +
+    clozurecl  + 
+  C++
+    gcc
+    VS2010
+    Intel C++ Compiler
+  Declaration
+    lisp              +
+  Generation
+    c++
+  Types
+    void              +
+    bool              +
+    short signed      +
+    signed            +
+    long signed       +
+    short unsigned    +
+    unsigned          +
+    long unsigned     +
+    float             +
+    double            +
+    string            +
+    array
+    functional        +
+      multiple return values -
+      object arguments       +
+      virtual                -
+    class             +
+      inhiertance     +
+  Functions   
+    Constructors      +
+    Destructors       +
+
+Filesystem
+
+Networking
+
+Testing
+  fixture support
+  parameterized cases
+  suite customization 
+  threads
+
+Logging
+
+CXXGenerator
+
+Typised lisp
+  Library
+  Language
+
+Grammar parser
+
+HPCFramework
+  CUDA Wrapper
+  OpenCL Wrapper
+  CPU Wrapper
+  Unit testing
+
+Report analyzer
+
+
+
+

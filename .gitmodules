@@ -4,3 +4,6 @@
 [submodule "testing"]
 	path = testing
 	url = git@github.com:sopindm/burning-testing.git
+[submodule "filesystem"]
+	path = filesystem
+	url = git@github.com:sopindm/filesystem.git

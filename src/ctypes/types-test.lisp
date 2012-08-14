@@ -2,75 +2,131 @@
 
 (in-case types-test)
 
-(deftest making-type
-  (let ((type (make-type '(arg1 arg2 arg3) '(rel1 t1 t2 t3) '(rel2 t12 t22))))
-    (!equal (type-arguments type) '(arg1 arg2 arg3))
-    (!equal (type-relations type) '((rel1 t1 t2 t3) (rel2 t12 t22)))))
+(deftest making-types
+  (let ((type (make-type 'some-type '(arg1 arg2 arg3))))
+    (?eq (type-name type) 'some-type)
+    (?equal (type-args-list type) '(arg1 arg2 arg3))
+    (?null (imagine-type-p type)))
+  (let ((type (make-type 'name 'args :imagine-type-p t)))
+    (?t (imagine-type-p type))))
 
-(deftest symbol-type-test
-  (let ((type1 (make-type '(arg) '(rel1) '(rel2 t1 t2)))
-	(type2 (make-type '(arg2) ())))
-    (?condition (symbol-type 'a-type)
-		ctypes-undefined-type 
-		(ctypes-undefined-type-name 'a-type))
-    (setf (symbol-type 'a-type) type1)
-    (?equalp (symbol-type 'a-type) type1)
-    (setf (symbol-type 'a-type) type2)
-    (?equalp (symbol-type 'a-type) type2)
-    (setf (symbol-type 'a-type) nil)
-    (?null (symbol-type 'a-type))
-    (unbind-type 'a-type)
-    (?condition (symbol-type 'a-type)
-		ctypes-undefined-type 
-		(ctypes-undefined-type-name 'a-type))))
+(define-equality-check type=)
 
-(deftest local-types-test
-  (let ((type1 (make-type '(arg1)))
-	(type2 (make-type '(arg2))))
-    (setf (symbol-type 'a-type) type1)
-    (in-type-context (make-type-context)
-      (setf (symbol-type 'a-type) type2)
-      (?equalp (symbol-type 'a-type) type2))
-    (?equalp (symbol-type 'a-type) type1)
-    (unbind-type 'a-type)))
+(deftest type=-test
+  (let ((type1 (make-type 'type1 '(arg1 arg2 arg3)))
+	(type2 (make-type 'type1 '(arg1 arg2 arg3))))
+    (?type= type1 type2))
+  (let ((type1 (make-type 'type '((a (very (very))) (deep (tree)))))
+	(type2 (make-type 'type '((a (very (very))) (deep (tree))))))
+    (?type= type1 type2))
+  (let ((type1 (make-type 'name ()))
+	(type2 (make-type 'other-name ())))
+    (?not (type= type1 type2)))
+  (let ((type1 (make-type 'name '(some args)))
+	(type2 (make-type 'name '(some other args))))
+    (?not (type= type1 type2)))
+  (let ((type1 (make-type 'name () :imagine-type-p t))
+	(type2 (make-type 'name () :imagine-type-p nil)))
+    (?not (type= type1 type2))))
 
-(deftest global-types-local-access
-  (setf (symbol-type 'a-type) (make-type '(a) ()))
-  (in-type-context (make-type-context)
-    (?equalp (symbol-type 'a-type) (make-type '(a) ())))
-  (unbind-type 'a-type))
+(deftest copying-types
+  (let ((type (make-type 'a-type '((arg1 argarg1) arg2))))
+    (let ((new-type (copy-type type)))
+      (?type= new-type type))
+    (let ((new-type (copy-type type :new-name 'other-type)))
+      (?eq (type-name new-type) 'other-type))
+    (let ((new-type (copy-type type :new-args-list '(some other args))))
+      (?equal (type-args-list new-type) '(some other args)))
+    (let ((new-type (copy-type type :imagine-type-p t)))
+      (?t (imagine-type-p new-type)))))
 
-(deftest saving-context
-  (let ((context (make-type-context)))
-    (in-type-context context
-      (setf (symbol-type 'a-type) (make-type '(an-arg) ())))
-    (in-type-context context
-      (?equalp (symbol-type 'a-type) (make-type '(an-arg) ())))))
+(defun ?have-types (table &rest types)
+  (flet ((?have-type (type)
+	   (?type= (if table (get-type (type-name type) table) (get-type (type-name type))) type)))
+    (when table (!= (type-table-size table) (length types)))
+    (mapc #'?have-type types)))
 
-(deftest tlet-test
-  (?eq
-   (tlet ((type-a '(arg1 arg2) '(mod1) '(rel1 t1 t2) '(rel2 t3 t4))
-	  (type-b '(arg3) '(mod2 mod3) '(self type-b) '(other type-a)))
-     (?equalp (symbol-type 'type-a) (make-type '(arg1 arg2) '(mod1) '(rel1 t1 t2) '(rel2 t3 t4)))
-     (?equalp (symbol-type 'type-b) (make-type '(arg3) '(mod2 mod3) '(self type-b) '(other type-a)))
-     'ok)
-   'ok))
+(deftest making-type-tables
+  (let ((table (make-type-table))
+	(type1 (make-type 'a-type '(some-args)))
+	(type2 (make-type 'other-type '(other args))))
+    (?error (get-type 'a-type table) 
+	    (format nil "Unknown type ~a in type table ~a." 'a-type table))
+    (set-type type1 table)
+    (set-type type2 table)
+    (?have-types table type1 type2)))
 
-(deftest type-reader-macro
-  (let ((type (make-type '(arg1 arg2) '(mod1) '(rel1 t1 t2) '(rel2 t3 t4))))
-    (setf #Ttype type)
-    (?equal #Ttype type)
-    (?equal (symbol-type 'type) type)
-    (unbind-type 'type)))
+(deftest removing-types-from-table
+  (let ((type1 (make-type 'type1 '()))
+	(type2 (make-type 'type2 '())))
+    (let ((table (make-type-table type1 type2)))
+      (?have-types table type1 type2)
+      (remove-type type1 table)
+      (?have-types table type2)
+      (remove-type 'type2 table)
+      (?have-types table))))
 
-(define-type my-type (arg1 arg2)
-  (> t1 t2 t3)
-  (< t4 t5 t6)
-  (self my-type))
+(deftest copying-type-tables
+  (let ((type1 (make-type 'a-type '(some args)))
+	(type2 (make-type 'other-type '(some other args))))
+    (let* ((table (make-type-table type1 type2))
+	   (new-table (copy-type-table table)))
+      (?have-types new-table type1 type2)
+      (let ((new-type (copy-type type1 :new-args-list '(new args))))
+	(set-type new-type new-table)
+	(?have-types new-table new-type type2)
+	(?have-types table type1 type2)))))
+    
+(deftest making-table-with-prototype
+  (let ((type1 (make-type 'type1 ()))
+	(type2 (make-type 'type2 ()))
+	(type3 (make-type 'type3 ())))
+    (let* ((base-table (make-type-table type1 type2))
+	   (table (make-type-table type3 :prototype base-table)))
+      (?have-types table type1 type2 type3))))
 
-(deftest define-type-test
-  (?equalp #Tmy-type (make-type '(arg1 arg2) '(> t1 t2 t3) '(< t4 t5 t6) '(self my-type))))
+(deftest type-tables-in-dynamic-scope
+  (let ((type1 (make-type 'type1 ()))
+	(type2 (make-type 'type2 ())))
+    (with-type-table (make-type-table type1 type2)
+      (?type= (get-type 'type1) type1)
+      (?type= (get-type 'type2) type2))))
 
+(deftest local-type-scope
+  (let ((type1 (make-type 'type1 ()))
+	(new-type1 (make-type 'type1 '(some args)))
+	(type2 (make-type 'type2 ()))
+	(type3 (make-type 'type3 ())))
+    (with-type-table (make-type-table type1 type2)
+      (with-local-type-table
+	(set-type type3)
+	(?have-types nil type1 type2 type3)
+	(set-type new-type1)
+	(?type= (get-type 'type1) new-type1))
+      (?have-types nil type1 type2))))
+
+(deftest defining-types
+  (with-type-table (make-type-table)
+    (define-type a-type (arg1 arg2 &rest other-args) ())
+    (define-type b-type (arg1 arg2) () 
+		 :imagine-type-p t)
+    (?have-types nil 
+		 (make-type 'a-type '(arg1 arg2 &rest other-args))
+		 (make-type 'b-type '(arg1 arg2) :imagine-type-p t))))
+
+(deftest defining-types-in-table
+  (let ((table (make-type-table)))
+    (define-type my-type () () 
+      :type-table table)
+    (?type= (get-type 'my-type table) (make-type 'my-type ()))))
+
+(deftest defining-types-with-wrong-options
+  (?condition (eval '(define-type a-type () () :wrong-option))
+	      type-error (type-error-datum :wrong-option)))
+
+
+
+;checking type lambda lists
 
 
 

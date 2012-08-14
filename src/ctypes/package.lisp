@@ -1,34 +1,28 @@
 (defpackage #:burning-ctypes
   (:use #:burning-lisp)
   (:export make-type
-	   type-arguments
-	   type-modifiers
-	   type-relations
+	   copy-type
 
-	   ctypes-undefined-type
-	   ctypes-undefined-type-name
+	   type-name
+	   type-args-list
+	   imagine-type-p
 
-	   symbol-type
-	   unbind-type
+	   type=
 
-	   make-type-context
-	   in-type-context
-	   tlet
+	   make-type-table
+	   copy-type-table
+	   type-table-size
 
 	   define-type
-	   instance-type
+	   get-type
+	   set-type
+	   remove-type
+	   
+	   with-type-table
+	   with-local-type-table))
 
-	   make-type-block
-	   block-addvar
-	   block-addexpr
-	   block-vartype
 
-	   inherit-types
 
-	   undefined-type
-	   true-type
-	   false-type
-	   and-type))
 
 
 

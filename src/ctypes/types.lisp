@@ -1,59 +1,73 @@
 (in-package #:burning-ctypes)
 
-(defstruct (ctype (:conc-name type-) (:constructor %make-type))
-  arguments
-  relations)
+(defclass ctype ()
+  ((name :initarg :name :reader type-name)
+   (args-list :initarg :args-list :reader type-args-list)
+   (imagine-type-p :initarg :imagine-type-p :initform nil :reader imagine-type-p)))
 
-(defun make-type (arguments &rest relations)
-  (%make-type :arguments arguments :relations relations))
+(defun make-type (name args-list &key imagine-type-p)
+  (make-instance 'ctype :name name :args-list args-list :imagine-type-p imagine-type-p))
 
-(defstruct (type-context (:constructor %make-type-context))
-  table
-  base)
+(defgeneric copy-type (type &key new-name new-args-list imagine-type-p))
 
-(defun make-type-context (&optional (base *type-context*))
-  (%make-type-context :table (make-hash-table) :base base))
+(defmethod copy-type ((type ctype) &key
+		      (new-name nil new-name-p)
+		      (new-args-list nil new-args-list-p)
+		      (imagine-type-p nil imagine-type-p-set-p))
+  (make-type (if new-name-p new-name (type-name type))
+	     (if new-args-list-p new-args-list (copy-tree (type-args-list type)))
+	     :imagine-type-p (if imagine-type-p-set-p imagine-type-p (imagine-type-p type))))
 
-(defvar *type-context* (make-type-context nil))
+(defgeneric type= (type1 type2))
 
-(defun %symbol-type (symbol context)
-  (unless context
-    (error 'ctypes-undefined-type :name symbol))
-  (multiple-value-bind (value set-p) (gethash symbol (type-context-table context))
-    (if set-p value
-	(%symbol-type symbol (type-context-base context)))))
+(defmethod type= ((type1 ctype) (type2 ctype))
+  (and (eq (type-name type1) (type-name type2))
+       (equal (type-args-list type1) (type-args-list type2))
+       (eq (imagine-type-p type1) (imagine-type-p type2))))
 
-(defun symbol-type (symbol)
-  (%symbol-type symbol *type-context*))
+(defun make-type-table (&rest types-and-prototype)
+  (let ((table (aif (find-keyword :prototype types-and-prototype)
+		    (copy-type-table it)
+		    (make-hash-table :test #'eq))))
+    (let ((types (remove-keywords types-and-prototype)))
+      (mapc (lambda (type) (set-type type table)) types))
+    table))
 
-(defun unbind-type (symbol)
-  (remhash symbol (type-context-table *type-context*)))
+(defun copy-type-table (table)
+  (copy-hash-table table))
 
-(defun (setf symbol-type) (value symbol)
-  (setf (gethash symbol (type-context-table *type-context*)) value))
+(defun type-table-size (table)
+  (hash-table-count table))
 
-(define-condition ctypes-undefined-type (error)
-  ((name :initarg :name :reader ctypes-undefined-type-name)))
+(defvar *types* (make-type-table))
 
-(defmacro in-type-context (context &body body)
-  `(let ((*type-context* ,context))
+(defun get-type (name &optional (table *types*))
+  (aif (gethash name table)
+       it
+       (error "Unknown type ~a in type table ~a." name table)))
+
+(defun set-type (type &optional (table *types*))
+  (setf (gethash (type-name type) table) type))
+
+(defmacro define-type (name (&rest arguments) (&rest relations) &body options)
+  (declare (ignore relations))
+  (check-keywords '(:imagine-type-p :type-table) options)
+  `(set-type (make-type ',name ',arguments ,@(aif (find-keyword :imagine-type-p options)
+						  `(:imagine-type-p ,it)))
+	     ,@(aif (find-keyword :type-table options) (list it))))
+    
+
+(defun remove-type (type table)
+  (let ((type-name (etypecase type
+		     (ctype (type-name type))
+		     (symbol type))))
+    (remhash type-name table)))
+  
+(defmacro with-type-table (init-form &body body)
+  `(let ((*types* ,init-form))
      ,@body))
 
-(defmacro tlet ((&rest bindings) &body body)
-  (flet ((parse-type (form)
-	   `(setf (symbol-type ',(first form)) (make-type ,@(rest form)))))
-    `(in-type-context (make-type-context)
-       ,@(mapcar #'parse-type bindings)
-       ,@body)))
-
-(set-dispatch-macro-character #\# #\T 
-			      #'(lambda (stream c1 c2)
-				  (declare (ignore c1 c2))
-				  `(symbol-type ',(read stream t nil t))))
-
-(defmacro define-type (name (&rest arguments) &body relations)
-  `(setf (symbol-type ',name) (make-type '(,@arguments) ,@(mapcar #'(lambda (rel) `',rel) relations))))
-
-
-
+(defmacro with-local-type-table (&body body)
+  `(let ((*types* (copy-type-table *types*)))
+     ,@body))
   

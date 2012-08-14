@@ -7,7 +7,6 @@
     :licence "GPL v3"
     :serial t
     :components ((:file "test-package")
-		 (:file "types-test")
-		 (:file "type-system-test"))
+		 (:file "types-test"))
     :depends-on (#:burning-ctypes #:burning-lisp #:burning-testing))
 

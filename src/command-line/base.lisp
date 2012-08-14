@@ -214,18 +214,6 @@
   (defun parse-arguments-option (args)
     `(list ,@(mapcar #'(lambda (spec) (parse-argument-spec (first spec) (rest spec))) args))))
 
-(defun find-key (name list)
-  (cond
-    ((null list) nil)
-    ((eq (first list) name) (second list))
-    (t (find-key name (rest list)))))
-
-(defun remove-key (name list)
-  (cond
-    ((null list) nil)
-    ((eq (first list) name) (remove-key name (rest (rest list))))
-    (t (cons (first list) (remove-key name (rest list))))))
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defmethod parse-argument-spec ((class (eql :action)) spec)
     (let ((args (find-key :arguments spec))

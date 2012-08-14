@@ -7,7 +7,6 @@
     :licence "GPL v3"
     :serial t
     :components ((:file "package")
-		 (:file "types")
-		 (:file "type-system"))
+		 (:file "types"))
     :depends-on (#:burning-lisp))
 

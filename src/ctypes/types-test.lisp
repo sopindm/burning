@@ -129,8 +129,7 @@
 
 (deftest defining-types-in-table
   (let ((table (make-type-table)))
-    (define-type my-type () () 
-      :type-table table)
+    (define-type my-type () () :type-table table)
     (?type= (get-type 'my-type table) (make-type 'my-type ()))))
 
 (deftest defining-types-with-wrong-options
@@ -142,9 +141,48 @@
      (with-type-table (make-type-table)
        ,@body)))
 
-(def-type-test type-reader-macro
+;;
+;; Type instances
+;;
+
+(def-type-test simple-instancing-types
   (define-type a-type () ())
-  (?type= #Ta-type (get-type 'a-type)))
+  (let ((instance (make-type-instance 'a-type)))
+    (?type= (instance-type instance) (get-type 'a-type))
+    (?eq (instance-args instance) ())))
+
+(def-type-test type-instance-reader-macro
+  (define-type a-type (arg1 arg2) ())
+  (let ((instance #T(a-type 'arg1 'arg2)))
+    (?type= (instance-type instance) (get-type 'a-type))
+    (?equal (instance-args instance) '(arg1 arg2))))
+
+(def-type-test type-instancing-in-type-table
+  (let ((table (make-type-table)))
+    (define-type a-type () () :type-table table)
+    (let ((instance #T(a-type :type-table table)))
+      (?type= (instance-type instance) (get-type 'a-type table))
+      (?eq (instance-args instance) ()))))
+
+(def-type-test checking-type-instances-simple-lambda-lists
+  (flet ((args-error (list type)
+	   (format nil "Wrong arguments list ~a for type ~a with lambda list ~a." 
+		   list
+		   (type-name type)
+		   (type-args-list type))))
+    (define-type a-type () ())
+    #T(a-type)
+    (?error #T(a-type 'some 'args) (args-error '(some args) (get-type 'a-type)))
+    (define-type b-type (arg1 arg2) ())
+    #T(b-type 'arg 'other-arg)
+    (?error #T(b-type 'arg) (args-error '(arg) (get-type 'b-type)))
+    (?error #T(b-type 'arg1 'arg2 'arg3) (args-error '(arg1 arg2 arg3) (get-type 'b-type)))))
+
+;checking lambda list (also with &rest)
+;;lambda lists with &rest and dots
+;;tree lambda lists
+;;tree lambda lists with inner rest and dots
+
 
 ;;
 ;; Type relations
@@ -170,25 +208,28 @@
   (define-type type1 () ())
   (define-type type2 () ())
   (define-relation relation (t1 t2) (declare (ignore t1 t2)) 'dont-know)
-  (define-relation-method relation (t1 (t2 type2)) (declare (ignore t1)) (list 't2 (type-name t2)))
-  (?equal (#Rrelation #Ttype1 #Ttype2) (list 't2 'type2))
+  (define-relation-method relation (t1 (type2)) (declare (ignore t1)) 't2)
+  (?equal (#Rrelation #Ttype1 #Ttype2) 't2)
   (?eq (#Rrelation #Ttype1 #Ttype1) 'dont-know)
-  (define-relation-method relation ((t1 type1) t2) (declare (ignore t2)) (list 't1 (type-name t1)))
-  (?equal (#Rrelation #Ttype1 #Ttype2) (list 't1 'type1))
-  (?equal (#Rrelation #Ttype2 #Ttype2) (list 't2 'type2))
-  (define-relation-method relation ((t1 type1) (t2 type2)) (list 'both (type-name t1) (type-name t2)))
-  (?equal (#Rrelation #Ttype1 #Ttype2) (list 'both 'type1 'type2))
+  (define-relation-method relation ((type1) t2) (declare (ignore t2)) 't1)
+  (?equal (#Rrelation #Ttype1 #Ttype2) 't1)
+  (?equal (#Rrelation #Ttype2 #Ttype2) 't2)
+  (define-relation-method relation ((type1) (type2)) 'both)
+  (?equal (#Rrelation #Ttype1 #Ttype2) 'both)
   (?eq (#Rrelation #Ttype2 #Ttype1) 'dont-know))
 
 ;specializaion with inheritance
 
 ;removing relation methods
 ;removing wrong method
+;calling default after removing method
 
-;simple relations with unification
+;simple relations with type arguments binding
+;checking type lambda list
 
 ;;defining methods (using pattern matching)
-;relations in table (locality, copying, etc )
+;defining relations and methods in specified table
+;relations in table (locality, copying, etc)
 ;relation expanders
 ;expanding transitive relations
 ;relations in types with parameters (returns unification)

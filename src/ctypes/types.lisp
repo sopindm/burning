@@ -29,6 +29,27 @@
        (equal (type-args-list type1) (type-args-list type2))
        (eq (imagine-type-p type1) (imagine-type-p type2))))
 
+(defun check-type-lambda-list (args type)
+  (let ((list (type-args-list type)))
+    (unless (and (typep args 'list) (= (length args) (length list)))
+      (error "Wrong arguments list ~a for type ~a with lambda list ~a." args (type-name type) list))
+    t))
+
+;;
+;; Type instances
+;;
+
+(defstruct (type-instance (:constructor %make-type-instance) (:conc-name instance-))
+  type
+  args)
+
+(defun make-type-instance (name &rest args-and-options)
+  (let ((args (remove-keyword :type-table args-and-options))
+	(table (or (find-keyword :type-table args-and-options) *types*)))
+    (let ((type (get-type name table)))
+      (check-type-lambda-list args type)
+      (%make-type-instance :type type :args args))))
+
 ;;
 ;; Type table type
 ;;
@@ -75,15 +96,41 @@
     (remhash type-name (type-table-types table))))
 
 ;;
-;; Type relations
+;; Type methods
 ;;
 
-(defun make-types-relation (method)
-  (flet ((make-table (default-key default-value)
+(defun make-type-generic (args-count &optional method)
+  (flet ((make-table (nil-value) 
 	   (let ((table (make-hash-table :test #'eq)))
-	     (setf (gethash default-key table) default-value)
+	     (when nil-value (setf (gethash nil table) nil-value))
 	     table)))
-    (make-table nil (make-table nil method))))
+    (if (= args-count 1) 
+	(make-table method) 
+	(make-table (make-type-generic (1- args-count) method)))))
+
+(defun type-method (generic &rest types)
+  (flet ((method (type) (or (gethash type generic) (gethash nil generic))))
+    (if (null (rest types))
+	(method (first types))
+	(apply #'type-method (method (first types)) (rest types)))))
+
+(defun (setf type-method) (value generic &rest types)
+  (labels ((method (generic type types)
+	     (or (gethash type generic)
+		 (setf (gethash type generic) (make-type-generic (length types)))))
+	   (do-set (generic types)
+	     (if (null (rest types))
+		 (setf (gethash (first types) generic) value)
+		 (do-set (method generic (first types) (rest types)) (rest types)))))
+    (do-set generic types)))
+
+(defun call-type-method (generic &rest args)
+  (apply (apply #'type-method generic 
+		(mapcar (lambda (arg) (type-name (instance-type arg))) args)) args))
+
+;;
+;; Type relations
+;;
 
 (defun types-relation (name &optional (table *types*))
   (aif (gethash name (type-table-relations table))
@@ -96,28 +143,8 @@
 (defun remove-relation (name &optional (table *types*))
   (remhash name (type-table-relations table)))
 
-(defun types-relation-method (relation type1 type2) 
-  (flet ((table-relation (table type)
-	   (or (gethash type table) (gethash nil table))))
-    (table-relation (table-relation relation type1) type2)))
-
-(defun (setf types-relation-method) (value relation type1 type2)
-  (unless (gethash type1 relation)
-    (setf (gethash type1 relation) (make-hash-table :test #'eq)))
-  (let ((table (gethash type1 relation)))
-    (unless table 
-      (setf table (setf (gethash type1 relation) (make-hash-table :test #'eq))))
-    (setf (gethash type2 table) value)))
-
-(defun remove-types-relation-method (relation type1 type2)
-  (let ((table (gethash type1 relation)))
-    (unless table (error "No method for relation ~a and types ~a and ~a exists." relation type1 type2))
-    (if (gethash type2 relation)
-	(remhash type2 relation)
-	(error "No method for relation ~a and types ~a and ~a exists." relation type1 type2))))
-
-(defun relation-call (relation arg1 arg2)
-  (funcall (types-relation-method relation (type-name arg1) (type-name arg2)) arg1 arg2))
+(defun call-relation (name arg1 arg2 &optional (table *types*))
+  (call-type-method (types-relation name table) arg1 arg2))
 
 ;;
 ;; Type table macro's
@@ -129,7 +156,6 @@
   `(set-type (make-type ',name ',arguments ,@(aif (find-keyword :imagine-type-p options)
 						  `(:imagine-type-p ,it)))
 	     ,@(aif (find-keyword :type-table options) (list it))))
-    
 
 (defmacro with-type-table (init-form &body body)
   `(let ((*types* ,init-form))
@@ -139,20 +165,30 @@
   `(let ((*types* (copy-type-table *types*)))
      ,@body))
   
-(defmacro define-relation (name (arg1 arg2 &rest options) &body body)
-  `(setf (types-relation ',name ,@(aif (find-keyword :type-table options) (list it)))
-	 (make-types-relation (lambda (,arg1 ,arg2) ,@body))))
+(defmacro define-relation (name-and-options (arg1 arg2) &body body)
+  (let ((name (if (listp name-and-options) (first name-and-options) name-and-options))
+	(options (if (listp name-and-options) (rest name-and-options) nil)))
+    `(setf (types-relation ',name ,@(aif (find-keyword :type-table options) (list it)))
+	   (make-type-generic 2 (lambda (,arg1 ,arg2) ,@body)))))
 
 (defun %argument-to-type (arg)
-  (if (and (listp arg) (= (length arg) 2)) (second arg)))
+  (if (listp arg) (first arg)))
 
-(defmacro define-relation-method (name (arg1 arg2) &body body)
-  (flet ((argument-name (arg)
-	   (if (listp arg) (first arg) arg)))
-    `(setf (types-relation-method (types-relation ',name)
-				  (%argument-to-type ',arg1)
-				  (%argument-to-type ',arg2))
-	   (lambda (,(argument-name arg1) ,(argument-name arg2)) ,@body))))
+(defmacro define-relation-method (name-and-options (arg1 arg2) &body body)
+  (let ((name (if (listp name-and-options) (first name-and-options) name-and-options))
+	(options (if (listp name-and-options) (rest name-and-options) nil))
+	(arg1-sym (gensym))
+	(arg2-sym (gensym)))
+    (flet ((argument-bindings (arg var)
+	     (if (listp arg) 
+		 nil
+		 `((,arg ,var)))))
+      `(setf (type-method (types-relation ',name ,@(aif (find-keyword :type-table options) (list it)))
+			  (%argument-to-type ',arg1)
+			  (%argument-to-type ',arg2))
+	     (lambda (,arg1-sym ,arg2-sym)
+	       (declare (ignorable ,arg1-sym ,arg2-sym))
+	       (let (,@(argument-bindings arg1 arg1-sym)
+		     ,@(argument-bindings arg2 arg2-sym))
+		 ,@body))))))
 
-(defun have-relation-p (name arg1 arg2 &optional (table *types*))
-  (relation-call (types-relation name table) arg1 arg2))

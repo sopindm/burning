@@ -22,10 +22,14 @@
 	   
 	   with-type-table
 	   with-local-type-table
+
+	   make-type-instance
+	   instance-type
+	   instance-args
 	   
 	   define-relation
 	   define-relation-method
-	   have-relation-p))
+	   call-relation))
 
 (in-package #:burning-ctypes)
 
@@ -33,11 +37,13 @@
   (:merge :standard)
   (:dispatch-macro-char #\# #\T (lambda (stream c1 c2) 
 				  (declare (ignore c1 c2))
-				  `(get-type ',(read stream))))
+				  (let ((args (read stream t nil t)))
+				    `(make-type-instance ',(if (listp args) (first args) args)
+							 ,@(if (listp args) (rest args))))))
   (:dispatch-macro-char #\# #\R	(lambda (stream c1 c2)
 				  (declare (ignore c1 c2))
 				  `(lambda (type1 type2)
-				     (have-relation-p ',(read stream) type1 type2)))))
+				     (call-relation ',(read stream) type1 type2)))))
 			  
 
 

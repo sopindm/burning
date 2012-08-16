@@ -8,5 +8,7 @@
     :serial t
     :components ((:file "package")
 		 (:file "types"))
-    :depends-on (#:burning-lisp))
+    :depends-on (#:burning-lisp
+		 #:named-readtables))
+
 

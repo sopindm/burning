@@ -1,9 +1,6 @@
 (in-package #:burning-cgen-test)
 (in-language :c)
 
-#G
-(include "stdio.h")
-
 (def-cg-macro compare (a b then-close &optional else-close)
   `(if (> ,a ,b) ,then-close ,@(if else-close (list else-close) nil)))
 
@@ -21,17 +18,15 @@
 
 #G 
 (defun sort (array length)
-  (declare (type (array int) array)
-	   (type int length))
-  (for ((i :from (1- length) :downto 1))
-    (for ((j :from 0 :lessto i))
+  (for ((i := (1- length) :>= 1))
+    (for ((j := 0 :< i))
       (compare-and-swap (aref array j) (aref array (1+ j))))))
 
 #G
 (defun main ()
   (let ((array (make-array :element-type int :initial-contents (7 3 5 2 6 3 5 7))))
     (sort array (length array))
-    (for ((i :from 0 :lessto (length array)))
+    (for ((i := 0 :< (length array)))
       (format "~a" (aref array i)))
     (format "~%")))
     

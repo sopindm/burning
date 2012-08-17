@@ -36,21 +36,6 @@
     t))
 
 ;;
-;; Type instances
-;;
-
-(defstruct (type-instance (:constructor %make-type-instance) (:conc-name instance-))
-  type
-  args)
-
-(defun make-type-instance (name &rest args-and-options)
-  (let ((args (remove-keyword :type-table args-and-options))
-	(table (or (find-keyword :type-table args-and-options) *types*)))
-    (let ((type (get-type name table)))
-      (check-type-lambda-list args type)
-      (%make-type-instance :type type :args args))))
-
-;;
 ;; Type table type
 ;;
 
@@ -94,6 +79,21 @@
 		     (ctype (type-name type))
 		     (symbol type))))
     (remhash type-name (type-table-types table))))
+
+;;
+;; Type instances
+;;
+
+(defstruct (type-instance (:constructor %make-type-instance) (:conc-name instance-))
+  type
+  args)
+
+(defun make-type-instance (name &rest args-and-options)
+  (let ((args (remove-keyword :type-table args-and-options))
+	(table (or (find-keyword :type-table args-and-options) *types*)))
+    (let ((type (get-type name table)))
+      (check-type-lambda-list args type)
+      (%make-type-instance :type type :args args))))
 
 ;;
 ;; Type methods

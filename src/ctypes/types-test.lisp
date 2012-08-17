@@ -164,25 +164,31 @@
       (?type= (instance-type instance) (get-type 'a-type table))
       (?eq (instance-args instance) ()))))
 
+(defun instance-args-error (list type)
+  (format nil "Wrong arguments list ~a for type ~a with lambda list ~a." 
+	  list
+	  (type-name type)
+	  (type-args-list type)))
+
 (def-type-test checking-type-instances-simple-lambda-lists
-  (flet ((args-error (list type)
-	   (format nil "Wrong arguments list ~a for type ~a with lambda list ~a." 
-		   list
-		   (type-name type)
-		   (type-args-list type))))
-    (define-type a-type () ())
-    #T(a-type)
-    (?error #T(a-type 'some 'args) (args-error '(some args) (get-type 'a-type)))
-    (define-type b-type (arg1 arg2) ())
-    #T(b-type 'arg 'other-arg)
-    (?error #T(b-type 'arg) (args-error '(arg) (get-type 'b-type)))
-    (?error #T(b-type 'arg1 'arg2 'arg3) (args-error '(arg1 arg2 arg3) (get-type 'b-type)))))
+  (define-type a-type () ())
+  #T(a-type)
+  (?error #T(a-type 'some 'args) (instance-args-error '(some args) (get-type 'a-type)))
+  (define-type b-type (arg1 arg2) ())
+  #T(b-type 'arg 'other-arg)
+  (?error #T(b-type 'arg) (instance-args-error '(arg) (get-type 'b-type)))
+  (?error #T(b-type 'arg1 'arg2 'arg3) (instance-args-error '(arg1 arg2 arg3) (get-type 'b-type))))
+
+(def-type-test checking-type-instances-lambda-lists-with-rest-and-dots
+  (define-type a-type (a &rest b) ())
+  #T(a-type 'arg)
+  #T(a-type 'arg1 'arg2)
+  (?error #T(a-type) (instance-args-error () (get-type 'a-type))))
 
 ;checking lambda list (also with &rest)
 ;;lambda lists with &rest and dots
 ;;tree lambda lists
 ;;tree lambda lists with inner rest and dots
-
 
 ;;
 ;; Type relations
@@ -227,7 +233,6 @@
 ;simple relations with type arguments binding
 ;checking type lambda list
 
-;;defining methods (using pattern matching)
 ;defining relations and methods in specified table
 ;relations in table (locality, copying, etc)
 ;relation expanders

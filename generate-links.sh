@@ -13,6 +13,3 @@ function link3rdString {
 
 ls 3rdparty/ | cat | while read line; do link3rdString 3rdparty/$line; done | sh
 ls src/ | cat | while read line; do linkString src/$line; done | sh
-linkModuleString lisp | sh
-linkModuleString testing | sh
-linkModuleString filesystem | sh

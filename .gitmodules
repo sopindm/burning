@@ -1,9 +1,9 @@
-[submodule "lisp"]
-	path = lisp
-	url = git@github.com:sopindm/burning-lisp.git
-[submodule "testing"]
-	path = testing
+[submodule "src/testing"]
+	path = src/testing
 	url = git@github.com:sopindm/burning-testing.git
-[submodule "filesystem"]
-	path = filesystem
-	url = git@github.com:sopindm/filesystem.git
+[submodule "src/filesystem"]
+	path = src/filesystem
+	url = git@github.com:sopindm/burning-filesystem.git
+[submodule "src/lisp"]
+	path = src/lisp
+	url = git@github.com:sopindm/burning-lisp.git

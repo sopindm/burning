@@ -28,8 +28,11 @@
 	   instance-args
 	   
 	   define-relation
+	   call-relation
+	   remove-relation
+
 	   define-relation-method
-	   call-relation))
+	   remove-relation-method))
 
 (in-package #:burning-ctypes)
 

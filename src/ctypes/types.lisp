@@ -10,6 +10,7 @@
    (imagine-type-p :initarg :imagine-type-p :initform nil :reader imagine-type-p)))
 
 (defun make-type (name args-list &key imagine-type-p)
+  (check-lambda-list args-list :macro-p t)
   (make-instance 'ctype :name name :args-list args-list :imagine-type-p imagine-type-p))
 
 (defgeneric copy-type (type &key new-name new-args-list imagine-type-p))
@@ -30,10 +31,8 @@
        (eq (imagine-type-p type1) (imagine-type-p type2))))
 
 (defun check-type-lambda-list (args type)
-  (let ((list (type-args-list type)))
-    (unless (and (typep args 'list) (= (length args) (length list)))
-      (error "Wrong arguments list ~a for type ~a with lambda list ~a." args (type-name type) list))
-    t))
+  (if (bind-lambda-list (type-args-list type) args)
+      t))
 
 ;;
 ;; Type table type
@@ -124,9 +123,19 @@
 		 (do-set (method generic (first types) (rest types)) (rest types)))))
     (do-set generic types)))
 
-(defun call-type-method (generic &rest args)
-  (apply (apply #'type-method generic 
-		(mapcar (lambda (arg) (type-name (instance-type arg))) args)) args))
+(define-condition type-method-error (error)
+  ((generic :initarg :generic :reader type-method-error-generic)
+   (type :initarg :type :reader type-method-error-type)))
+
+(defun remove-type-method (generic &rest types)
+  (if (null (rest types))
+      (if (gethash (first types) generic)
+	  (remhash (first types) generic)
+	  (error 'type-method-error :generic generic :type (first types)))
+      (let ((method (type-method generic (first types))))
+	(apply #'remove-type-method method (rest types))
+	(when (= (hash-table-count method) 0)
+	  (remhash (first types) generic)))))
 
 ;;
 ;; Type relations
@@ -144,7 +153,11 @@
   (remhash name (type-table-relations table)))
 
 (defun call-relation (name arg1 arg2 &optional (table *types*))
-  (call-type-method (types-relation name table) arg1 arg2))
+  (let ((name1 (type-name (instance-type arg1)))
+	(name2 (type-name (instance-type arg2))))
+    (let ((method (type-method (types-relation name table) name1 name2)))
+      (unless method (error "No method for relation ~a and types ~a, ~a." name name1 name2))
+      (funcall method arg1 arg2))))
 
 ;;
 ;; Type table macro's
@@ -169,26 +182,34 @@
   (let ((name (if (listp name-and-options) (first name-and-options) name-and-options))
 	(options (if (listp name-and-options) (rest name-and-options) nil)))
     `(setf (types-relation ',name ,@(aif (find-keyword :type-table options) (list it)))
-	   (make-type-generic 2 (lambda (,arg1 ,arg2) ,@body)))))
+	   (make-type-generic 2 ,@(if body `((lambda (,arg1 ,arg2) ,@body)))))))
 
 (defun %argument-to-type (arg)
   (if (listp arg) (first arg)))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun argument-lambda-list (arg)
+    (if (listp arg)
+	(rest arg)
+	arg)))
 
 (defmacro define-relation-method (name-and-options (arg1 arg2) &body body)
   (let ((name (if (listp name-and-options) (first name-and-options) name-and-options))
 	(options (if (listp name-and-options) (rest name-and-options) nil))
 	(arg1-sym (gensym))
 	(arg2-sym (gensym)))
-    (flet ((argument-bindings (arg var)
-	     (if (listp arg) 
-		 nil
-		 `((,arg ,var)))))
-      `(setf (type-method (types-relation ',name ,@(aif (find-keyword :type-table options) (list it)))
-			  (%argument-to-type ',arg1)
-			  (%argument-to-type ',arg2))
-	     (lambda (,arg1-sym ,arg2-sym)
-	       (declare (ignorable ,arg1-sym ,arg2-sym))
-	       (let (,@(argument-bindings arg1 arg1-sym)
-		     ,@(argument-bindings arg2 arg2-sym))
-		 ,@body))))))
+    `(setf (type-method (types-relation ',name ,@(aif (find-keyword :type-table options) (list it)))
+			(%argument-to-type ',arg1)
+			(%argument-to-type ',arg2))
+	   (lambda (,arg1-sym ,arg2-sym)
+	     (declare (ignorable ,arg1-sym ,arg2-sym))
+	     (destructuring-bind ,(list (argument-lambda-list arg1) (argument-lambda-list arg2))
+		 (list (instance-args ,arg1-sym) (instance-args ,arg2-sym))
+	       ,@body)))))
+
+(defun remove-relation-method (name type1 type2 &optional (table *types*))
+  (handler-case
+      (remove-type-method (types-relation name table) type1 type2)
+    (type-method-error ()
+      (error "Unknown method for type relation ~a and types ~a, ~a." name type1 type2))))
 

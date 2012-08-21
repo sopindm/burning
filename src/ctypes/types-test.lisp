@@ -12,7 +12,7 @@
     (?eq (type-name type) 'some-type)
     (?equal (type-args-list type) '(arg1 arg2 arg3))
     (?null (imagine-type-p type)))
-  (let ((type (make-type 'name 'args :imagine-type-p t)))
+  (let ((type (make-type 'name '(args) :imagine-type-p t)))
     (?t (imagine-type-p type))))
 
 (define-equality-check type=)
@@ -21,8 +21,8 @@
   (let ((type1 (make-type 'type1 '(arg1 arg2 arg3)))
 	(type2 (make-type 'type1 '(arg1 arg2 arg3))))
     (?type= type1 type2))
-  (let ((type1 (make-type 'type '((a (very (very))) (deep (tree)))))
-	(type2 (make-type 'type '((a (very (very))) (deep (tree))))))
+  (let ((type1 (make-type 'type '((a (very (-very))) (deep (tree)))))
+	(type2 (make-type 'type '((a (very (-very))) (deep (tree))))))
     (?type= type1 type2))
   (let ((type1 (make-type 'name ()))
 	(type2 (make-type 'other-name ())))
@@ -45,8 +45,6 @@
     (let ((new-type (copy-type type :imagine-type-p t)))
       (?t (imagine-type-p new-type)))))
 
-;inheritance
-
 ;;
 ;; type tables
 ;;
@@ -64,7 +62,7 @@
 	(type1 (make-type 'a-type '(some-args)))
 	(type2 (make-type 'other-type '(other args))))
     (?error (get-type 'a-type table) 
-	    (format nil "Unknown type ~a in type table ~a." 'a-type table))
+	    "Unknown type ~a in type table ~a." 'a-type table)
     (set-type type1 table)
     (set-type type2 table)
     (?have-types table type1 type2)))
@@ -141,6 +139,12 @@
      (with-type-table (make-type-table)
        ,@body)))
 
+(def-type-test checking-types-lambda-lists 
+  (define-type a-type ((a b) (&rest c) (&key d e f)) ())
+  (?error (define-type b-type (&rest a b c) ())
+	  "Wrong &rest lambda list ~a." '(a b c)))
+	  
+
 ;;
 ;; Type instances
 ;;
@@ -164,31 +168,19 @@
       (?type= (instance-type instance) (get-type 'a-type table))
       (?eq (instance-args instance) ()))))
 
-(defun instance-args-error (list type)
-  (format nil "Wrong arguments list ~a for type ~a with lambda list ~a." 
-	  list
-	  (type-name type)
-	  (type-args-list type)))
-
 (def-type-test checking-type-instances-simple-lambda-lists
   (define-type a-type () ())
   #T(a-type)
-  (?error #T(a-type 'some 'args) (instance-args-error '(some args) (get-type 'a-type)))
+  (?error #T(a-type 'some 'args) "Too much arguments for lambda list ~a in ~a." () '(some args))
   (define-type b-type (arg1 arg2) ())
   #T(b-type 'arg 'other-arg)
-  (?error #T(b-type 'arg) (instance-args-error '(arg) (get-type 'b-type)))
-  (?error #T(b-type 'arg1 'arg2 'arg3) (instance-args-error '(arg1 arg2 arg3) (get-type 'b-type))))
+  (?error #T(b-type 'arg) "Not enought arguments for lambda list ~a in ~a." '(arg1 arg2) '(arg)))
 
 (def-type-test checking-type-instances-lambda-lists-with-rest-and-dots
   (define-type a-type (a &rest b) ())
   #T(a-type 'arg)
   #T(a-type 'arg1 'arg2)
-  (?error #T(a-type) (instance-args-error () (get-type 'a-type))))
-
-;checking lambda list (also with &rest)
-;;lambda lists with &rest and dots
-;;tree lambda lists
-;;tree lambda lists with inner rest and dots
+  (?error #T(a-type) "Not enought arguments for lambda list ~a in ~a." '(a) ()))
 
 ;;
 ;; Type relations
@@ -203,12 +195,23 @@
   (?eq (#Rsimple-relation #Ttype1 #Ttype2)
        'dont-know))
 
+(def-type-test creating-relation-without-body
+  (define-relation relation (t1 t2))
+  (define-type type () ())
+  (?error (#Rrelation #Ttype #Ttype)
+	  "No method for relation ~a and types ~a, ~a." 'relation 'type 'type))
+
 (def-type-test testing-unexisting-relation
   (define-type type1 () ())
   (define-type type2 () ())
   (?error (#Rsome-relation #Ttype1 #Ttype2) (format nil "Unknown type relation ~a." 'some-relation)))
 
-;removing relations
+(def-type-test removing-relation
+  (define-type a-type () ())
+  (define-relation relation (t1 t2) (declare (ignore t1 t2)) 'maybe)
+  (?eq (#Rrelation #Ta-type #T a-type) 'maybe)
+  (remove-relation 'relation)
+  (?error (#Rrelation #Ta-type #Ta-type) "Unknown type relation ~a." 'relation))
 
 (def-type-test relations-with-simple-specialization
   (define-type type1 () ())
@@ -224,17 +227,41 @@
   (?equal (#Rrelation #Ttype1 #Ttype2) 'both)
   (?eq (#Rrelation #Ttype2 #Ttype1) 'dont-know))
 
-;specializaion with inheritance
+(def-type-test removing-relation-methods
+  (define-type type1 () ())
+  (define-type type2 () ())
+  (define-relation relation (t1 t2) (declare (ignore t1 t2)) 'nothing)
+  (define-relation-method relation ((type1) t2) (declare (ignore t2)) 'first)
+  (define-relation-method relation ((type1) (type2)) 'both)
+  (?eq (#Rrelation #Ttype1 #Ttype2) 'both)
+  (remove-relation-method 'relation 'type1 'type2)
+  (?eq (#Rrelation #Ttype1 #Ttype2) 'first)
+  (remove-relation-method 'relation 'type1 nil)
+  (?eq (#Rrelation #Ttype1 #Ttype2) 'nothing))
 
-;removing relation methods
-;removing wrong method
-;calling default after removing method
+(def-type-test removing-wrong-method-error
+  (?error (remove-relation-method 'some-relation nil nil)
+	  "Unknown type relation ~a." 'some-relation)
+  (define-relation relation (t1 t2))
+  (?error (remove-relation-method 'relation 'some-type 'other-type)
+	  "Unknown method for type relation ~a and types ~a, ~a." 'relation 'some-type 'other-type))
+
+(def-type-test relations-with-argument-binding
+  (define-type type1 (a &optional b c &key d) ())
+  (define-type type2 (a &rest b) ())
+  (define-relation relation (t1 t2))
+  (define-relation-method relation ((type1 a &optional (b 1) (c a)) (type2 e &rest f))
+    (list a b c e f))
+  (?equal (#Rrelation #T(type1 -1) #T(type2 1 2 3 4)) '(-1 1 -1 1 (2 3 4))))
 
 ;simple relations with type arguments binding
-;checking type lambda list
+;checking argument names (cannot be same)
+;checking with type lambda list
 
 ;defining relations and methods in specified table
 ;relations in table (locality, copying, etc)
+
+;method specializators
 ;relation expanders
 ;expanding transitive relations
 ;relations in types with parameters (returns unification)

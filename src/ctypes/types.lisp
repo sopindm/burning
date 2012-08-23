@@ -30,6 +30,10 @@
        (equal (type-args-list type1) (type-args-list type2))
        (eq (imagine-type-p type1) (imagine-type-p type2))))
 
+(defmethod print-object ((type ctype) stream)
+  (with-slots (name args-list imagine-type-p) type
+    (format stream "#<CTYPE :name ~a :args-list ~a :imagine-type-p ~a>" name args-list imagine-type-p)))
+
 (defun check-type-lambda-list (args type)
   (if (bind-lambda-list (type-args-list type) args)
       t))
@@ -93,6 +97,7 @@
     (let ((type (get-type name table)))
       (check-type-lambda-list args type)
       (%make-type-instance :type type :args args))))
+
 
 ;;
 ;; Type methods
@@ -191,21 +196,41 @@
   (defun argument-lambda-list (arg)
     (if (listp arg)
 	(rest arg)
-	arg)))
+	(list arg))))
+
+(defun %check-type-lambda-list (method type list)
+  (unless (lambda-list= (type-args-list type) list :macro-p t)
+    (error (lines "Lambda list of method ~a is incompatible with that of type ~a."
+		  "Method's lambda list: ~a"
+		  "Type's lambda list: ~a")
+	   method (type-name type) list (type-args-list type)))
+  t)
 
 (defmacro define-relation-method (name-and-options (arg1 arg2) &body body)
   (let ((name (if (listp name-and-options) (first name-and-options) name-and-options))
 	(options (if (listp name-and-options) (rest name-and-options) nil))
 	(arg1-sym (gensym))
-	(arg2-sym (gensym)))
-    `(setf (type-method (types-relation ',name ,@(aif (find-keyword :type-table options) (list it)))
-			(%argument-to-type ',arg1)
-			(%argument-to-type ',arg2))
-	   (lambda (,arg1-sym ,arg2-sym)
-	     (declare (ignorable ,arg1-sym ,arg2-sym))
-	     (destructuring-bind ,(list (argument-lambda-list arg1) (argument-lambda-list arg2))
-		 (list (instance-args ,arg1-sym) (instance-args ,arg2-sym))
-	       ,@body)))))
+	(arg2-sym (gensym))
+	(list1 (argument-lambda-list arg1))
+	(list2 (argument-lambda-list arg2)))
+    (check-lambda-list list1 :macro-p t)
+    (check-lambda-list list2 :macro-p t)
+    (awhen (intersection (lambda-list-arguments list1) (lambda-list-arguments list2))
+      (error "Variables ~a occurs more than once in lambda list ~a." it (list list1 list2)))
+    (let ((type-table (find-keyword :type-table options)))
+      `(progn
+	 ,@(aif (%argument-to-type arg1) 
+		`((%check-type-lambda-list ',name (get-type ',it ,@(aif type-table (list it))) ',list1)))
+	 ,@(aif (%argument-to-type arg2) 
+		`((%check-type-lambda-list ',name (get-type ',it ,@(aif type-table (list it))) ',list2)))
+	 (setf (type-method (types-relation ',name ,@(aif (find-keyword :type-table options) (list it)))
+			    (%argument-to-type ',arg1)
+			    (%argument-to-type ',arg2))
+	       (lambda (,arg1-sym ,arg2-sym)
+		 (destructuring-bind ,(list list1 list2)
+		     (list ,(if (symbolp arg1) `(list ,arg1-sym) `(instance-args ,arg1-sym))
+			   ,(if (symbolp arg2) `(list ,arg2-sym) `(instance-args ,arg2-sym)))
+		   ,@body)))))))
 
 (defun remove-relation-method (name type1 type2 &optional (table *types*))
   (handler-case

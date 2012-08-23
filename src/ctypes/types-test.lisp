@@ -216,16 +216,16 @@
 (def-type-test relations-with-simple-specialization
   (define-type type1 () ())
   (define-type type2 () ())
-  (define-relation relation (t1 t2) (declare (ignore t1 t2)) 'dont-know)
-  (define-relation-method relation (t1 (type2)) (declare (ignore t1)) 't2)
-  (?equal (#Rrelation #Ttype1 #Ttype2) 't2)
-  (?eq (#Rrelation #Ttype1 #Ttype1) 'dont-know)
-  (define-relation-method relation ((type1) t2) (declare (ignore t2)) 't1)
-  (?equal (#Rrelation #Ttype1 #Ttype2) 't1)
-  (?equal (#Rrelation #Ttype2 #Ttype2) 't2)
+  (define-relation relation (t1 t2) (list (instance-type t1) (instance-type t2)))
+  (define-relation-method relation (t1 (type2)) (instance-type t1))
+  (?type= (#Rrelation #Ttype1 #Ttype2) (get-type 'type1))
+  (mapcheck ?type= (#Rrelation #Ttype1 #Ttype1) (list (get-type 'type1) (get-type 'type1)))
+  (define-relation-method relation ((type1) t2) (instance-type t2))
+  (?type= (#Rrelation #Ttype1 #Ttype2) (get-type 'type2))
+  (?type= (#Rrelation #Ttype2 #Ttype2) (get-type 'type2))
   (define-relation-method relation ((type1) (type2)) 'both)
   (?equal (#Rrelation #Ttype1 #Ttype2) 'both)
-  (?eq (#Rrelation #Ttype2 #Ttype1) 'dont-know))
+  (mapcheck ?type= (#Rrelation #Ttype2 #Ttype1) (mapcar #'get-type '(type2 type1))))
 
 (def-type-test removing-relation-methods
   (define-type type1 () ())
@@ -247,17 +247,38 @@
 	  "Unknown method for type relation ~a and types ~a, ~a." 'relation 'some-type 'other-type))
 
 (def-type-test relations-with-argument-binding
-  (define-type type1 (a &optional b c &key d) ())
+  (define-type type1 (a &optional b c) ())
   (define-type type2 (a &rest b) ())
   (define-relation relation (t1 t2))
   (define-relation-method relation ((type1 a &optional (b 1) (c a)) (type2 e &rest f))
     (list a b c e f))
   (?equal (#Rrelation #T(type1 -1) #T(type2 1 2 3 4)) '(-1 1 -1 1 (2 3 4))))
 
-;simple relations with type arguments binding
-;checking argument names (cannot be same)
-;checking with type lambda list
+(def-type-test checking-relation-argument-names
+  (define-type type1 (a b) ())
+  (define-type type2 (c d) ())
+  (define-relation relation (t1 t2))
+  (?error (macroexpand '(define-relation-method relation ((type1 a b) (type2 a c)) (declare (ignore a b c)) ()))
+	  "Variables ~a occurs more than once in lambda list ~a." '(a) '((a b) (a c))))
 
+(def-type-test checking-type-lambda-list
+  (define-type type1 (a b c) ())
+  (define-relation relation (t1 t2))
+  (?error (define-relation-method relation ((type1 a b) t2) (declare (ignore a b t2)) ())
+	  (lines "Lambda list of method ~a is incompatible with that of type ~a."
+		 "Method's lambda list: ~a"
+		 "Type's lambda list: ~a")
+	  'relation 'type1
+	  '(a b)
+	  '(a b c)))
+
+(def-type-test checking-bad-lambda-lists
+  (?error (define-type type (&bad a b c) ())
+	  "Wrong lambda list keywords ~a." '(&bad))
+  (define-type type (a b c) ())
+  (?error (macroexpand '(define-relation-method relation ((type &bad a b c) t2) ()))
+	  "Wrong lambda list keywords ~a." '(&bad)))
+	  
 ;defining relations and methods in specified table
 ;relations in table (locality, copying, etc)
 
@@ -266,7 +287,7 @@
 ;expanding transitive relations
 ;relations in types with parameters (returns unification)
 ;enumerable relations
-;reflecting relations
+;symmetric and symmetric-to relations
 
 
 

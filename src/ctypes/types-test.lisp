@@ -116,6 +116,8 @@
 	(?type= (get-type 'type1) new-type1))
       (?have-types nil type1 type2))))
 
+;with-type-table and with-local-type-table returns table
+
 (deftest defining-types
   (with-type-table (make-type-table)
     (define-type a-type (arg1 arg2 &rest other-args) ())
@@ -279,8 +281,40 @@
   (?error (macroexpand '(define-relation-method relation ((type &bad a b c) t2) ()))
 	  "Wrong lambda list keywords ~a." '(&bad)))
 	  
-;defining relations and methods in specified table
-;relations in table (locality, copying, etc)
+(def-type-test relations-in-specified-table
+  (define-type type () ())
+  (define-relation relation (t1 t2) (declare (ignore t1 t2)) 'global)
+  (let ((table (make-type-table)))
+    (define-type type () () :type-table table)
+    (define-relation (relation :type-table table) (t1 t2) (declare (ignore t1 t2)) 'local)
+    (?eq (call-relation 'relation 
+			(make-type-instance 'type :type-table table)
+			(make-type-instance 'type :type-table table)
+			table)
+	 'local)
+    (define-relation-method (relation :type-table table) ((type) (type)) 'inherit)
+    (?eq (call-relation 'relation 
+			(make-type-instance 'type :type-table table)
+			(make-type-instance 'type :type-table table)
+			table)
+	 'inherit))
+  (?eq (call-relation 'relation (make-type-instance 'type) (make-type-instance 'type))
+       'global))
+
+(def-type-test copying-relations-with-type-tables
+  (define-type type1 () ())
+  (define-type type2 () ())
+  (define-relation relation (t1 t2) (declare (ignore t1 t2)) 'global)
+  (define-relation-method relation ((type1) t2) (declare (ignore t2)) 'for-t1)
+  (let ((local-table (with-local-type-table 
+		       (remove-relation-method 'relation 'type1 nil)
+		       (define-relation-method relation (t1 (type2)) (declare (ignore t1)) 'for-t2))))
+    (?eq (#Rrelation #Ttype1 #Ttype2) 'for-t1)
+    (?eq (#Rrelation #Ttype2 #Ttype2) 'global)
+    (define-relation-method relation ((type1) (type2)) 'both)
+    (with-type-table local-table
+      (?eq (#Rrelation #Ttype1 #Ttype1) 'global)
+      (?eq (#Rrelation #Ttype2 #Ttype2) 'for-t2))))
 
 ;method specializators
 ;relation expanders

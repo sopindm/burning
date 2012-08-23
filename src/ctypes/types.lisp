@@ -58,7 +58,8 @@
   (flet ((copy-types ()
 	   (copy-hash-table (type-table-types table)))
 	 (copy-relations ()
-	   (copy-hash-table (type-table-relations table))))
+	   (copy-hash-table (type-table-relations table) 
+			    :key (lambda (x) (copy-type-generic x 2)))))
     (let ((table (%copy-type-table table)))
       (setf (type-table-types table) (copy-types))
       (setf (type-table-relations table) (copy-relations))
@@ -111,6 +112,10 @@
     (if (= args-count 1) 
 	(make-table method) 
 	(make-table (make-type-generic (1- args-count) method)))))
+
+(defun copy-type-generic (generic args-count)
+  (copy-hash-table generic 
+		   :key (if (= args-count 1) #'identity (lambda (x) (copy-type-generic x (1- args-count))))))
 
 (defun type-method (generic &rest types)
   (flet ((method (type) (or (gethash type generic) (gethash nil generic))))
@@ -177,11 +182,13 @@
 
 (defmacro with-type-table (init-form &body body)
   `(let ((*types* ,init-form))
-     ,@body))
+     ,@body
+     *types*))
 
 (defmacro with-local-type-table (&body body)
   `(let ((*types* (copy-type-table *types*)))
-     ,@body))
+     ,@body
+     *types*))
   
 (defmacro define-relation (name-and-options (arg1 arg2) &body body)
   (let ((name (if (listp name-and-options) (first name-and-options) name-and-options))

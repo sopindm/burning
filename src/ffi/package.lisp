@@ -1,5 +1,5 @@
-(defpackage :burning-ffi
-  (:use :burning-lisp)
+(defpackage #:burning-ffi
+  (:use #:burning-lisp)
   (:export load-ffi
 
 	   generate-uuid-file

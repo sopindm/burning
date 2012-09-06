@@ -114,9 +114,9 @@
 
 (defun generate-uuid-file (filename &rest actions)
   (let ((uuids (apply #'ffi-generate-uuid actions)))
-    (with-open-file (file filename :direction :output :if-exists :supersede)
+    (cl:with-open-file (file filename :direction :output :if-exists :supersede)
       (mapc #'(lambda (x) (format file "~s~%" x)) uuids))
-    (with-open-file (file (concatenate 'string filename ".h") :direction :output :if-exists :supersede)
+    (cl:with-open-file (file (concatenate 'string filename ".h") :direction :output :if-exists :supersede)
       (labels ((print-uuid (uuid)
 		 (cond 
 		   ((null uuid) t)
@@ -134,7 +134,7 @@
 	     (awhile (read stream nil)
 	       (push it actions))
 	     (reverse actions))))
-    (with-open-file (stream filename)
+    (cl:with-open-file (stream filename)
       (apply #'generate-uuid-file uuid-filename (stream-to-actions stream)))))
 
 (defun load-ffi-uuid (&rest actions)
@@ -142,7 +142,7 @@
 			    (intern (c-name-to-lisp (second x))))) actions))
 
 (defun read-uuid-file (filename)
-  (with-open-file (file filename :direction :input)
+  (cl:with-open-file (file filename :direction :input)
     (do ((action (read file nil) (read file nil))
 	 (actions ()))
 	((null action) actions)

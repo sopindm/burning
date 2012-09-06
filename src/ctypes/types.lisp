@@ -6,33 +6,23 @@
 
 (defclass ctype ()
   ((name :initarg :name :reader type-name)
-   (args-list :initarg :args-list :reader type-args-list)
-   (imagine-type-p :initarg :imagine-type-p :initform nil :reader imagine-type-p)))
+   (args-list :initarg :args-list :reader type-args-list)))
 
-(defun make-type (name args-list &key imagine-type-p)
-  (check-lambda-list args-list :macro-p t)
-  (make-instance 'ctype :name name :args-list args-list :imagine-type-p imagine-type-p))
+(defun make-type (name args-list)
+  (check-lambda-list args-list :allowed-keywords '(&optional &rest))
+  (make-instance 'ctype :name name :args-list args-list))
 
-(defgeneric copy-type (type &key new-name new-args-list imagine-type-p))
-
-(defmethod copy-type ((type ctype) &key
-		      (new-name nil new-name-p)
-		      (new-args-list nil new-args-list-p)
-		      (imagine-type-p nil imagine-type-p-set-p))
+(defun copy-type (type &key (new-name nil new-name-p) (new-args-list nil new-args-list-p))
   (make-type (if new-name-p new-name (type-name type))
-	     (if new-args-list-p new-args-list (copy-tree (type-args-list type)))
-	     :imagine-type-p (if imagine-type-p-set-p imagine-type-p (imagine-type-p type))))
+	     (if new-args-list-p new-args-list (copy-list (type-args-list type)))))
 
-(defgeneric type= (type1 type2))
-
-(defmethod type= ((type1 ctype) (type2 ctype))
+(defun type= (type1 type2)
   (and (eq (type-name type1) (type-name type2))
-       (equal (type-args-list type1) (type-args-list type2))
-       (eq (imagine-type-p type1) (imagine-type-p type2))))
+       (equal (type-args-list type1) (type-args-list type2))))
 
 (defmethod print-object ((type ctype) stream)
-  (with-slots (name args-list imagine-type-p) type
-    (format stream "#<CTYPE :name ~a :args-list ~a :imagine-type-p ~a>" name args-list imagine-type-p)))
+  (with-slots (name args-list) type
+    (format stream "#<CTYPE :name ~a :args-list ~a>" name args-list)))
 
 (defun check-type-lambda-list (args type)
   (if (bind-lambda-list (type-args-list type) args)
@@ -174,11 +164,13 @@
 ;;
   
 (defmacro define-type (name (&rest arguments) (&rest relations) &body options)
-  (declare (ignore relations))
-  (check-keywords '(:imagine-type-p :type-table) options)
-  `(set-type (make-type ',name ',arguments ,@(aif (find-keyword :imagine-type-p options)
-						  `(:imagine-type-p ,it)))
-	     ,@(aif (find-keyword :type-table options) (list it))))
+  (check-keywords '(:type-table) options)
+  (labels ((set-relation-method (relation type)
+	     `(define-relation-method ,relation (,(aif (listp type) type (list type)) (,name ,@arguments)) t))
+	   (set-relation (spec)
+	     (mapcar (lambda (type) (set-relation-method (first spec) type)) (rest spec))))
+    `(progn (set-type (make-type ',name ',arguments) ,@(aif (find-keyword :type-table options) (list it)))
+	    ,@(mapcan #'set-relation relations))))
 
 (defmacro with-type-table (init-form &body body)
   `(let ((*types* ,init-form))

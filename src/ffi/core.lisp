@@ -73,7 +73,7 @@
   (mapc #'(lambda (x) (apply #'do-ffi-action x)) actions))
 
 (defun load-ffi (filename)
-  (with-open-file (file filename :direction :input)
+  (cl:with-open-file (file filename :direction :input)
     (do ((action (read file nil) (read file nil)))
 	((null action) t)
       (apply #'do-ffi-action action))))

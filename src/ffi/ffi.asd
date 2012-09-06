@@ -1,6 +1,6 @@
 (in-package :asdf)
 
-(defsystem burning-ffi
+(defsystem #:burning-ffi
     :description "Library for operating with C-side functions."
     :version "0.1"
     :author "Dmitry Sopin <sopindm@gmail.com>"
@@ -13,5 +13,5 @@
 		 (:file "object")
 		 (:file "array")
 		 (:file "asdf-classes"))
-    :depends-on (:burning-lisp :cffi))
+    :depends-on (#:burning-lisp #:cffi))
 

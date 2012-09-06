@@ -10,10 +10,7 @@
 (deftest making-types
   (let ((type (make-type 'some-type '(arg1 arg2 arg3))))
     (?eq (type-name type) 'some-type)
-    (?equal (type-args-list type) '(arg1 arg2 arg3))
-    (?null (imagine-type-p type)))
-  (let ((type (make-type 'name '(args) :imagine-type-p t)))
-    (?t (imagine-type-p type))))
+    (?equal (type-args-list type) '(arg1 arg2 arg3))))
 
 (define-equality-check type=)
 
@@ -21,29 +18,21 @@
   (let ((type1 (make-type 'type1 '(arg1 arg2 arg3)))
 	(type2 (make-type 'type1 '(arg1 arg2 arg3))))
     (?type= type1 type2))
-  (let ((type1 (make-type 'type '((a (very (-very))) (deep (tree)))))
-	(type2 (make-type 'type '((a (very (-very))) (deep (tree))))))
-    (?type= type1 type2))
   (let ((type1 (make-type 'name ()))
 	(type2 (make-type 'other-name ())))
     (?not (type= type1 type2)))
   (let ((type1 (make-type 'name '(some args)))
 	(type2 (make-type 'name '(some other args))))
-    (?not (type= type1 type2)))
-  (let ((type1 (make-type 'name () :imagine-type-p t))
-	(type2 (make-type 'name () :imagine-type-p nil)))
     (?not (type= type1 type2))))
 
 (deftest copying-types
-  (let ((type (make-type 'a-type '((arg1 argarg1) arg2))))
+  (let ((type (make-type 'a-type '(arg1 arg2))))
     (let ((new-type (copy-type type)))
       (?type= new-type type))
     (let ((new-type (copy-type type :new-name 'other-type)))
       (?eq (type-name new-type) 'other-type))
     (let ((new-type (copy-type type :new-args-list '(some other args))))
-      (?equal (type-args-list new-type) '(some other args)))
-    (let ((new-type (copy-type type :imagine-type-p t)))
-      (?t (imagine-type-p new-type)))))
+      (?equal (type-args-list new-type) '(some other args)))))
 
 ;;
 ;; type tables
@@ -116,16 +105,18 @@
 	(?type= (get-type 'type1) new-type1))
       (?have-types nil type1 type2))))
 
-;with-type-table and with-local-type-table returns table
+(deftest with-type-table-returns-type-table
+  (let ((table (with-type-table (make-type-table))))
+    (set-type (make-type 'a-type '(bla bla-bla)) table))
+  (let ((table (with-local-type-table)))
+    (set-type (make-type 'a-type '(bla bla-bla)) table)))
 
 (deftest defining-types
   (with-type-table (make-type-table)
     (define-type a-type (arg1 arg2 &rest other-args) ())
-    (define-type b-type (arg1 arg2) () 
-		 :imagine-type-p t)
-    (?have-types nil 
-		 (make-type 'a-type '(arg1 arg2 &rest other-args))
-		 (make-type 'b-type '(arg1 arg2) :imagine-type-p t))))
+    (define-type b-type (arg1 arg2) ())
+    (?have-types nil (make-type 'a-type '(arg1 arg2 &rest other-args))
+		 (make-type 'b-type '(arg1 arg2)))))
 
 (deftest defining-types-in-table
   (let ((table (make-type-table)))
@@ -142,7 +133,7 @@
        ,@body)))
 
 (def-type-test checking-types-lambda-lists 
-  (define-type a-type ((a b) (&rest c) (&key d e f)) ())
+  (define-type a-type (a b &rest c) ())
   (?error (define-type b-type (&rest a b c) ())
 	  "Wrong &rest lambda list ~a." '(a b c)))
 	  
@@ -316,13 +307,35 @@
       (?eq (#Rrelation #Ttype1 #Ttype1) 'global)
       (?eq (#Rrelation #Ttype2 #Ttype2) 'for-t2))))
 
-;method specializators
-;relation expanders
-;expanding transitive relations
-;relations in types with parameters (returns unification)
-;enumerable relations
+(def-type-test defining-relations-for-type
+  (define-type type1 () ())
+  (define-relation relation (t1 t2) (declare (ignore t1 t2)) nil)
+  (define-type type2 ()
+      ((relation type1)))
+  (?null (#Rrelation #Ttype2 #Ttype1))
+  (?t (#Rrelation #Ttype1 #Ttype2)))
+
+(def-type-test defining-relations-for-types-with-arguments
+  (define-relation relation (t1 t2) (declare (ignore t1 t2)) nil)
+  (define-type type1 (a b) ())
+  (define-type type2 (a b c) 
+      ((relation (type1 a b))
+       (relation (type1 (#'- a c)))))
+  (?t (#Rrelation #T(type1 1 2) #T(type2 1 2 3)))
+  (?null (#Rrelation #T(type1 1 2) #T(type2 3 2 1))))
+
 ;symmetric and symmetric-to relations
 
+;
+; (define-type name (pattern) (&body relations) &body options)
+;
+; (define-type array (type &rest dimensions)
+;   ((inherit (sequence type))))
+; 
+; (define-type array (#Tint '*)
+;   ((inherit int-sequence)))
+;  (#Rinheirt #T(array #Tint) #(sequence #Tint)) -> nil
+;  (#Rinheirt #T(array #Tint) #(int-sequence)) -> t
 
 
 

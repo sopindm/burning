@@ -216,9 +216,9 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defmethod parse-argument-spec ((class (eql :action)) spec)
-    (let ((args (find-key :arguments spec))
-	  (spec (remove-key :arguments spec)))
-      (unless (find-key :description spec)
+    (let ((args (find-keyword :arguments spec))
+	  (spec (remove-keyword :arguments spec)))
+      (unless (find-keyword :description spec)
 	(setf spec (append spec '(:description ""))))
       `(make-arguments-list 'action ,spec ,args))))
 
@@ -275,8 +275,8 @@
 	       (:one-max '(:args-max 1))
 	       (:one-min '(:args-min 1))
 	       (:one-only '(:args-min 1 :args-max 1)))))
-      (let ((args (find-key :arguments spec))
-	    (spec (remove-key :arguments spec)))
+      (let ((args (find-keyword :arguments spec))
+	    (spec (remove-keyword :arguments spec)))
 	(let ((restrictions (remove-if-not #'restriction-p spec))
 	      (spec (remove-if #'restriction-p spec)))
 	  (when (> (length restrictions) 1) (error "Too much restrictions for group."))

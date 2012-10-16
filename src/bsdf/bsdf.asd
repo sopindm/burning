@@ -7,6 +7,7 @@
     :licence "GPL v3"
     :serial t
     :components ((:file "package")
+		 (:file "errors")
 		 (:file "targets"))
     :depends-on (#:burning-lisp #:burning-filesystem))
 

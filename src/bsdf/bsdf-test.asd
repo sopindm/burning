@@ -7,6 +7,7 @@
     :licence "PRIVATE"
     :serial t
     :components ((:file "test-package")
+		 (:file "errors-test")
 		 (:file "targets-test"))
     :depends-on (#:burning-bsdf #:burning-testing))
 

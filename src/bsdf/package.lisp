@@ -9,10 +9,22 @@
 	   bsdf-compilation-error
 	   bsdf-compilation-warning
 
-	   add-target
-
+	   make-target
 	   target-name
 	   target-command
 	   target-input
 	   target-output
-	   target-depends-on))
+	   target-depends-on
+
+	   get-target
+	   set-target
+	   remove-target
+
+	   get-targets
+
+	   *targets*
+	   copy-targets-table))
+
+
+
+	   

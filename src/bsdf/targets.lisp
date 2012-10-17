@@ -29,13 +29,8 @@
 (defun (setf target-depends-on) (value target)
   (setf (%target-depends-on target) value))
 
-(defun target-key-name (target)
-  (or (target-name target) (if (> (length (target-output target)) 1) 
-			       (target-output target) 
-			       (first (target-output target)))))
-
 (defun target-print-name (target)
-  (let ((name (target-key-name target)))
+  (let ((name (or (target-name target) (target-output target))))
     (if (listp name)
 	(format nil "~{~a~^ ~}" name)
 	name)))
@@ -44,59 +39,86 @@
   (when (not (listp output))
     (setf output (list output)))
   (when (and (not name) (not output))
-    (bsdf-compilation-error "No output file or name for target"))
+    (bsdf-compilation-error "No output file or name in target"))
   (let ((target (%make-target :name name
 			      :command command 
 			      :input (if (listp input) input (list input))
 			      :output output
 			      :depends-on (if (listp depends-on) depends-on (list depends-on)))))
     (when (and command (not (functionp command)))
-      (bsdf-compilation-error "Wrong command ~a for target '~a'" command (target-print-name target)))
+      (bsdf-compilation-error "Wrong command ~a in target '~a'" command (target-print-name target)))
     target))
-    
 
 ;;
 ;; Target table
 ;;
 
-(defvar *targets* ())
+(defstruct targets
+  (list (make-double-list))
+  (table (make-hash-table :test #'equal))
+  (files (make-hash-table :test #'equal)))
+
+(defvar *targets* (make-targets))
 
 (defun copy-targets-table (&optional (table *targets*))
-  (copy-tree table))
+  (make-targets :list (copy-double-list (targets-list table))
+		:table (copy-hash-table (targets-table table) :test #'equal)
+		:files (copy-hash-table (targets-files table) :test #'equal)))
 
-(defun find-output (file)
-  (labels ((find1 (target)
-	     (and (target-command target)
-		  (find file (target-output target) :test #'equal)))
-	   (do-find (targets)
-	     (cond ((null targets) nil)
-		   ((find1 (rest (first targets))) (rest (first targets)))
-		   (t (do-find (rest targets))))))
-    (do-find *targets*)))
+(defun get-file (name)
+  (gethash name (targets-files *targets*)))
 
-(defun set-target (target)
-  (let ((name (target-key-name target)))
-    (awhen (get-target name)
-      (when (or (target-name target) 
-		(target-name it)
-		(and (target-command target) (target-command it)))
-	(bsdf-compilation-error "Target with name '~a' already exists" (target-print-name target))))
-    (flet ((check-output (file)
-	     (awhen (and (target-command target) (find-output file))
-	       (bsdf-compilation-error (lines* "Found two targets generating '~a':"
-					       "'~a', '~a'")
-				       file (target-print-name it) (target-print-name target)))))
-      (mapc #'check-output (target-output target)))
-    (setf *targets* (acons (if (or (target-command target) (target-name target)) name (gensym)) target *targets*))
-    (when (and (null (target-command target))
-	       (or (null (target-input target))
-		   (null (target-output target))))
-      (bsdf-compilation-warn "Target '~a' is empty" (target-print-name target))))
-  target)
+(defun (setf get-file) (value name)
+  (setf (gethash name (targets-files *targets*)) value))
 
 (defun get-target (name)
-  (rest (assoc name *targets* :test #'equal)))
+  (gethash name (targets-table *targets*)))
+
+(defun (setf get-target) (value name)
+  (setf (gethash name (targets-table *targets*)) value))
 
 (defun get-targets ()
-  (let ((targets (mapcar #'rest *targets*)))
-    (reverse targets)))
+  (double-list-head (targets-list *targets*)))
+
+;;
+;; Pushing targets to table
+;;
+
+(defun push-to-list (target)
+  (double-list-push target (targets-list *targets*)))
+
+(defun push-to-table (target)
+  (let ((name (or (target-name target)
+		  (if (not (target-command target)) (gensym))
+		  (target-output target))))
+    (when (get-target name)
+      (bsdf-compilation-error "Target with name '~a' already exists" (target-print-name target)))
+    (when (get-file name)
+      (bsdf-compilation-error "Target name '~a' is already a file name" name))
+    (setf (get-target name) target)))
+
+(defun push-file-to-table (name target)
+  (when (get-target name)
+    (bsdf-compilation-error "File name '~a' is already a target name" name))
+  (let* ((file (get-file name))
+	 (file-target (first file))
+	 (depends (rest file)))
+    (when (and (target-command target) file-target)
+      (bsdf-compilation-error (lines* "Found two targets generating '~a':"
+				      "'~a', '~a'")
+			      name (target-print-name file-target) (target-print-name target)))
+    (cond ((target-command target) (setf file-target target))
+	  ((target-input target) (setf depends (append depends (target-input target)))))
+    (setf (get-file name) (cons file-target depends))))
+
+(defun set-target (target)
+  (push-to-list target)
+  (push-to-table target)
+  (mapc (lambda (file) (push-file-to-table file target)) (target-output target))
+  (when (and (null (target-command target))
+	     (or (null (target-input target))
+		 (null (target-output target))))
+    (bsdf-compilation-warn "Target '~a' is empty" (target-print-name target)))
+  target)
+
+

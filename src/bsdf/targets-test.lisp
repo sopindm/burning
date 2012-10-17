@@ -22,16 +22,16 @@
 
 (def-targets-test checking-target-having-name-or-one-output-file
   (?bsdf-compilation-error (make-target nil)
-			   (lines "No output file or name for target"))
+			   (lines "No output file or name in target"))
   (make-target nil :name "simple")
   (make-target nil :output "some output")
   (make-target nil :output '("some other output")))
 
 (def-targets-test wrong-command-test
   (?bsdf-compilation-error (make-target 42 :name "wrong target")
-			   (lines "Wrong command 42 for target 'wrong target'"))
+			   (lines "Wrong command 42 in target 'wrong target'"))
   (?bsdf-compilation-error (make-target "bla bla" :output "sample")
-			   (lines "Wrong command bla bla for target 'sample'")))
+			   (lines "Wrong command bla bla in target 'sample'")))
 
 (def-targets-test accessing-targets-by-name
   (let ((target (make-target nil :name "some target" :input "file1" :output "file2")))
@@ -39,7 +39,7 @@
     (?eq (get-target "some target") target))
   (let ((target (make-target #'identity :output "some file")))
     (set-target target)
-    (?eq (get-target "some file") target))
+    (?eq (get-target '("some file")) target))
   (let ((target (make-target #'identity :output '("file1" "file2" "file3"))))
     (set-target target)
     (?eq (get-target '("file1" "file2" "file3")) target)))
@@ -61,20 +61,20 @@
       (?bsdf-compilation-error (set-target target2)
 			       (lines "Target with name 'target' already exists"))
       (?bsdf-compilation-error (set-target target3)
-			       (lines "Target with name 'target' already exists"))))
+			       (lines "File name 'target' is already a target name"))))
   (let ((target (make-target #'identity :output "file1")))
     (set-target target)
     (let ((target2 (make-target nil :output "file1" :input "no"))
 	  (target3 (make-target nil :name "file1")))
       (set-target target2)
       (?bsdf-compilation-error (set-target target3)
-			       (lines "Target with name 'file1' already exists")))
-    (?eq (get-target "file1") target))
+			       (lines "Target name 'file1' is already a file name")))
+    (?eq (get-target '("file1")) target))
   (let ((target1 (make-target nil :output "file" :input "no"))
 	(target2 (make-target #'identity :output "file")))
     (set-target target1)
     (set-target target2)
-    (?eq (get-target "file") target2)))
+    (?eq (get-target '("file")) target2)))
 
 (def-targets-test adding-several-targets-with-one-output
   (let ((target1 (make-target #'identity :output "file"))

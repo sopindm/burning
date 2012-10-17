@@ -20,3 +20,6 @@
 
 (defun bsdf-compilation-error (message &rest args)
   (error 'bsdf-compilation-error :format-control message :format-arguments args))
+
+(defun bsdf-compilation-warn (message &rest args)
+  (warn 'bsdf-compilation-warning :format-control message :format-arguments args))

@@ -87,7 +87,11 @@
 					       "'~a', '~a'")
 				       file (target-print-name it) (target-print-name target)))))
       (mapc #'check-output (target-output target)))
-    (setf *targets* (acons (if (or (target-command target) (target-name target)) name (gensym)) target *targets*)))
+    (setf *targets* (acons (if (or (target-command target) (target-name target)) name (gensym)) target *targets*))
+    (when (and (null (target-command target))
+	       (or (null (target-input target))
+		   (null (target-output target))))
+      (bsdf-compilation-warn "Target '~a' is empty" (target-print-name target))))
   target)
 
 (defun get-target (name)

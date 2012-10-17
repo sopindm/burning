@@ -34,7 +34,7 @@
 			   (lines "Wrong command bla bla for target 'sample'")))
 
 (def-targets-test accessing-targets-by-name
-  (let ((target (make-target nil :name "some target")))
+  (let ((target (make-target nil :name "some target" :input "file1" :output "file2")))
     (set-target target)
     (?eq (get-target "some target") target))
   (let ((target (make-target #'identity :output "some file")))
@@ -45,16 +45,16 @@
     (?eq (get-target '("file1" "file2" "file3")) target)))
 
 (def-targets-test listing-targets
-  (let ((target1 (make-target nil :name "target1"))
-	(target2 (make-target nil :output "some file"))
-	(target3 (make-target nil :name "target3")))
+  (let ((target1 (make-target #'identity :name "target1"))
+	(target2 (make-target #'identity :output "some file"))
+	(target3 (make-target #'identity :name "target3")))
     (set-target target2)
     (set-target target1)
     (set-target target3)
     (?equal (get-targets) (list target2 target1 target3))))
 
 (def-targets-test adding-targets-with-same-key-name-error
-  (let ((target (make-target nil :name "target")))
+  (let ((target (make-target #'identity :name "target")))
     (set-target target)
     (let ((target2 (make-target nil :name "target"))
 	  (target3 (make-target nil :output "target")))
@@ -64,13 +64,13 @@
 			       (lines "Target with name 'target' already exists"))))
   (let ((target (make-target #'identity :output "file1")))
     (set-target target)
-    (let ((target2 (make-target nil :output "file1"))
+    (let ((target2 (make-target nil :output "file1" :input "no"))
 	  (target3 (make-target nil :name "file1")))
       (set-target target2)
       (?bsdf-compilation-error (set-target target3)
 			       (lines "Target with name 'file1' already exists")))
     (?eq (get-target "file1") target))
-  (let ((target1 (make-target nil :output "file"))
+  (let ((target1 (make-target nil :output "file" :input "no"))
 	(target2 (make-target #'identity :output "file")))
     (set-target target1)
     (set-target target2)
@@ -78,7 +78,7 @@
 
 (def-targets-test adding-several-targets-with-one-output
   (let ((target1 (make-target #'identity :output "file"))
-	(target2 (make-target nil :output "file"))
+	(target2 (make-target nil :output "file" :input "no"))
 	(target3 (make-target #'identity :output '("file2" "file"))))
     (set-target target1)
     (set-target target2)
@@ -86,13 +86,28 @@
 			     (lines "Found two targets generating 'file':"
 				    "'file', 'file2 file'"))))
 
+(def-targets-test empty-target-warning
+  (let ((target (make-target nil :input "file1" :output "file2"))
+	(target2 (make-target nil :name "target" :input "file"))
+	(target3 (make-target nil :output "file4"))
+	(target4 (make-target #'identity :name "target4" :input "file"))
+	(target5 (make-target #'identity :output "file5")))
+    (?condition-safe (set-target target))
+    (?bsdf-compilation-warning (set-target target2)
+			       (lines "Target 'target' is empty"))
+    (?bsdf-compilation-warning (set-target target3)
+			       (lines "Target 'file4' is empty"))
+    (?condition-safe (set-target target4))
+    (?condition-safe (set-target target5))))
 
-			     
-;empty rule warning
-
+;target or file dependencies
 ;wrong target depends-on error    
 
-;target tables test
+;targets runtime api (adding and removing dependencies, input and output)
+
+;targets subtables
+
+;; generators (separate files maybe)
 
 ;generating makefile's
 ;generating ninja files
@@ -100,10 +115,6 @@
 ;generating lisp sources
 ;generating pure lisp sources
 ;generating asd systesm
-
-;targets runtime api (adding and removing dependencies, input and output)
-
-;targets subtables
 
 ;variables
 ;include's

@@ -37,10 +37,10 @@
   (let ((target (make-target nil :name "some target")))
     (set-target target)
     (?eq (get-target "some target") target))
-  (let ((target (make-target nil :output "some file")))
+  (let ((target (make-target #'identity :output "some file")))
     (set-target target)
     (?eq (get-target "some file") target))
-  (let ((target (make-target nil :output '("file1" "file2" "file3"))))
+  (let ((target (make-target #'identity :output '("file1" "file2" "file3"))))
     (set-target target)
     (?eq (get-target '("file1" "file2" "file3")) target)))
 
@@ -53,8 +53,42 @@
     (set-target target3)
     (?equal (get-targets) (list target2 target1 target3))))
 
-;adding targets with same key name error
-;adding several targets with no-nil command producting one output error
+(def-targets-test adding-targets-with-same-key-name-error
+  (let ((target (make-target nil :name "target")))
+    (set-target target)
+    (let ((target2 (make-target nil :name "target"))
+	  (target3 (make-target nil :output "target")))
+      (?bsdf-compilation-error (set-target target2)
+			       (lines "Target with name 'target' already exists"))
+      (?bsdf-compilation-error (set-target target3)
+			       (lines "Target with name 'target' already exists"))))
+  (let ((target (make-target #'identity :output "file1")))
+    (set-target target)
+    (let ((target2 (make-target nil :output "file1"))
+	  (target3 (make-target nil :name "file1")))
+      (set-target target2)
+      (?bsdf-compilation-error (set-target target3)
+			       (lines "Target with name 'file1' already exists")))
+    (?eq (get-target "file1") target))
+  (let ((target1 (make-target nil :output "file"))
+	(target2 (make-target #'identity :output "file")))
+    (set-target target1)
+    (set-target target2)
+    (?eq (get-target "file") target2)))
+
+(def-targets-test adding-several-targets-with-one-output
+  (let ((target1 (make-target #'identity :output "file"))
+	(target2 (make-target nil :output "file"))
+	(target3 (make-target #'identity :output '("file2" "file"))))
+    (set-target target1)
+    (set-target target2)
+    (?bsdf-compilation-error (set-target target3)
+			     (lines "Found two targets generating 'file':"
+				    "'file', 'file2 file'"))))
+
+
+			     
+;empty rule warning
 
 ;wrong target depends-on error    
 
@@ -63,6 +97,9 @@
 ;generating makefile's
 ;generating ninja files
 ;generating bsc files
+;generating lisp sources
+;generating pure lisp sources
+;generating asd systesm
 
 ;targets runtime api (adding and removing dependencies, input and output)
 

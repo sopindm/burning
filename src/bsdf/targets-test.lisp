@@ -20,6 +20,8 @@
   (let ((target2 (make-target #'identity :name "test")))
     (?eq (target-command target2) #'identity)))
 
+;removing duplicates
+
 (def-targets-test checking-target-having-name-or-one-output-file
   (?bsdf-compilation-error (make-target nil)
 			   (lines "No output file or name in target"))
@@ -100,10 +102,91 @@
     (?condition-safe (set-target target4))
     (?condition-safe (set-target target5))))
 
-;target or file dependencies
-;wrong target depends-on error    
+(def-targets-test target-depends
+  (let ((target (make-target #'identity 
+			     :name "target" 
+			     :input '("file1" "file2") 
+			     :depends-on '("file3" "target2"))))
+    (set-target target)
+    (?equal (get-depends "target") '("file1" "file2" "file3" "target2")))
+  (set-target (make-target #'identity 
+			   :input "file1"
+			   :output "file4"
+			   :depends-on "target2"))
+  (?equal (get-depends '("file4")) '("file1" "target2")))
+
+(def-targets-test file-depends
+  (let ((target1 (make-target #'identity
+			      :name "target"
+			      :output "file"
+			      :input "file2"
+			      :depends-on "target2"))
+	(target2 (make-target nil
+			      :output "file"
+			      :input '("file3")
+			      :depends-on '("target3" "target4"))))
+    (set-target target1)
+    (set-target target2)
+    (?equal (get-depends "file") '("target" "file3" "target3" "target4"))))
+
+(def-targets-test dependencies-map
+  (let ((target (make-target #'identity :name "target"
+			     :input '("f1" "f2" "f3")
+			     :output '("f4")
+			     :depends-on '("t2" "t3"))))
+    (let ((depends '("f1" "f2" "f3" "t2" "t3")))
+      (set-target target)
+      (?equal (map-depends #'identity "target")
+	      depends)
+      (?equal (with-output-to-string (output)
+		(mapc-depends (lambda (x) (format output "~a~%" x)) "target"))
+	      (apply #'lines depends)))))
+
+(def-targets-test recursive-map-for-dependencies
+  (let ((target (make-target #'identity :name "target"
+			     :depends-on '("target2" "target3")))
+	(target2 (make-target #'identity :name "target2" :input '("file2" "file")))
+	(target3 (make-target #'identity :name "target3" :input '("file3" "file"))))
+    (set-target target)
+    (set-target target2)
+    (set-target target3)
+    (let ((depends '("target2" "target3" "file2" "file" "file3")))
+      (?equal (map-depends #'identity "target" :recursive t) depends)
+      (?equal (with-output-to-string (output)
+		(mapc-depends (lambda (x) (format output "~a" x)) "target" :recursive t))
+	      (apply #'string+ depends)))))
+
+(def-targets-test self-dependency-error
+  (let ((target1 (make-target #'identity
+			      :name "target1"
+			      :depends-on "target2"))
+	(target2 (make-target #'identity
+			      :name "target2"
+			      :depends-on "target1"))
+	(target3 (make-target #'identity
+			      :name "target3"
+			      :depends-on "target1")))
+    (set-target target1)
+    (set-target target2)
+    (set-target target3)
+    (?bsdf-error (mapc-depends #'identity "target1" :recursive t)
+		 (lines "Circular dependency for target 'target1' found"))
+    (?bsdf-error (mapc-depends #'identity "target3" :recursive t)
+		 (lines "Circular dependency for target 'target1' found"))))
+
+;dependencies optimization
 
 ;targets runtime api (adding and removing dependencies, input and output)
+
+;; (remove-target target)
+
+;; (add-input target file)
+;; (remove-input target file) ;throwing warning
+;; (add-output target file)
+;; (remove-output target file) ;throwing warning
+
+;; (add-dependency e1 e2)
+;; (remove-dependency e1 e2) ;throwing warning
 
 ;targets subtables
 

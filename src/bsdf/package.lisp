@@ -1,5 +1,5 @@
-(defpackage #:burning-bsdf
-  (:use #:burning-lisp #:burning-filesystem)
+(defpackage #:burning-bsdf-errors
+  (:use #:burning-lisp)
   (:export bsdf-condition
 	   bsdf-condition-message
 
@@ -9,7 +9,11 @@
 	   bsdf-compilation-error
 	   bsdf-compilation-warning
 
-	   make-target
+	   bsdf-compilation-warn))
+
+(defpackage #:burning-bsdf-targets
+  (:use #:burning-lisp #:burning-bsdf-errors #:alexandria)
+  (:export make-target
 	   target-name
 	   target-command
 	   target-input
@@ -23,7 +27,17 @@
 	   get-targets
 
 	   *targets*
-	   copy-targets-table))
+	   copy-targets-table
+
+	   get-depends
+
+	   map-depends
+	   mapc-depends))
+
+(burning-lisp:define-merged-package #:burning-bsdf 
+  #:burning-bsdf-errors
+  #:burning-bsdf-targets)
+
 
 
 

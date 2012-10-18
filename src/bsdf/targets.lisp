@@ -1,4 +1,4 @@
-(in-package #:burning-bsdf)
+(in-package #:burning-bsdf-targets)
 
 ;;
 ;; Target structure
@@ -58,6 +58,10 @@
   (table (make-hash-table :test #'equal))
   (files (make-hash-table :test #'equal)))
 
+(defstruct file
+  target
+  depends)
+
 (defvar *targets* (make-targets))
 
 (defun copy-targets-table (&optional (table *targets*))
@@ -80,17 +84,55 @@
 (defun get-targets ()
   (double-list-head (targets-list *targets*)))
 
+(defun get-target-depends (target)
+  (append (target-input target)
+	  (target-depends-on target)))
+
+(defun get-file-depends (file)
+  (append (aif (file-target file) (list (target-key-name it)))
+	  (file-depends file)))
+
+(defun get-depends (entity)
+  (acond ((get-target entity) (get-target-depends it))
+	 ((get-file entity) (get-file-depends it))))
+
+(defun %map-depends (mapper reducer function entity recursive 
+		     &optional (visited (make-hash-table :test #'equal)) denied)
+  (push entity denied)
+  (let ((depends (get-depends entity)))
+    (mapc (lambda (entity) (when (find entity denied :test #'equal)
+			     (bsdf-error "Circular dependency for target '~a' found" entity)))
+	  depends)
+    (when recursive (setf depends (remove-if (lambda (x) (gethash x visited)) depends)))
+    (let ((mapped (funcall mapper function depends)))
+      (setf (gethash entity visited) t)
+      (when (and recursive depends)
+	(setf mapped (apply reducer mapped
+			    (mapcan (lambda (entity) 
+				      (list (%map-depends mapper reducer function entity t visited denied)))
+				    depends))))
+      mapped)))
+
+(defun map-depends (function entity &key recursive)
+  (%map-depends #'mapcar #'append function entity recursive))
+
+(defun mapc-depends (function entity &key recursive)
+  (%map-depends #'mapc (lambda (&rest args) (first args)) function entity recursive))
+
 ;;
 ;; Pushing targets to table
 ;;
 
+(defun target-key-name (target)
+  (or (target-name target)
+      (if (target-command target) (target-output target))))
+
 (defun push-to-list (target)
-  (double-list-push target (targets-list *targets*)))
+  (when (target-key-name target)
+    (double-list-push target (targets-list *targets*))))
 
 (defun push-to-table (target)
-  (let ((name (or (target-name target)
-		  (if (not (target-command target)) (gensym))
-		  (target-output target))))
+  (when-let (name (target-key-name target))
     (when (get-target name)
       (bsdf-compilation-error "Target with name '~a' already exists" (target-print-name target)))
     (when (get-file name)
@@ -100,16 +142,17 @@
 (defun push-file-to-table (name target)
   (when (get-target name)
     (bsdf-compilation-error "File name '~a' is already a target name" name))
-  (let* ((file (get-file name))
-	 (file-target (first file))
-	 (depends (rest file)))
+  (let* ((file (or (get-file name) (make-file)))
+	 (file-target (file-target file))
+	 (depends (file-depends file)))
     (when (and (target-command target) file-target)
       (bsdf-compilation-error (lines* "Found two targets generating '~a':"
 				      "'~a', '~a'")
 			      name (target-print-name file-target) (target-print-name target)))
     (cond ((target-command target) (setf file-target target))
-	  ((target-input target) (setf depends (append depends (target-input target)))))
-    (setf (get-file name) (cons file-target depends))))
+	  ((or (target-input target) (target-depends-on target)) 
+	   (setf depends (append depends (target-input target) (target-depends-on target)))))
+    (setf (get-file name) (make-file :target file-target :depends depends))))
 
 (defun set-target (target)
   (push-to-list target)

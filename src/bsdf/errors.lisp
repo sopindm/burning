@@ -1,4 +1,4 @@
-(in-package #:burning-bsdf)
+(in-package #:burning-bsdf-errors)
 
 (define-condition bsdf-condition (simple-condition)
   ())
@@ -18,8 +18,14 @@
 (defun bsdf-condition-message (cond)
   (lines (apply #'format nil (simple-condition-format-control cond) (simple-condition-format-arguments cond))))
 
+(defun %bsdf-error (error message args)
+  (error error :format-control message :format-arguments args))
+
+(defun bsdf-error (message &rest args)
+  (%bsdf-error 'bsdf-error message args))
+
 (defun bsdf-compilation-error (message &rest args)
-  (error 'bsdf-compilation-error :format-control message :format-arguments args))
+  (%bsdf-error 'bsdf-compilation-error message args))
 
 (defun bsdf-compilation-warn (message &rest args)
   (warn 'bsdf-compilation-warning :format-control message :format-arguments args))

@@ -20,9 +20,18 @@
 	   target-output
 	   target-depends-on
 
+	   make-file
+	   file-target
+	   file-depends
+
 	   get-target
 	   set-target
-	   remove-target
+
+	   add-input
+	   add-output
+	   add-dependency
+
+	   get-file
 
 	   get-targets
 

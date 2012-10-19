@@ -55,6 +55,19 @@
     (set-target target3)
     (?equal (get-targets) (list target2 target1 target3))))
 
+(def-targets-test listing-file-targets
+  (let ((target1 (make-target #'identity :output "file"))
+	(target2 (make-target nil
+			      :input "file2"
+			      :output "file"))
+	(target3 (make-target nil
+			      :input '("file3" "file4")
+			      :output '("file" "file5"))))
+    (set-target target1)
+    (set-target target2)
+    (set-target target3)
+    (?equal (get-targets) (list target1 target2 target3))))
+
 (def-targets-test adding-targets-with-same-key-name-error
   (let ((target (make-target #'identity :name "target")))
     (set-target target)
@@ -108,7 +121,9 @@
 			     :input '("file1" "file2") 
 			     :depends-on '("file3" "target2"))))
     (set-target target)
-    (?equal (get-depends "target") '("file1" "file2" "file3" "target2")))
+    (let ((depends '("file1" "file2" "file3" "target2")))
+      (?equal (get-depends "target") depends)
+      (?equal (get-depends target) depends)))
   (set-target (make-target #'identity 
 			   :input "file1"
 			   :output "file4"
@@ -124,10 +139,15 @@
 	(target2 (make-target nil
 			      :output "file"
 			      :input '("file3")
-			      :depends-on '("target3" "target4"))))
+			      :depends-on '("target3" "target4")))
+	(target3 (make-target #'identity
+			      :output "file3")))
     (set-target target1)
     (set-target target2)
-    (?equal (get-depends "file") '("target" "file3" "target3" "target4"))))
+    (set-target target3)
+    (let ((depends '("target" "file3" "target3" "target4")))
+      (?equal (get-depends "file") depends))
+    (?equal (get-depends "file3") '(("file3")))))
 
 (def-targets-test dependencies-map
   (let ((target (make-target #'identity :name "target"
@@ -136,8 +156,8 @@
 			     :depends-on '("t2" "t3"))))
     (let ((depends '("f1" "f2" "f3" "t2" "t3")))
       (set-target target)
-      (?equal (map-depends #'identity "target")
-	      depends)
+      (?equal (map-depends #'identity "target") depends)
+      (?equal (map-depends #'identity target) depends)
       (?equal (with-output-to-string (output)
 		(mapc-depends (lambda (x) (format output "~a~%" x)) "target"))
 	      (apply #'lines depends)))))
@@ -169,24 +189,80 @@
     (set-target target1)
     (set-target target2)
     (set-target target3)
-    (?bsdf-error (mapc-depends #'identity "target1" :recursive t)
+    (?bsdf-error (mapc-depends #'identity target1 :recursive t)
 		 (lines "Circular dependency for target 'target1' found"))
     (?bsdf-error (mapc-depends #'identity "target3" :recursive t)
 		 (lines "Circular dependency for target 'target1' found"))))
 
 ;dependencies optimization
 
-;targets runtime api (adding and removing dependencies, input and output)
+(def-targets-test adding-input-to-target
+  (let ((target (make-target #'identity :name "target"
+			     :input "file1"
+			     :output "file2")))
+    (set-target target)
+    (add-input target "file3")
+    (?equal (target-input target) '("file1" "file3"))
+    (?equal (get-depends target) '("file1" "file3"))
+    (add-input "target" "file4")
+    (?equal (get-depends target) '("file1" "file3" "file4")))
+  (let ((target (make-target nil
+			     :input "file"
+			     :output "file1")))
+    (set-target target)
+    (add-input target "file2")
+    (?equal (get-depends "file1") '("file" "file2")))
+  (?condition-safe (add-input nil "file"))
+  (?condition-safe (add-input "blabla" "file")))
 
-;; (remove-target target)
+(def-targets-test adding-output-to-target
+  (let ((target (make-target #'identity :name "target"
+			     :input "file1"
+			     :output "file2")))
+    (set-target target)
+    (add-output target "file3")
+    (?equal (target-output target) '("file2" "file3"))
+    (?equal (get-depends "file3") '("target")))
+  (let ((target (make-target nil
+			     :input "file2"
+			     :output "file4")))
+    (set-target target)
+    (add-output target "file5")
+    (?equal (get-depends "file5") '("file2")))
+  (let ((target (make-target #'identity
+			     :input "input"
+			     :output "output")))
+    (set-target target)
+    (add-output target "output2")
+    (?equal (get-target '("output" "output2")) target)
+    (?null (get-target '("output")))
+    (?equal (get-depends "output") '(("output" "output2")))
+    (?equal (get-depends "output2") '(("output" "output2")))))
 
-;; (add-input target file)
-;; (remove-input target file) ;throwing warning
-;; (add-output target file)
-;; (remove-output target file) ;throwing warning
+(def-targets-test adding-existing-file-as-an-output
+  (set-target (make-target nil :input "file1" :output '("file2" "file3")))
+  (let ((target (make-target #'identity :name "target")))
+    (set-target target)
+    (add-output target "file2")
+    (?equal (get-depends "file2") '("target" "file1")))
+  (let ((target (make-target nil :output "file3" :input "file4")))
+    (set-target target)
+    (add-output target "file2")
+    (?equal (get-depends "file2") '("target" "file1" "file4"))))
 
-;; (add-dependency e1 e2)
-;; (remove-dependency e1 e2) ;throwing warning
+(def-targets-test adding-dependencies-to-targets
+  (let ((target (make-target #'identity 
+			     :name "target"
+			     :input "input"
+			     :output "output"
+			     :depends-on "depend")))
+    (set-target target)
+    (add-dependency "target" "depend2")
+    (?equal (get-depends "target") '("input" "depend" "depend2"))))
+
+;deftarget
+
+;move to bsdf context
 
 ;targets subtables
 

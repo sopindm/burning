@@ -18,16 +18,13 @@
   (%target-command target))
 
 (defun target-input (target)
-  (%target-input target))
+  (double-list-head (%target-input target)))
 
 (defun target-output (target)
-  (%target-output target))
+  (double-list-head (%target-output target)))
 
 (defun target-depends-on (target)
-  (%target-depends-on target))
-
-(defun (setf target-depends-on) (value target)
-  (setf (%target-depends-on target) value))
+  (double-list-head (%target-depends-on target)))
 
 (defun target-print-name (target)
   (let ((name (or (target-name target) (target-output target))))
@@ -42,9 +39,9 @@
     (bsdf-compilation-error "No output file or name in target"))
   (let ((target (%make-target :name name
 			      :command command 
-			      :input (if (listp input) input (list input))
-			      :output output
-			      :depends-on (if (listp depends-on) depends-on (list depends-on)))))
+			      :input (make-double-list (if (listp input) input (list input)))
+			      :output (make-double-list output)
+			      :depends-on (make-double-list (if (listp depends-on) depends-on (list depends-on))))))
     (when (and command (not (functionp command)))
       (bsdf-compilation-error "Wrong command ~a in target '~a'" command (target-print-name target)))
     target))
@@ -54,13 +51,25 @@
 ;;
 
 (defstruct targets
-  (list (make-double-list))
+  (list (make-double-list nil))
   (table (make-hash-table :test #'equal))
   (files (make-hash-table :test #'equal)))
 
-(defstruct file
+(defstruct (file (:constructor %make-file) (:conc-name %file-))
   target
   depends)
+
+(defun file-target (file)
+  (%file-target file))
+
+(defun file-depends (file)
+  (double-list-head (%file-depends file)))
+
+(defun file-add-dependency (file entity)
+  (double-list-push entity (%file-depends file)))
+
+(defun make-file (&optional target depends)
+  (%make-file :target target :depends (make-double-list depends)))
 
 (defvar *targets* (make-targets))
 
@@ -84,6 +93,14 @@
 (defun get-targets ()
   (double-list-head (targets-list *targets*)))
 
+(defun get-file-targets ()
+  (let ((targets ()))
+    (maphash (lambda (key value)
+	       (awhen (file-depends value)
+		 (push (make-target nil :input it :output key) targets)))
+	     (targets-files *targets*))
+    targets))
+
 (defun get-target-depends (target)
   (append (target-input target)
 	  (target-depends-on target)))
@@ -93,11 +110,16 @@
 	  (file-depends file)))
 
 (defun get-depends (entity)
-  (acond ((get-target entity) (get-target-depends it))
-	 ((get-file entity) (get-file-depends it))))
+  (typecase entity
+    (target (get-target-depends entity))
+    (null nil)
+    (otherwise (acond ((get-target entity) (get-target-depends it))
+		      ((get-file entity) (get-file-depends it))))))
 
 (defun %map-depends (mapper reducer function entity recursive 
 		     &optional (visited (make-hash-table :test #'equal)) denied)
+  (when (target-p entity)
+    (setf entity (target-key-name entity)))
   (push entity denied)
   (let ((depends (get-depends entity)))
     (mapc (lambda (entity) (when (find entity denied :test #'equal)
@@ -125,11 +147,10 @@
 
 (defun target-key-name (target)
   (or (target-name target)
-      (if (target-command target) (target-output target))))
+      (if (target-command target) (copy-list (target-output target)))))
 
 (defun push-to-list (target)
-  (when (target-key-name target)
-    (double-list-push target (targets-list *targets*))))
+  (double-list-push target (targets-list *targets*)))
 
 (defun push-to-table (target)
   (when-let (name (target-key-name target))
@@ -152,7 +173,7 @@
     (cond ((target-command target) (setf file-target target))
 	  ((or (target-input target) (target-depends-on target)) 
 	   (setf depends (append depends (target-input target) (target-depends-on target)))))
-    (setf (get-file name) (make-file :target file-target :depends depends))))
+    (setf (get-file name) (make-file file-target depends))))
 
 (defun set-target (target)
   (push-to-list target)
@@ -164,4 +185,28 @@
     (bsdf-compilation-warn "Target '~a' is empty" (target-print-name target)))
   target)
 
+;;
+;; Removing targets from table
+;;
+
+(defun add-dependency (target dep)
+  (unless (target-p target) (setf target (get-target target)))
+  (when target (double-list-push dep (%target-depends-on target))))
+
+(defun add-input (target input)
+  (unless (target-p target) (setf target (get-target target)))
+  (when target
+    (double-list-push input (%target-input target))
+    (unless (target-key-name target)
+      (mapc (lambda (file) (file-add-dependency (get-file file) input)) (target-output target)))))
+
+(defun add-output (target output)
+  (unless (target-p target) (setf target (get-target target)))
+  (when target
+    (let ((name (target-key-name target)))
+      (double-list-push output (%target-output target))
+      (unless (equal (target-key-name target) name)
+	(remhash name (targets-table *targets*))
+	(setf (gethash (target-key-name target) (targets-table *targets*)) target))
+      (push-file-to-table output target))))
 

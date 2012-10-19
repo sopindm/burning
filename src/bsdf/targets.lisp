@@ -26,25 +26,46 @@
 (defun target-depends-on (target)
   (double-list-head (%target-depends-on target)))
 
+(defun %target-print-name (name output)
+  (let ((name (or name output)))
+    (if (listp name) (format nil "~{~a~^ ~}" name) name)))
+
 (defun target-print-name (target)
-  (let ((name (or (target-name target) (target-output target))))
-    (if (listp name)
-	(format nil "~{~a~^ ~}" name)
-	name)))
+  (%target-print-name (target-name target) (target-output target)))
 
 (defun make-target (command &key name input output depends-on)
-  (when (not (listp output))
-    (setf output (list output)))
-  (when (and (not name) (not output))
-    (bsdf-compilation-error "No output file or name in target"))
-  (let ((target (%make-target :name name
-			      :command command 
-			      :input (make-double-list (if (listp input) input (list input)))
-			      :output (make-double-list output)
-			      :depends-on (make-double-list (if (listp depends-on) depends-on (list depends-on))))))
-    (when (and command (not (functionp command)))
-      (bsdf-compilation-error "Wrong command ~a in target '~a'" command (target-print-name target)))
-    target))
+  (flet ((to-list (arg type) 
+	   (unless (or (stringp arg) (and (listp arg) (every #'stringp arg)))
+	     (bsdf-compilation-error "Wrong ~a '~a' in target '~a'" type arg (%target-print-name name output)))
+	   (copy-list (if (listp arg) arg (list arg))))
+	 (to-name (arg) 
+	   (unless (or (not name) (stringp name)) (bsdf-compilation-error "Wrong target name '~a'" name))
+	   arg)
+	 (to-command (arg) 
+	   (when (and arg (not (functionp arg)))
+	     (bsdf-compilation-error "Wrong command ~a in target '~a'" 
+				     command (%target-print-name name output)))
+	   arg))
+    (setf output (to-list output "output"))
+    (when (and (not name) (not output))
+      (bsdf-compilation-error "No output file or name in target"))
+    (%make-target :name (to-name name)
+		  :command (to-command command)
+		  :input (make-double-list (to-list input "input"))
+		  :output (make-double-list output)
+		  :depends-on (make-double-list (to-list depends-on "dependencies list")))))
+
+(defmacro deftarget (name command input output &optional depends-on)
+  (flet ((to-list (expr)
+	   (if (listp expr) (cons 'list expr) expr)))
+    (let ((input (to-list input))
+	  (output (to-list output))
+	  (depends-on (to-list depends-on)))
+      `(set-target (make-target ,command 
+				:name ,name
+				:input ,input
+				:output ,output
+				:depends-on ,depends-on)))))
 
 ;;
 ;; Target table

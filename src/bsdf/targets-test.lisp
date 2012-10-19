@@ -8,17 +8,30 @@
        ,@body)))
 
 (def-targets-test making-targets-test
-  (let ((target (make-target nil :name "a target" :input 'some-input :output 'some-output)))
+  (let ((target (make-target nil :name "a target" :input "some-input" :output "some-output")))
     (?equal (target-name target) "a target")
     (?null (target-command target))
-    (?equal (target-input target) '(some-input))
-    (?equal (target-output target) '(some-output))
+    (?equal (target-input target) '("some-input"))
+    (?equal (target-output target) '("some-output"))
     (?null (target-depends-on target)))
-  (let ((target2 (make-target nil :name "test" :input '(input1 input2) :output '(output1 output2 output3))))
-    (?equal (target-input target2) '(input1 input2))
-    (?equal (target-output target2) '(output1 output2 output3)))
+  (let ((target2 (make-target nil 
+			      :name "test"
+			      :input '("input1" "input2")
+			      :output '("output1" "output2" "output3"))))
+    (?equal (target-input target2) '("input1" "input2"))
+    (?equal (target-output target2) '("output1" "output2" "output3")))
   (let ((target2 (make-target #'identity :name "test")))
     (?eq (target-command target2) #'identity)))
+
+(def-targets-test wrong-argument-types-error
+  (?bsdf-compilation-error (make-target nil :name '(1 2 3))
+			   (lines "Wrong target name '~a'") '(1 2 3))
+  (?bsdf-compilation-error (make-target nil :name "target" :input '(1 2 3))
+			   (lines "Wrong input '~a' in target 'target'") '(1 2 3))
+  (?bsdf-compilation-error (make-target nil :name "target" :output '(1 2 3))
+			   (lines "Wrong output '~a' in target 'target'") '(1 2 3))
+  (?bsdf-compilation-error (make-target nil :name "target" :depends-on '(1 2 3))
+			   (lines "Wrong dependencies list '~a' in target 'target'") '(1 2 3)))
 
 ;removing duplicates
 
@@ -260,7 +273,17 @@
     (add-dependency "target" "depend2")
     (?equal (get-depends "target") '("input" "depend" "depend2"))))
 
-;deftarget
+(def-targets-test simply-deftarget-test
+  (deftarget "target" #'identity
+      ("input1" "input2")
+    "output"
+    "target2")
+  (let ((target (get-target "target")))
+    (?eq (target-command target) #'identity)
+    (?equal (target-name target) "target")
+    (?equal (target-input target) '("input1" "input2"))
+    (?equal (target-output target) '("output"))
+    (?equal (target-depends-on target) '("target2"))))
 
 ;move to bsdf context
 

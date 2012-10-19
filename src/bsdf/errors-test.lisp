@@ -4,14 +4,16 @@
   `(?condition ,expr, condition
 	       (bsdf-condition-message ,message :test equal)))
 
-(defmacro ?bsdf-error (expr message)
-  `(?bsdf-condition ,expr ,message bsdf-error))
+(defmacro define-?bsdf-condition (name type)
+  `(defmacro ,name (expr message &rest args)
+     `(?bsdf-condition ,expr (format nil ,message ,@args) ,',type)))
 
-(defmacro ?bsdf-warning (expr message)
-  `(?bsdf-condition ,expr ,message bsdf-warning))
+(defmacro define-?bsdf-conditions (&body forms)
+  `(progn ,@(mapcar (lambda (form) `(define-?bsdf-condition ,(first form) ,(second form))) forms)))
 
-(defmacro ?bsdf-compilation-error (expr message)
-  `(?bsdf-condition ,expr ,message bsdf-compilation-error))
+(define-?bsdf-conditions 
+  (?bsdf-error bsdf-error)
+  (?bsdf-warning bsdf-warning)
+  (?bsdf-compilation-error bsdf-compilation-error)
+  (?bsdf-compilation-warning bsdf-compilation-warning))
 
-(defmacro ?bsdf-compilation-warning (expr message)
-  `(?bsdf-condition ,expr ,message bsdf-compilation-warning))

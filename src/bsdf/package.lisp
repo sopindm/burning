@@ -13,7 +13,8 @@
 
 (defpackage #:burning-bsdf-targets
   (:use #:burning-lisp #:burning-bsdf-errors #:alexandria)
-  (:export make-target
+  (:export deftarget
+	   make-target
 	   target-name
 	   target-command
 	   target-input

@@ -20,8 +20,8 @@
 	   target-input
 	   target-output
 	   target-depends-on
+	   target-print-name
 
-	   make-file
 	   file-target
 	   file-depends
 
@@ -44,9 +44,22 @@
 	   map-depends
 	   mapc-depends))
 
+(defpackage #:burning-bsdf-generator
+  (:use #:burning-lisp #:burning-bsdf-targets #:burning-filesystem)
+  (:export *bsdf-generator*
+
+	   generate
+
+	   generator-file-name
+
+	   makefile
+	   ninja
+	   bsc))
+
 (burning-lisp:define-merged-package #:burning-bsdf 
   #:burning-bsdf-errors
-  #:burning-bsdf-targets)
+  #:burning-bsdf-targets
+  #:burning-bsdf-generator)
 
 
 

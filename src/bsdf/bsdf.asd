@@ -8,7 +8,9 @@
     :serial t
     :components ((:file "package")
 		 (:file "errors")
-		 (:file "targets"))
+		 (:file "targets")
+		 (:file "generator")
+		 (:file "makefile-generator"))
     :depends-on (#:burning-lisp #:burning-filesystem))
 
 

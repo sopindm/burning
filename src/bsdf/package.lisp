@@ -48,13 +48,28 @@
   (:use #:burning-lisp #:burning-bsdf-targets #:burning-filesystem)
   (:export *bsdf-generator*
 
-	   generate
+	   define-generator
 
-	   generator-file-name
+	   define-generator-method
 
+	   define-command-method
+
+	   generator-make-context
+	   generator-write-context
+	   generator-close-context
+	   
+	   generator-context-add-target
+	   generator-parse-target
+
+	   generate-command
+	   generate-file
+	   
 	   makefile
 	   ninja
-	   bsc))
+	   bsc
+
+	   echo
+	   echo-command))
 
 (burning-lisp:define-merged-package #:burning-bsdf 
   #:burning-bsdf-errors

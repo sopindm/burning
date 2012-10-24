@@ -62,7 +62,9 @@
 	   generator-parse-target
 
 	   generate-command
+
 	   generate-file
+	   generate-from-file
 	   
 	   makefile
 	   ninja
@@ -76,7 +78,8 @@
   #:burning-bsdf-targets
   #:burning-bsdf-generator)
 
-
+(defpackage #:burning-bsdf-user
+  (:use #:burning-lisp #:burning-filesystem #:burning-bsdf))
 
 
 	   

@@ -54,6 +54,19 @@
 	   (generator-write-context generator context))
       (generator-close-context generator context))))
 
+(defun generate-from-file (path &key (generator nil generator-p)  (output-path nil output-p))
+  (let ((*targets* (copy-targets-table))
+	(*package* (find-package '#:burning-bsdf-user)))
+    (let ((exprs (make-double-list nil)))
+      (with-open-file (input path :direction :input)
+	(do ((expr #1=(read input nil :eof) #1#))
+	    ((eq expr :eof) nil)
+	  (double-list-push expr exprs)))
+      (eval (cons 'progn (double-list-head exprs))))
+    (apply #'generate-file (append (when generator-p (list :generator generator))
+				   (when output-p (list :path output-path))))))
+	
+
 ;;
 ;; Generator commands basics
 ;;

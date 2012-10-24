@@ -48,7 +48,12 @@
 	(targets (double-list-head (rest context))))
     (with-open-file (stream (path+ (copy-path path :new-filename nil) (path-from-string "Makefile")) 
 			    :direction :output :if-exists :supersede)
-      (mapc (lambda (target) (print-makefile-target target stream)) targets))))
+      (mapl (lambda (targets) 
+	      (let ((target (first targets)))
+		(print-makefile-target target stream)
+		(when (and (rest targets) (makefile-target-command target)) (format stream "~%"))))
+	    targets)
+      (format stream "~%"))))
       
 ;;
 ;; Makefile common commands
@@ -65,4 +70,4 @@
   nil)
 
 (def-simple-makefile-command echo (format &rest args)
-  (apply #'format nil (format nil "echo '~a'" format) args))
+  (apply #'format nil (format nil "@echo '~a'" format) args))

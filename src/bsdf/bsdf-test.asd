@@ -8,6 +8,7 @@
     :serial t
     :components ((:file "test-package")
 		 (:file "errors-test")
+		 (:file "variables-test")
 		 (:file "targets-test")
 		 (:file "makefile-generator-test"))
     :depends-on (#:burning-bsdf #:burning-testing #:burning-filesystem))

@@ -2,6 +2,9 @@
   (:use #:burning-lisp)
   (:export bsdf-condition
 	   bsdf-condition-message
+	   
+	   bsdf-condition-format-control
+	   bsdf-condition-format-args
 
 	   bsdf-error
 	   bsdf-warning
@@ -44,6 +47,20 @@
 	   map-depends
 	   mapc-depends))
 
+(defpackage #:burning-bsdf-variables
+  (:use #:burning-lisp #:burning-bsdf-errors #:burning-filesystem #:alexandria)
+  (:shadowing-import-from #:burning-filesystem #:copy-file)
+  (:export variable
+	   make-variable
+	   variable-name
+	   variable-expression
+	   variable-type
+	   variable-description
+	   variable-visible-p
+
+	   variable-value
+	   variable-string))
+
 (defpackage #:burning-bsdf-generator
   (:use #:burning-lisp #:burning-bsdf-targets #:burning-filesystem)
   (:export *bsdf-generator*
@@ -76,7 +93,8 @@
 (burning-lisp:define-merged-package #:burning-bsdf 
   #:burning-bsdf-errors
   #:burning-bsdf-targets
-  #:burning-bsdf-generator)
+  #:burning-bsdf-generator
+  #:burning-bsdf-variables)
 
 (defpackage #:burning-bsdf-user
   (:use #:burning-lisp #:burning-filesystem #:burning-bsdf))

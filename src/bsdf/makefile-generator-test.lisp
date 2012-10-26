@@ -96,6 +96,8 @@
 		 ".PHONY: target2"
 		 "target2: out1 out2"
 		 "")))
+
+;compilation errors with source line
     
 (def-makefile-test generating-with-output-directory
   (deftarget nil nil ("in1" "in2") ("out1" "out2"))
@@ -112,7 +114,12 @@
     (generate-file :generator 'makefile)
     (?equal (read-file "Makefile") (lines "out: f1 f2 f3" ""))))
 
-;escaping spaces (something else too???)
+;escaping spaces
+;escaping dollars
+;escaping wildcard characters (*, %, ?)
+;working with newlines
+
+;special rule names escaping
 
 ;using input and output variables in commands
 ;using variables

@@ -8,6 +8,7 @@
     :serial t
     :components ((:file "package")
 		 (:file "errors")
+		 (:file "variables")
 		 (:file "targets")
 		 (:file "generator")
 		 (:file "makefile-generator"))

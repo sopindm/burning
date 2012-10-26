@@ -68,13 +68,8 @@
 				:depends-on ,depends-on)))))
 
 ;;
-;; Target table
+;; Files
 ;;
-
-(defstruct targets
-  (list (make-double-list nil))
-  (table (make-hash-table :test #'equal))
-  (files (make-hash-table :test #'equal)))
 
 (defstruct (file (:constructor %make-file) (:conc-name %file-))
   target
@@ -91,6 +86,15 @@
 
 (defun make-file (&optional target depends)
   (%make-file :target target :depends (make-double-list depends)))
+
+;;
+;; Target table
+;;
+
+(defstruct targets
+  (list (make-double-list nil))
+  (table (make-hash-table :test #'equal))
+  (files (make-hash-table :test #'equal)))
 
 (defvar *targets* (make-targets))
 

@@ -275,7 +275,7 @@
 
 (def-targets-test simply-deftarget-test
   (deftarget "target" #'identity
-      ("input1" "input2")
+    ("input1" "input2")
     "output"
     "target2")
   (let ((target (get-target "target")))
@@ -285,18 +285,21 @@
     (?equal (target-output target) '("output"))
     (?equal (target-depends-on target) '("target2"))))
 
-;move to bsdf context
+;accessing variables by name
+;name conficts for variables, files and targets
 
-;targets subtables
+;using variables in target arguments
 
-;; generators (separate files maybe)
+;;
+;;targets hierarchy
+;;
+
+;; generators (separate files)
 
 ;generating makefile's
-;generating ninja files
+;generating ninja files?
 ;generating bsc files
 ;generating lisp sources
 ;generating pure lisp sources
-;generating asd systesm
+;generating asd systesm???
 
-;variables
-;include's

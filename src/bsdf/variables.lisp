@@ -22,6 +22,16 @@
 ;; Type generics and macro's
 ;;
 
+(defgeneric bsdf-type-p (type &rest args))
+
+(defmethod bsdf-type-p (type &rest args)
+  (declare (ignore type args))
+  nil)
+
+(defmacro def-type-p (type (args-var) &body body)
+  `(defmethod bsdf-type-p ((type (eql ',type)) &rest ,args-var)
+     ,@body))
+
 (defgeneric bsdf-type-of (value))
 
 (defmethod bsdf-type-of (value)
@@ -77,13 +87,22 @@
 (defmethod bsdf-type-of ((value (eql t)))
   :bool)
 
+(def-type-p t (args)
+  (null args))
+
 (def-type-of string :string)
 (def-type-of integer :int)
 (def-type-of burning-filesystem:path :path)
 (def-type-of keyword :enum)
 
+(def-type-p :string (args)
+  (null args))
+
 (defcast :int :string (value)
   (format nil "~d" value))
+
+(def-type-p :int (args)
+  (< (length args) 3))
 
 (defcast :path :string (value)
   (path-to-string value))
@@ -94,9 +113,17 @@
 (defcast :enum :string (value)
   (symbol-name value))
 
+(def-type-p :list (args)
+  (and (<= (length args) 1)
+       (or (not args)
+	   (apply #'bsdf-type-p (if (listp (first args)) (first args) (list (first args)))))))
+
 (defcast (:list args) (:list dest-args) (value)
   (if dest-args
-      (mapcar (lambda (arg) (cast-type arg (first dest-args))) value)
+      (restart-case 
+	  (handler-bind ((bsdf-compilation-error (lambda (err) (invoke-restart 'list-error err))))
+	    (mapcar (lambda (arg) (cast-type arg (first dest-args))) value))
+	(list-error (err) (declare (ignore err)) (call-next-method)))
       value))
 
 (defcast (:list args) :string (value)
@@ -109,13 +136,13 @@
 (defcast (:int args) (:int dest-args) (value)
   (declare (ignore args))
   (if (and dest-args
-	   (dbind (min max) dest-args
+	   (dbind (max &optional (min 0)) (reverse dest-args)
 	     (or (< value min) (> value max))))
       (call-next-method)
       value))
 
 (defcast :list :bool (value)
-  (if (null value) nil (call-next-method)))
+  (if (null value) nil t))
 
 (defcast :path :file (value)
   (if (file-path-p value) value (call-next-method)))
@@ -132,9 +159,25 @@
 (defcast :string :directory (value)
   (cast-type (cast-type value :path :string) :directory :path))
 
+(def-type-p :path (args)
+  (null args))
+
+(def-type-p :file (args)
+  (apply #'bsdf-type-p :path args))
+
+(def-type-p :directory (args)
+  (apply #'bsdf-type-p :path args))
+
+(def-type-p :bool (args)
+  (null args))
+
 (defcast :enum (:enum dest-args) (value)
   (if (or (not dest-args) (member value dest-args)) value
       (call-next-method)))
+
+(def-type-p :enum (args)
+  (every (lambda (x) (and (symbolp x) (eq (symbol-package x) (find-package "KEYWORD"))))
+	 args))
 
 ;;
 ;; Variables
@@ -152,6 +195,8 @@
 							 (bsdf-condition-format-control err)))
 					   (setf (bsdf-condition-format-args err)
 						 (cons name (bsdf-condition-format-args err))))))
+    (unless (apply #'bsdf-type-p (if (listp type) type (list type)))
+      (bsdf-compilation-error "Wrong BSDF type ~a" type))
     (let ((real-type (bsdf-type-of expression)))
       (unless (equal real-type type) 
 	(setf expression (cast-type expression type real-type))))

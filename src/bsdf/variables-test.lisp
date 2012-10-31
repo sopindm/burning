@@ -48,8 +48,11 @@
 (deftest making-integers-with-boundaries
   (?expr= (123 '(:int -100 123)) 123 "123")
   (?expr= (-200 '(:int -200 -200)) -200 "-200")
+  (?expr= (10 '(:int 100)) 10 "10")
   (?wrong-cast "var" 123 :int '(:int 0 100))
-  (?wrong-cast "var2" -201 :int '(:int -200 0)))
+  (?wrong-cast "var2" -201 :int '(:int -200 0))
+  (?wrong-cast "var" 100 :int '(:int 99))
+  (?wrong-cast "var" -1 :int '(:int 100)))
 
 (deftest making-bool-variables
   (?expr= (nil :bool) nil "()")
@@ -100,11 +103,29 @@
 			   #(1 2 3)))
 
 (deftest defining-list-variables-with-type
-  (?expr= ('("a" 2 :c) '(:list :string)) '("a" 2 "C") "(a 2 C)"))
+  (?expr= ('("a" 2 :c) '(:list :string)) '("a" "2" "C") "(a 2 C)")
+  (?expr= ('(((1 2 "3") ("4" "5" "6")) (("7" 8 9))) '(:list (:list (:list :string))))
+	  '((("1" "2" "3") ("4" "5" "6")) (("7" "8" "9"))) "(((1 2 3) (4 5 6)) ((7 8 9)))"))
 
-;list <type> wrong casts
+(deftest list-with-type-wrong-casts
+  (?wrong-cast "var" '(1 2 :3) :list '(:list :int)))
 
-;checking type correctness (wrong variable type error)
+
+(defmacro ?wrong-type (expr type)
+  `(?bsdf-compilation-error (make-variable "var" ,expr :type ',type)
+			    (lines "In definition of variable 'var':"
+				   "Wrong BSDF type ~a") ',type))
+
+(deftest wrong-variable-type-error
+  (?wrong-type "123" (:string "bla"))
+  (?wrong-type "456" :wrong)
+  (?wrong-type '(1 2 3) (:list :wrong-type))
+  (?wrong-type '(1 2 3) (:list (:list (:list :wrong-type))))
+  (?wrong-type 123 (t 1 2 3))
+  (?wrong-type 123 (:int 1 2 3))
+  (?wrong-type "a.file" (:path 1))
+  (?wrong-type :a (:enum :a :b 1 2 3))
+  (?wrong-type nil (:bool 1)))
 
 ;complex variable expressions (accessing and evaluating)
 ;;for string or t variables

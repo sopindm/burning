@@ -19,6 +19,29 @@
 	  ,@(mapcar (lambda (slot) `(defreader ,type ,slot)) read-only-slots)))
 
 ;;
+;; Operation generic and macro's
+;;
+
+(defvar *operations* (make-hash-table :test #'eq))
+
+(defun bsdf-operation-p (symbol-or-expr)
+  (let ((symbol (if (listp symbol-or-expr) (first symbol-or-expr) symbol-or-expr)))
+    (gethash symbol *operations*)))
+
+(defun set-operation (name)
+  (setf (gethash name *operations*) t))
+
+(defgeneric bsdf-operation-type (operation args))
+(defgeneric bsdf-operation-value (operation args))
+
+(defmacro defoperation (operation (args-sym) (&body type-method) (&body value-method))
+  `(progn (set-operation ',operation)
+	  (defmethod bsdf-operation-type ((operation (eql ',operation)) ,args-sym)
+	    ,@type-method)
+	  (defmethod bsdf-operation-value ((operation (eql ',operation)) ,args-sym)
+	    ,@value-method)))
+
+;;
 ;; Type generics and macro's
 ;;
 
@@ -79,10 +102,11 @@
 ;;
 
 (defmethod bsdf-type-of ((value list))
-  (let ((types (mapcar #'bsdf-type-of value)))
-    (if (every (lambda (type) (equal type (first types))) (rest types))
-	`(:list ,(first types))
-	:list)))
+  (if (bsdf-operation-p (first value)) (bsdf-operation-type (first value) (rest value))
+      (let ((types (mapcar #'bsdf-type-of value)))
+	(if (every (lambda (type) (equal type (first types))) (rest types))
+	    `(:list ,(first types))
+	    :list))))
 
 (defmethod bsdf-type-of ((value (eql t)))
   :bool)
@@ -206,6 +230,25 @@
 		    :description description
 		    :visible-p visible-p)))
 
-(defun variable-value (var) (variable-expression var))
+(defun variable-value (var) 
+  (let ((expr (variable-expression var)))
+    (if (and (listp expr) (bsdf-operation-p expr))
+	(bsdf-operation-value (first expr) (rest expr))
+	expr)))
+
 (defun variable-string (var) (cast-type (variable-value var) :string))
 
+;;
+;; Operations
+;;
+
+(defoperation ++ (args)
+  (:string)
+  ((apply #'concatenate 'string args)))
+
+(defoperation substring (args)
+  (:string)
+  ((dbind (string first &optional last) args
+     (when (< first 0) (setf first (+ (length string) first)))
+     (when (and last (< last 0)) (setf last (+ (length string) last 1)))
+     (subseq string first (or last (length string))))))

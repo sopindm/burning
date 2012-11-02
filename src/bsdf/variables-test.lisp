@@ -19,9 +19,9 @@
 (defmacro ?expr= ((expr type) value string &optional (test '?equal))
   (let ((var-sym (gensym)))
     `(let ((,var-sym (make-variable "var" ,expr :type ,type)))
-       (?condition-safe (?equal (variable-type ,var-sym) ,type))
-       (?condition-safe (,test (variable-value ,var-sym) ,value))
-       (?condition-safe (?equal (variable-string ,var-sym) ,string)))))
+       (?condition-safe (?equal (variable-type ,var-sym) ,type) bsdf-warning)
+       (?condition-safe (,test (variable-value ,var-sym) ,value) bsdf-warning)
+       (?condition-safe (?equal (variable-string ,var-sym) ,string) bsdf-warning))))
 
 (deftest defining-string-variables
   (?expr= ("123" :string) "123" "123")
@@ -127,10 +127,47 @@
   (?wrong-type :a (:enum :a :b 1 2 3))
   (?wrong-type nil (:bool 1)))
 
-;complex variable expressions (accessing and evaluating)
-;;for string or t variables
-;;for integer variables
-;;for list variables
-;;for path variables
-;;for enum variables???
-;;for boolean variables (and equality for other types)
+;string expressions
+
+(deftest simple-variable-expression
+  (?expr= ('(++ "abc" "def" "ghi") :string) "abcdefghi" "abcdefghi")
+  (?expr= ('(substring "abcdef" 1) :string) "bcdef" "bcdef")
+  (?expr= ('(substring "abcdef" 2 4) :string) "cd" "cd")
+  (?expr= ('(substring "abcdef" -2) :string) "ef" "ef")
+  (?expr= ('(substring "abcdef" -1) :string) "f" "f")
+  (?expr= ('(substring "abcdef" -3 -1) :string) "def" "def"))
+
+;wrong expression error
+;wrong type in expression error
+;wrong expression arguments error
+
+;int expressions
+;;+
+;;-
+;;*
+;;/
+;;mod
+
+;list expressions
+;;append
+;;first - fifth
+;;nth
+;;rest
+;;nth-cdr
+;;find
+;;remove
+;;remove-duplicates
+
+;path expressions
+;;path+
+;;path-
+;;as-absolute
+;;as-relative
+
+;bool expressions
+;;= (not for bools only)
+;;and
+;;or
+;;not
+
+;variables in expressions

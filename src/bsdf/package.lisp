@@ -59,7 +59,10 @@
 	   variable-visible-p
 
 	   variable-value
-	   variable-string))
+	   variable-string
+	   
+	   ++
+	   substring))
 
 (defpackage #:burning-bsdf-generator
   (:use #:burning-lisp #:burning-bsdf-targets #:burning-filesystem)

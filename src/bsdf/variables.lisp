@@ -26,20 +26,27 @@
 
 (defun bsdf-operation-p (symbol-or-expr)
   (let ((symbol (if (listp symbol-or-expr) (first symbol-or-expr) symbol-or-expr)))
-    (gethash symbol *operations*)))
+    (and (symbolp symbol) (not (typep symbol 'boolean)))))
 
 (defun set-operation (name)
   (setf (gethash name *operations*) t))
 
 (defgeneric bsdf-operation-type (operation args))
+
+(defmethod bsdf-operation-type (operation args)
+  (declare (ignore args))
+  (bsdf-compilation-error "Wrong BSDF operation ~a" operation))
+
 (defgeneric bsdf-operation-value (operation args))
 
-(defmacro defoperation (operation (args-sym) (&body type-method) (&body value-method))
+#|
+(defmacro defoperation (operation args type &body value-method)
   `(progn (set-operation ',operation)
 	  (defmethod bsdf-operation-type ((operation (eql ',operation)) ,args-sym)
-	    ,@type-method)
+	    ,type)
 	  (defmethod bsdf-operation-value ((operation (eql ',operation)) ,args-sym)
 	    ,@value-method)))
+|#
 
 ;;
 ;; Type generics and macro's
@@ -224,11 +231,13 @@
     (let ((real-type (bsdf-type-of expression)))
       (unless (equal real-type type) 
 	(setf expression (cast-type expression type real-type))))
-    (%make-variable :name name
-		    :type type
-		    :expression expression
-		    :description description
-		    :visible-p visible-p)))
+    (let ((var (%make-variable :name name
+			       :type type
+			       :expression expression
+			       :description description
+			       :visible-p visible-p)))
+      (variable-value var)
+      var)))
 
 (defun variable-value (var) 
   (let ((expr (variable-expression var)))
@@ -242,13 +251,35 @@
 ;; Operations
 ;;
 
-(defoperation ++ (args)
-  (:string)
-  ((apply #'concatenate 'string args)))
+(defmacro defoperation (name args type-specs &body body)
+  (let ((args-sym (gensym)))
+    (labels ((var-handler (var)
+	       `(lambda (err)
+		  (setf (bsdf-condition-format-control err)
+			(lines* (format nil "In argument '~a' of '~a':" ',var ',name)
+				(bsdf-condition-format-control err)))
+		  err))
+	     (cast-expr (spec)
+	       (dbind (var type) spec
+		 `(,var (handler-bind ((bsdf-compilation-error ,(var-handler var)))
+			  (cast-type ,var ',type))))))
+      `(progn (set-operation ',name)
+	      (defmethod bsdf-operation-type ((operation (eql ',name)) ,args-sym)
+		(declare (ignore ,args-sym))
+		',(first type-specs))
+	      (defmethod bsdf-operation-value ((operation (eql ',name)) ,args-sym)
+		(dbind ,args ,args-sym
+		  (let (,@(mapcar #'cast-expr (rest type-specs)))
+		    (cast-type (progn ,@body) ',(first type-specs)))))))))
 
-(defoperation substring (args)
-  (:string)
-  ((dbind (string first &optional last) args
-     (when (< first 0) (setf first (+ (length string) first)))
-     (when (and last (< last 0)) (setf last (+ (length string) last 1)))
-     (subseq string first (or last (length string))))))
+(defoperation ++ (&rest args)
+    (:string (args (:list :string)))
+  (apply #'concatenate 'string args))
+
+(defoperation substring (string first &optional (last (length string)))
+    (:string (string :string) (first :int) (last :int))
+  (when (< first 0) (setf first (+ (length string) first)))
+  (when (< last 0) (setf last (+ (length string) last 1)))
+  (when (or (> last (length string)) (> first last))
+    (bsdf-compilation-error "Bad interval [~a, ~a) for string '~a'" first last string))
+  (subseq string first last))

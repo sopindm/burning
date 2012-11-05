@@ -283,3 +283,21 @@
   (when (or (> last (length string)) (> first last))
     (bsdf-compilation-error "Bad interval [~a, ~a) for string '~a'" first last string))
   (subseq string first last))
+
+(defoperation + (&rest args)
+    (:int (args (:list :int)))
+  (apply #'+ args))
+
+(defoperation - (number &rest numbers)
+    (:int (number :int) (numbers (:list :int)))
+  (apply #'- number numbers))
+
+(defoperation * (&rest args)
+    (:int (args (:list :int)))
+  (apply #'* args))
+
+(defoperation / (number &rest numbers)
+    (:int (number :int) (numbers (:list :int)))
+  (when (some (lambda (x) (= x 0)) numbers)
+    (bsdf-compilation-error "Division by zero in (/ ~a ~{~a~^ ~})" number numbers))
+  (floor (apply #'/ number numbers)))

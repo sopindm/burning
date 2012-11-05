@@ -162,16 +162,48 @@
   (?wrong-expr (substring "abc" 0 10) "Bad interval [0, 10) for string 'abc'")
   (?wrong-expr (substring "abc" 2 1) "Bad interval [2, 1) for string 'abc'"))
 
+(deftest +-expression-test
+  (?expr= ('(+ 1 2) :int) 3 "3")
+  (?expr= ('(+ 1 2 3) :int) 6 "6")
+  (?expr= ('(+) :int) 0 "0")
+  (?wrong-expr-arg (+ 1 "a") args (wrong-cast-message '(1 "a") :LIST '(:LIST :INT))))
+
+(deftest --expression-test
+  (?expr= ('(- 2 1) :int) 1 "1")
+  (?expr= ('(- 2) :int) -2 "-2")
+  (?wrong-expr-arg (- "a" 1) number (wrong-cast-message "a" :STRING :INT))
+  (?wrong-expr-arg (- 1 "a") numbers (wrong-cast-message '("a") '(:LIST :STRING) '(:LIST :INT))))
+
+(deftest *-expression-test
+  (?expr= ('(* 2 3) :int) 6 "6")
+  (?expr= ('(* 2 3 4) :int) 24 "24")
+  (?expr= ('(*) :int) 1 "1")
+  (?wrong-expr-arg (* 1 "a") args (wrong-cast-message '(1 "a") :LIST '(:LIST :INT))))
+
+(deftest /-expression-test
+  (?expr= ('(/ 1 2) :int) 0 "0")
+  (?expr= ('(/ 8 2) :int) 4 "4")
+  (?expr= ('(/ 32 3 2) :int) 5 "5")
+  (?wrong-expr-arg (/ "a" 1) number (wrong-cast-message "a" :STRING :INT))
+  (?wrong-expr-arg (/ 1 2 "a") numbers (wrong-cast-message '(2 "a") :LIST '(:LIST :INT)))
+  (?wrong-expr (/ 1 0) "Division by zero in (/ 1 0)"))
+
+(deftest mod-expression-test
+  (?expr= ('(mod 2 2) :int) 0 "0")
+  (?expr= ('(mod 10 4) :int) 2 "2")
+  (?expr= ('(mod 7 1) :int) 0 "0")
+  (?wrong-expr-arg (mod "a" 1) number (wrong-cast-message "a" :STRING :INT))
+  (?wrong-expr-arg (mod 1 "a") divisor (wrong-cast-message "a" :STRING :INT))
+  (?wrong-expr (mod 1 0) "Division by zero in (mod 1 0)"))
+
 ;int expressions (eval, error checking)
-;;+
-;;-
-;;*
-;;/
 ;;mod
 
 ;list expressions
+;;cons
+;;cons-back
 ;;append
-;;first - fifth
+;;first - tenth
 ;;nth
 ;;rest
 ;;nth-cdr
@@ -184,6 +216,7 @@
 ;;path-
 ;;as-absolute
 ;;as-relative
+;;copy-path
 
 ;bool expressions
 ;;= (not for bools only)

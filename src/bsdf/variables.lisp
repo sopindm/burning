@@ -66,8 +66,8 @@
 (defun cast-type (value dest-type &optional (type (bsdf-type-of value)))
   (cond ((eq dest-type t) value)
 	((equal dest-type type) value)
-	((eq type t) (cast-type value dest-type))
 	((bsdf-operation-p value) `(cast ,value ,dest-type))
+	((eq type t) (cast-type value dest-type))
 	(t (let ((type (if (listp type) (first type) type))
 		 (type-args (if (listp type) (rest type)))
 		 (dest-type (if (listp dest-type) (first dest-type) dest-type))
@@ -160,8 +160,9 @@
 (defcast (:int args) (:int dest-args) (value)
   (declare (ignore args))
   (if (and dest-args
-	   (dbind (max &optional (min 0)) (reverse dest-args)
-	     (or (< value min) (> value max))))
+	   (dbind (min &optional (max '*)) dest-args
+	     (or (and (not (eq min '*)) (< value min)) 
+		 (and (not (eq max '*)) (> value max)))))
       (call-next-method)
       value))
 
@@ -323,3 +324,25 @@
     (:list (list :list))
   (cons item list))
 
+(defoperation append (&rest lists)
+    (:list)
+  (apply #'append 
+	 (mapcar (lambda (x) (if (listp x) x (list x))) lists)))
+
+(defmacro def-nth (n)
+  (let ((name (intern (string-upcase (format nil "~:r" n)))))
+    `(defoperation ,name (list)
+	 (t (list :list))
+       (,name list))))
+
+(defmacro def-nths (max)
+  `(progn ,@(do ((n 1 (1+ n))
+		 (specs ()))
+		((> n max) (reverse specs))
+		(push `(def-nth ,n) specs))))
+
+(def-nths 10)
+
+(defoperation nth (index list)
+    (t (index (:int 0)) (list :list))
+  (nth index list))

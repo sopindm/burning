@@ -51,11 +51,12 @@
 (deftest making-integers-with-boundaries
   (?expr= (123 '(:int -100 123)) 123 "123")
   (?expr= (-200 '(:int -200 -200)) -200 "-200")
-  (?expr= (10 '(:int 100)) 10 "10")
+  (?expr= (10 '(:int 0)) 10 "10")
+  (?expr= (10 '(:int * 100)) 10 "10")
   (?wrong-cast 123 :int '(:int 0 100))
   (?wrong-cast -201 :int '(:int -200 0))
-  (?wrong-cast 100 :int '(:int 99))
-  (?wrong-cast -1 :int '(:int 100)))
+  (?wrong-cast 98 :int '(:int 99))
+  (?wrong-cast 101 :int '(:int * 100)))
 
 (deftest making-bool-variables
   (?expr= (nil :bool) nil "()")
@@ -207,10 +208,24 @@
   (?wrong-expr (cons 1 2 3) "Too much arguments for lambda list ~a in ~a." '(item list) '(1 2 3))
   (?wrong-expr (cons 1) "Not enought arguments for lambda list ~a in ~a." '(item list) '(1)))
 
+(deftest append-test
+  (?expr= ('(append (1 2) (3 4)) '(:list :int)) '(1 2 3 4) "(1 2 3 4)")
+  (?expr= ('(append (1 "2") (3 4) (5 "6")) :list) '(1 "2" 3 4 5 "6") "(1 2 3 4 5 6)")
+  (?expr= ('(append (:a :b :c)) '(:list (:enum :a :b :c))) '(:a :b :c) "(A B C)")
+  (?expr= ('(append) :list) () "()")
+  (?expr= ('(append :a :b :c (1 2 3) 4 5 (6 7)) :list) '(:a :b :c 1 2 3 4 5 6 7) "(A B C 1 2 3 4 5 6 7)"))
+
+(deftest fifth-test
+  (?expr= ('(fifth (1 "a" 2 :b 3)) :int) 3 "3")
+  (?wrong-expr-arg (fifth "abc") list (wrong-cast-message "abc" :STRING :LIST)))
+
+(deftest nth-test
+  (?expr= ('(nth "2" (1 2 3)) :int) 3 "3")
+  (?wrong-expr-arg (nth 0 123) list (wrong-cast-message 123 :INT :LIST))
+  (?wrong-expr-arg (nth "a" (1 2 3)) index (wrong-cast-message "a" :STRING '(:INT 0)))
+  (?wrong-expr-arg (nth -1 (1 2 3)) index (wrong-cast-message -1 :INT '(:INT 0))))
+
 ;list expressions
-;;append
-;;first - tenth
-;;nth
 ;;rest
 ;;nth-cdr
 ;;find

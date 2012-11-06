@@ -162,6 +162,8 @@
   (?wrong-expr (substring "abc" 0 10) "Bad interval [0, 10) for string 'abc'")
   (?wrong-expr (substring "abc" 2 1) "Bad interval [2, 1) for string 'abc'"))
 
+;wrong arguments count !!!
+
 (deftest +-expression-test
   (?expr= ('(+ 1 2) :int) 3 "3")
   (?expr= ('(+ 1 2 3) :int) 6 "6")
@@ -196,12 +198,16 @@
   (?wrong-expr-arg (mod 1 "a") divisor (wrong-cast-message "a" :STRING :INT))
   (?wrong-expr (mod 1 0) "Division by zero in (mod 1 0)"))
 
-;int expressions (eval, error checking)
-;;mod
+(deftest cons-expression-test
+  (?expr= ('(cons 1 nil) '(:list :int)) '(1) "(1)")
+  (?expr= ('(cons nil (1 2 3)) :list) '(nil 1 2 3) "(NIL 1 2 3)")
+  (?wrong-expr-arg (cons 1 2) list (wrong-cast-message 2 :INT :LIST)))
+
+(deftest wrong-arguments-count
+  (?wrong-expr (cons 1 2 3) "Too much arguments for lambda list ~a in ~a." '(item list) '(1 2 3))
+  (?wrong-expr (cons 1) "Not enought arguments for lambda list ~a in ~a." '(item list) '(1)))
 
 ;list expressions
-;;cons
-;;cons-back
 ;;append
 ;;first - tenth
 ;;nth

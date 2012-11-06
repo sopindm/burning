@@ -26,7 +26,8 @@
 
 (defun bsdf-operation-p (symbol-or-expr)
   (let ((symbol (if (listp symbol-or-expr) (first symbol-or-expr) symbol-or-expr)))
-    (and (symbolp symbol) (not (typep symbol 'boolean)))))
+    (and (symbolp symbol) (not (typep symbol 'boolean)) 
+	 (not (eq (symbol-package symbol) (find-package "KEYWORD"))))))
 
 (defun set-operation (name)
   (setf (gethash name *operations*) t))
@@ -38,15 +39,6 @@
   (bsdf-compilation-error "Wrong BSDF operation ~a" operation))
 
 (defgeneric bsdf-operation-value (operation args))
-
-#|
-(defmacro defoperation (operation args type &body value-method)
-  `(progn (set-operation ',operation)
-	  (defmethod bsdf-operation-type ((operation (eql ',operation)) ,args-sym)
-	    ,type)
-	  (defmethod bsdf-operation-value ((operation (eql ',operation)) ,args-sym)
-	    ,@value-method)))
-|#
 
 ;;
 ;; Type generics and macro's
@@ -75,6 +67,7 @@
   (cond ((eq dest-type t) value)
 	((equal dest-type type) value)
 	((eq type t) (cast-type value dest-type))
+	((bsdf-operation-p value) `(cast ,value ,dest-type))
 	(t (let ((type (if (listp type) (first type) type))
 		 (type-args (if (listp type) (rest type)))
 		 (dest-type (if (listp dest-type) (first dest-type) dest-type))
@@ -240,16 +233,27 @@
       var)))
 
 (defun variable-value (var) 
-  (let ((expr (variable-expression var)))
-    (if (and (listp expr) (bsdf-operation-p expr))
-	(bsdf-operation-value (first expr) (rest expr))
-	expr)))
+  (labels ((expr-value (expr)
+	     (if (and (listp expr) (bsdf-operation-p expr))
+		 (bsdf-operation-value (first expr) (mapcar #'expr-value (rest expr)))
+		 expr)))
+    (let ((expr (variable-expression var)))
+      (if (listp expr) 
+	  (expr-value expr)
+	  expr))))
 
 (defun variable-string (var) (cast-type (variable-value var) :string))
 
 ;;
 ;; Operations
 ;;
+
+(defun try-bind (lambda-list args)
+  (handler-bind ((simple-error (lambda (err)
+				 (let ((control (simple-condition-format-control err))
+				       (args (simple-condition-format-arguments err)))
+				   (change-class err 'bsdf-compilation-error :args args :control control)))))
+    (bind-lambda-list lambda-list args)))
 
 (defmacro defoperation (name args type-specs &body body)
   (let ((args-sym (gensym)))
@@ -265,12 +269,19 @@
 			  (cast-type ,var ',type))))))
       `(progn (set-operation ',name)
 	      (defmethod bsdf-operation-type ((operation (eql ',name)) ,args-sym)
-		(declare (ignore ,args-sym))
-		',(first type-specs))
+		(try-bind ',args ,args-sym)
+		(dbind ,args ,args-sym
+		  (declare (ignorable ,@(lambda-list-arguments args)))
+		  ,(first type-specs)))
 	      (defmethod bsdf-operation-value ((operation (eql ',name)) ,args-sym)
+		(try-bind ',args ,args-sym)
 		(dbind ,args ,args-sym
 		  (let (,@(mapcar #'cast-expr (rest type-specs)))
-		    (cast-type (progn ,@body) ',(first type-specs)))))))))
+		    (cast-type (progn ,@body) (bsdf-operation-type ',name ,args-sym)))))))))
+
+(defoperation cast (value type)
+    (type)
+  (cast-type value type))
 
 (defoperation ++ (&rest args)
     (:string (args (:list :string)))
@@ -301,3 +312,14 @@
   (when (some (lambda (x) (= x 0)) numbers)
     (bsdf-compilation-error "Division by zero in (/ ~a ~{~a~^ ~})" number numbers))
   (floor (apply #'/ number numbers)))
+
+(defoperation mod (number divisor)
+    (:int (number :int) (divisor :int))
+  (when (= 0 divisor)
+    (bsdf-compilation-error "Division by zero in (mod ~a ~a)" number divisor))
+  (mod number divisor))
+
+(defoperation cons (item list)
+    (:list (list :list))
+  (cons item list))
+

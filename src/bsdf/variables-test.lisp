@@ -225,12 +225,16 @@
   (?wrong-expr-arg (nth "a" (1 2 3)) index (wrong-cast-message "a" :STRING '(:INT 0)))
   (?wrong-expr-arg (nth -1 (1 2 3)) index (wrong-cast-message -1 :INT '(:INT 0))))
 
-;list expressions
-;;rest
-;;nth-cdr
-;;find
-;;remove
-;;remove-duplicates
+(deftest remove-test
+  (?expr= ('(remove "123" (123 "123" :123)) :list) '(123 :123) "(123 123)")
+  (?expr= ('(remove 456 (123 (cons 789 nil))) :list) '(123 (789)) "(123 (789))")
+  (?expr= ('(remove (123 456) (123 456 (123 456))) :list) '(123 456) "(123 456)")
+  (?wrong-expr-arg (remove 123 456) list (wrong-cast-message 456 :INT :LIST)))
+
+(deftest remove-duplicates-test
+  (?expr= ('(remove-duplicates (123 "123" (123 456) :123 (123 456) "123" :123 123)) :list)
+	  '(123 "123" (123 456) :123) "(123 123 (123 456) 123)")
+  (?wrong-expr-arg (remove-duplicates 123) list (wrong-cast-message 123 :INT :LIST)))
 
 ;path expressions
 ;;path+

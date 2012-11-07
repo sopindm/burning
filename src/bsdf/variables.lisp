@@ -235,8 +235,10 @@
 
 (defun variable-value (var) 
   (labels ((expr-value (expr)
-	     (if (and (listp expr) (bsdf-operation-p expr))
-		 (bsdf-operation-value (first expr) (mapcar #'expr-value (rest expr)))
+	     (if (listp expr)
+		 (if (bsdf-operation-p expr)
+		     (bsdf-operation-value (first expr) (mapcar #'expr-value (rest expr)))
+		     (mapcar #'expr-value expr))
 		 expr)))
     (let ((expr (variable-expression var)))
       (if (listp expr) 
@@ -283,6 +285,10 @@
 (defoperation cast (value type)
     (type)
   (cast-type value type))
+
+(defoperation quote (item)
+    (t)
+  item)
 
 (defoperation ++ (&rest args)
     (:string (args (:list :string)))
@@ -346,3 +352,15 @@
 (defoperation nth (index list)
     (t (index (:int 0)) (list :list))
   (nth index list))
+
+(defoperation remove (item list)
+    (:list (list :list))
+  (remove item list :test #'equal))
+
+(defoperation remove-duplicates (list)
+    (:list (list :list))
+  (labels ((do-remove (list)
+	     (if (null list) nil
+		 (cons (first list)
+		       (do-remove (remove (first list) (rest list) :test #'equal))))))
+    (do-remove list)))

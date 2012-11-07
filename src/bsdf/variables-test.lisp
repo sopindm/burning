@@ -163,8 +163,6 @@
   (?wrong-expr (substring "abc" 0 10) "Bad interval [0, 10) for string 'abc'")
   (?wrong-expr (substring "abc" 2 1) "Bad interval [2, 1) for string 'abc'"))
 
-;wrong arguments count !!!
-
 (deftest +-expression-test
   (?expr= ('(+ 1 2) :int) 3 "3")
   (?expr= ('(+ 1 2 3) :int) 6 "6")
@@ -236,17 +234,51 @@
 	  '(123 "123" (123 456) :123) "(123 123 (123 456) 123)")
   (?wrong-expr-arg (remove-duplicates 123) list (wrong-cast-message 123 :INT :LIST)))
 
-;path expressions
-;;path+
-;;path-
-;;as-absolute
-;;as-relative
-;;copy-path
+(defmacro def-path-test (name &body body)
+  `(deftest ,name 
+     (let ((*default-filesystem* (make-virtual-filesystem)))
+       ,@body)))
 
+(def-path-test parent-path-expression
+  (?expr= ('(parent-path "/home/a.file") :string) "/home/" "/home/")
+  (?wrong-expr-arg (parent-path 123) path (wrong-cast-message 123 :INT :PATH)))
+
+(def-path-test directory-path-exression
+  (?expr= ('(directory-path "/home/a.file") :string) "/home/" "/home/")
+  (?expr= ('(directory-path "/home/a.dir/") :string) "/home/a.dir/" "/home/a.dir/"))
+
+(def-path-test root-path-expression-test
+  (?expr= ('(root-path "/home/a.file") :string) "/" "/")
+  (?expr= ('(root-path "home/a.file") :string) "" ""))
+
+(def-path-test path+-expression-test
+  (?expr= ('(path+ "/home/" "a.file") :string) "/home/a.file" "/home/a.file")
+  (?wrong-expr-arg (path+ "/home/" 123) paths (wrong-cast-message '("/home/" 123) ':LIST '(:LIST :PATH))))
+
+(def-path-test as-absolute-test
+  (?expr= ('(as-absolute "a.file") :string) "/work/a.file" "/work/a.file")
+  (?wrong-expr-arg (as-absolute 123) path (wrong-cast-message 123 :INT :PATH)))
+
+(def-path-test as-relative-test
+  (?expr= ('(as-relative "/home/a.dir/a.file" "/home/b.dir/") :string) "../a.dir/a.file" "../a.dir/a.file"))
+
+(def-path-test copy-path-test
+  (?expr= ('(copy-path "/home/a.file" :new-name "other") :string) "/home/other.file" "/home/other.file")
+  (?expr= ('(copy-path "/home/new.file" :new-type "dir") :string) "/home/new.dir" "/home/new.dir")
+  (?expr= ('(copy-path "a.file" :new-name 123) :string) "123.file" "123.file"))
+  
 ;bool expressions
-;;= (not for bools only)
 ;;and
 ;;or
 ;;not
 
 ;variables in expressions
+
+;predicates
+;;= (not for bools only)
+;;???
+
+;conditionals
+;;if
+;;cond???
+

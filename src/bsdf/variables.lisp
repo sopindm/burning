@@ -364,3 +364,34 @@
 		 (cons (first list)
 		       (do-remove (remove (first list) (rest list) :test #'equal))))))
     (do-remove list)))
+
+(defoperation parent-path (path)
+    (:path (path :path))
+  (parent-path path))
+
+(defoperation directory-path (path)
+    (:path (path :path))
+  (copy-path path :new-filename nil))
+
+(defoperation root-path (path)
+    (:path (path :path))
+  (root-path path))
+
+(defoperation path+ (&rest paths)
+    (:path (paths (:list :path)))
+  (apply #'path+ paths))
+
+(defoperation as-absolute (path)
+    (:path (path :path))
+  (as-absolute-path path))
+
+(defoperation as-relative (path base-path)
+    (:path (path :path) (base-path :path))
+  (as-relative-path path base-path))
+
+(defoperation copy-path (path 
+			 &key (new-name (path-name path) new-name-p) (new-type (path-type path) new-type-p))
+    (:path (path :path) (new-name :string) (new-type :string))
+  (apply #'copy-path path
+	 (append (when new-name-p (list :new-name new-name))
+		 (when new-type-p (list :new-type new-type)))))

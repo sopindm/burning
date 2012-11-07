@@ -62,7 +62,12 @@
 	   variable-string
 	   
 	   ++
-	   substring))
+	   substring
+
+	   as-absolute
+	   as-relative
+
+	   directory-path))
 
 (defpackage #:burning-bsdf-generator
   (:use #:burning-lisp #:burning-bsdf-targets #:burning-filesystem)

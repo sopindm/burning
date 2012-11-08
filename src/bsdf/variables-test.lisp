@@ -266,13 +266,26 @@
   (?expr= ('(copy-path "/home/a.file" :new-name "other") :string) "/home/other.file" "/home/other.file")
   (?expr= ('(copy-path "/home/new.file" :new-type "dir") :string) "/home/new.dir" "/home/new.dir")
   (?expr= ('(copy-path "a.file" :new-name 123) :string) "123.file" "123.file"))
-  
+
+(defoperation-macro ct-eval (operation &rest args)
+  (expression-value (cons operation args)))
+
+(defoperation-macro ct-! (n)
+  (if (= n 0) 1
+      `(* ,n (ct-! ,(1- n)))))
+
+(deftest compile-time-evaluation-test
+  (let ((var (make-variable "var" '(ct-eval + 1 2 3))))
+    (?equal (variable-expression var) 6))
+  (let ((var (make-variable "var" '(first (ct-eval append (1 2 3) (4 5 6))))))
+    (?equal (variable-expression var) '(first (1 2 3 4 5 6))))
+  (let ((var (make-variable "Var" '(ct-! 5))))
+    (?equal (variable-expression var) '(* 5 (* 4 (* 3 (* 2 (* 1 1))))))))
+
 ;bool expressions
 ;;and
 ;;or
 ;;not
-
-;variables in expressions
 
 ;predicates
 ;;= (not for bools only)

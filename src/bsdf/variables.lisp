@@ -32,6 +32,17 @@
 (defun set-operation (name)
   (setf (gethash name *operations*) t))
 
+(defgeneric bsdf-operation-expansion (operation args))
+(defmethod bsdf-operation-expansion (operation args)
+  (values (cons operation (mapcar #'expand-expression args)) t))
+
+(defun expand-expression (expr)
+  (if (and expr (listp expr))
+      (multiple-value-bind (value last-p) (bsdf-operation-expansion (first expr) (rest expr))
+	(if last-p value
+	    (expand-expression value)))
+      expr))
+
 (defgeneric bsdf-operation-type (operation args))
 
 (defmethod bsdf-operation-type (operation args)
@@ -222,6 +233,7 @@
 						 (cons name (bsdf-condition-format-args err))))))
     (unless (apply #'bsdf-type-p (if (listp type) type (list type)))
       (bsdf-compilation-error "Wrong BSDF type ~a" type))
+    (setf expression (expand-expression expression))
     (let ((real-type (bsdf-type-of expression)))
       (unless (equal real-type type) 
 	(setf expression (cast-type expression type real-type))))
@@ -233,17 +245,15 @@
       (variable-value var)
       var)))
 
+(defun expression-value (expr)
+  (if (listp expr)
+      (if (bsdf-operation-p expr)
+	  (bsdf-operation-value (first expr) (mapcar #'expression-value (rest expr)))
+	  (mapcar #'expression-value expr))
+      expr))
+
 (defun variable-value (var) 
-  (labels ((expr-value (expr)
-	     (if (listp expr)
-		 (if (bsdf-operation-p expr)
-		     (bsdf-operation-value (first expr) (mapcar #'expr-value (rest expr)))
-		     (mapcar #'expr-value expr))
-		 expr)))
-    (let ((expr (variable-expression var)))
-      (if (listp expr) 
-	  (expr-value expr)
-	  expr))))
+  (expression-value (variable-expression var)))
 
 (defun variable-string (var) (cast-type (variable-value var) :string))
 
@@ -281,6 +291,14 @@
 		(dbind ,args ,args-sym
 		  (let (,@(mapcar #'cast-expr (rest type-specs)))
 		    (cast-type (progn ,@body) (bsdf-operation-type ',name ,args-sym)))))))))
+
+(defmacro defoperation-macro (name args &body body)
+  (let ((args-sym (gensym)))
+    `(progn (set-operation ',name)
+	    (defmethod bsdf-operation-expansion ((operation (eql ',name)) ,args-sym)
+	      (try-bind ',args ,args-sym)
+	      (dbind ,args ,args-sym
+		,@body)))))
 
 (defoperation cast (value type)
     (type)

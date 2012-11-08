@@ -61,13 +61,18 @@
 	   variable-value
 	   variable-string
 	   
+	   expression-value
+
 	   ++
 	   substring
 
 	   as-absolute
 	   as-relative
 
-	   directory-path))
+	   directory-path
+	   
+	   defoperation
+	   defoperation-macro))
 
 (defpackage #:burning-bsdf-generator
   (:use #:burning-lisp #:burning-bsdf-targets #:burning-filesystem)

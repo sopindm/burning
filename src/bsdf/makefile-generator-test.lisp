@@ -25,13 +25,14 @@
 		 "")))
 
 ;change multiple output behavior
-;temp names generation
-
 (def-makefile-test generating-targets-with-multiple-input-and-output
-  (deftarget nil nil ("input1" "input2" "input3") "output1 output2 output3")
+  (deftarget nil nil ("input1" "input2" "input3") ("output1" "output2" "output3"))
   (generate-file)
   (?equal (read-file "Makefile")
-	  (lines "output1 output2 output3: input1 input2 input3" "")))
+	  (lines ".PHONY: __output1\ output2\ output3"
+		 "__output1\ output2\ output3: input1 input2 input3" 
+		 "output1 output2 output3: __output1\ output2\ output3"
+		 "")))
 
 (defmacro without-warnings (&body forms)
   `(handler-bind ((warning #'muffle-warning))
@@ -54,24 +55,24 @@
     (deftarget "target" (echo "more") nil ("out1" "out2") ("t1" "t2")))
   (generate-file)
   (?equal (read-file "Makefile")
-	  (lines "out1 out2: "
+	  (lines ".PHONY: target"
+		 "target: "
 		 (format nil "~c@echo 'more'" #\Tab)
 		 ""
+		 "out1 out2: target"
 		 "out1 out2: t1 t2"
-		 ".PHONY: target"
-		 "target: out1 out2"
 		 "")))
 
 (def-makefile-test generating-targets-with-name-input-and-output
   (deftarget "target" (echo "and more") ("in1" "in2" "in3") ("out1" "out2") ("t1" "t2" "t4"))
   (generate-file)
   (?equal (read-file "Makefile")
-	  (lines "out1 out2: in1 in2 in3"
+	  (lines ".PHONY: target"
+		 "target: in1 in2 in3"
 		 (format nil "~c@echo 'and more'" #\Tab)
 		 ""
+		 "out1 out2: target"
 		 "out1 out2: t1 t2 t4"
-		 ".PHONY: target"
-		 "target: out1 out2"
 		 "")))
 
 (def-makefile-test generating-serveral-files 
@@ -79,10 +80,12 @@
   (deftarget "tt" nil ("out1" "out2") "total")
   (generate-file)
   (?equal (read-file "Makefile")
-	  (lines "out1 out2: in1 in2 in3"
-		 "total: out1 out2"
+	  (lines ".PHONY: __out1 out2"
+		 "__out1 out2: in1 in2 in3"
+		 "out1 out2: __out1 out2"
 		 ".PHONY: tt"
-		 "tt: total"
+		 "tt: out1 out2"
+		 "total: tt"
 		 "")))
 
 (def-makefile-test generating-makefile-from-file
@@ -95,19 +98,20 @@
 		 "target1: "
 		 (format nil "~c@echo '2+2 is 4'" #\Tab)
 		 ""
-		 "out1 out2: in1 in2"
 		 ".PHONY: target2"
-		 "target2: out1 out2"
+		 "target2: in1 in2"
+		 "out1 out2: target2"
 		 "")))
 
 ;compilation errors with source line
     
 (def-makefile-test generating-with-output-directory
   (deftarget nil nil ("in1" "in2") ("out1" "out2"))
-  (generate-file :path "other.file")
+  (let ((*context* (copy-context)))
+    (generate-file :path "other.file"))
   (make-directory "a.dir/")
   (generate-file :path "a.dir/")
-  (let ((text (lines "out1 out2: in1 in2" "")))
+  (let ((text (lines ".PHONY: __out1 out2"  "__out1 out2: in1 in2" "out1 out2: __out1 out2" "")))
     (?equal (read-file "Makefile") text)
     (?equal (read-file "a.dir/Makefile") text)))
 

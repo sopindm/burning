@@ -1,4 +1,4 @@
-(in-package #:burning-bsdf-generator)
+(in-package #:bsdf-generator)
 
 ;;
 ;; Makefile target structure

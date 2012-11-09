@@ -1,4 +1,4 @@
-(defpackage #:burning-bsdf-errors
+(defpackage #:bsdf-errors
   (:use #:burning-lisp)
   (:export bsdf-condition
 	   bsdf-condition-message
@@ -14,41 +14,8 @@
 
 	   bsdf-compilation-warn))
 
-(defpackage #:burning-bsdf-targets
-  (:use #:burning-lisp #:burning-bsdf-errors #:alexandria)
-  (:export deftarget
-	   make-target
-	   target-name
-	   target-command
-	   target-input
-	   target-output
-	   target-depends-on
-	   target-print-name
-
-	   file-target
-	   file-depends
-
-	   get-target
-	   set-target
-
-	   add-input
-	   add-output
-	   add-dependency
-
-	   get-file
-
-	   get-targets
-
-	   *targets*
-	   copy-targets-table
-
-	   get-depends
-
-	   map-depends
-	   mapc-depends))
-
-(defpackage #:burning-bsdf-variables
-  (:use #:burning-lisp #:burning-bsdf-errors #:burning-filesystem #:alexandria)
+(defpackage #:bsdf-variables
+  (:use #:burning-lisp #:bsdf-errors #:burning-filesystem #:alexandria)
   (:shadowing-import-from #:burning-filesystem #:copy-file)
   (:export variable
 	   make-variable
@@ -74,8 +41,48 @@
 	   defoperation
 	   defoperation-macro))
 
-(defpackage #:burning-bsdf-generator
-  (:use #:burning-lisp #:burning-bsdf-targets #:burning-filesystem)
+(defpackage #:bsdf-targets
+  (:use #:burning-lisp #:bsdf-errors #:alexandria #:bsdf-variables)
+  (:export deftarget
+	   make-target
+	   target-name
+	   target-command
+	   target-input
+	   target-output
+	   target-depends-on
+	   target-print-name
+
+	   file-target
+	   file-depends
+
+	   get-target
+	   set-target
+
+	   get-variable
+	   set-variable
+	   defvariable
+
+	   gen-tmp-name
+	   free-tmp-name
+
+	   add-input
+	   add-output
+	   add-dependency
+
+	   get-file
+
+	   get-targets
+
+	   *context*
+	   copy-context
+
+	   get-depends
+
+	   map-depends
+	   mapc-depends))
+
+(defpackage #:bsdf-generator
+  (:use #:burning-lisp #:bsdf-targets #:burning-filesystem)
   (:export *bsdf-generator*
 
 	   define-generator
@@ -103,14 +110,14 @@
 	   echo
 	   echo-command))
 
-(burning-lisp:define-merged-package #:burning-bsdf 
-  #:burning-bsdf-errors
-  #:burning-bsdf-targets
-  #:burning-bsdf-generator
-  #:burning-bsdf-variables)
+(burning-lisp:define-merged-package #:bsdf 
+  #:bsdf-errors
+  #:bsdf-targets
+  #:bsdf-generator
+  #:bsdf-variables)
 
-(defpackage #:burning-bsdf-user
-  (:use #:burning-lisp #:burning-filesystem #:burning-bsdf))
+(defpackage #:bsdf-user
+  (:use #:burning-lisp #:burning-filesystem #:bsdf))
 
 
 	   

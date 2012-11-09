@@ -1,10 +1,10 @@
-(in-package #:burning-bsdf-test)
+(in-package #:bsdf-test)
 
 (in-case makefile-generation-tests)
 
 (defmacro def-makefile-test (name &body body)
   `(deftest ,name
-     (let ((*targets* (copy-targets-table))
+     (let ((*context* (copy-context))
 	   (*bsdf-generator* 'makefile)
 	   (*default-filesystem* (make-virtual-filesystem)))
        ,@body)))
@@ -23,6 +23,9 @@
 		 "target: "
 		 (format nil "~c@echo 'Hello, world!!!'" #\Tab)
 		 "")))
+
+;change multiple output behavior
+;temp names generation
 
 (def-makefile-test generating-targets-with-multiple-input-and-output
   (deftarget nil nil ("input1" "input2" "input3") "output1 output2 output3")

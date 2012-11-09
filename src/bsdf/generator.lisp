@@ -1,4 +1,4 @@
-(in-package #:burning-bsdf-generator)
+(in-package #:bsdf-generator)
 
 (defvar *bsdf-generator* 'bsc)
 
@@ -55,8 +55,8 @@
       (generator-close-context generator context))))
 
 (defun generate-from-file (path &key (generator nil generator-p)  (output-path nil output-p))
-  (let ((*targets* (copy-targets-table))
-	(*package* (find-package '#:burning-bsdf-user)))
+  (let ((*context* (copy-context))
+	(*package* (find-package '#:bsdf-user)))
     (let ((exprs (make-double-list nil)))
       (with-open-file (input path :direction :input)
 	(do ((expr #1=(read input nil :eof) #1#))

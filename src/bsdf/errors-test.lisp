@@ -1,4 +1,4 @@
-(in-package #:burning-bsdf-test)
+(in-package #:bsdf-test)
 
 (defmacro ?bsdf-condition (expr message &optional (condition 'bsdf-condition))
   `(?condition ,expr, condition

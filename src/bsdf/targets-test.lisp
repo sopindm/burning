@@ -1,10 +1,10 @@
-(in-package #:burning-bsdf-test)
+(in-package #:bsdf-test)
 
 (in-case targets-test)
 
 (defmacro def-targets-test (name &body body)
   `(deftest ,name 
-     (let ((*targets* (copy-targets-table)))
+     (let ((*context* (copy-context)))
        ,@body)))
 
 (def-targets-test making-targets-test
@@ -85,18 +85,26 @@
   (let ((target (make-target #'identity :name "target")))
     (set-target target)
     (let ((target2 (make-target nil :name "target"))
-	  (target3 (make-target nil :output "target")))
+	  (target3 (make-target nil :output "target"))
+	  (target4 (make-target #'identity :name "other-target" :input "target")))
       (?bsdf-compilation-error (set-target target2)
 			       (lines "Target with name 'target' already exists"))
       (?bsdf-compilation-error (set-target target3)
+			       (lines "File name 'target' is already a target name"))
+      (?bsdf-compilation-error (set-target target4)
 			       (lines "File name 'target' is already a target name"))))
   (let ((target (make-target #'identity :output "file1")))
     (set-target target)
     (let ((target2 (make-target nil :output "file1" :input "no"))
-	  (target3 (make-target nil :name "file1")))
+	  (target3 (make-target nil :name "file1"))
+	  (target4 (make-target #'identity :name "new-target" :input "file2"))
+	  (target5 (make-target #'identity :name "file2")))
       (set-target target2)
       (?bsdf-compilation-error (set-target target3)
-			       (lines "Target name 'file1' is already a file name")))
+			       (lines "Target name 'file1' is already a file name"))
+      (set-target target4)
+      (?bsdf-compilation-error (set-target target5)
+			       (lines "Target name 'file2' is already a file name")))
     (?eq (get-target '("file1")) target))
   (let ((target1 (make-target nil :output "file" :input "no"))
 	(target2 (make-target #'identity :output "file")))
@@ -285,10 +293,70 @@
     (?equal (target-output target) '("output"))
     (?equal (target-depends-on target) '("target2"))))
 
-;accessing variables by name
-;name conficts for variables, files and targets
+(def-targets-test setting-and-accessing-variables
+  (let ((var (make-variable "var" 123)))
+    (set-variable var)
+    (?equal (get-variable "var") var)
+    (?equal (get-variable '|var|) var)
+    (?equal (get-variable '#:|var|) var))
+  (let ((var (make-variable '#:other-var 456)))
+    (set-variable var)
+    (?equal (get-variable "OTHER-VAR") var)))
 
-;using variables in target arguments
+(def-targets-test defining-variables
+  (defvariable var '(append 1 2 3)
+    :type (:list :int)
+    :description "simple integer variable"
+    :visible-p t)
+  (?equalp (get-variable "VAR")
+	   (make-variable 'var '(append 1 2 3)
+			  :type '(:list :int)
+			  :description "simple integer variable"
+			  :visible-p t)))
+
+(def-targets-test variables-name-conflicts
+  (deftarget "var" #'identity () ())
+  (?bsdf-compilation-error (set-variable (make-variable "var" 123))
+			   (lines "Variable name 'var' is already a target name"))
+  (deftarget nil #'identity "input" "output")
+  (?bsdf-compilation-error (set-variable (make-variable "output" 456))
+			   (lines "Variable name 'output' is already a file name"))
+  (defvariable "a-var" 123)
+  (?bsdf-compilation-error (set-variable (make-variable "a-var" 789))
+			   (lines "Variable with name 'a-var' already exists"))
+  (?bsdf-compilation-error (deftarget "a-var" #'identity () ())
+			   (lines "Target name 'a-var' is already a variable name"))
+  (?bsdf-compilation-error (deftarget nil #'identity "input" "a-var")
+			   (lines "File name 'a-var' is already a variable name")))
+
+(def-targets-test simple-generating-temporal-names
+  (let ((name (gen-tmp-name "name"))
+	(name2 (gen-tmp-name "name")))
+    (?equal name "__name")
+    (?equal name2 "__name_2"))
+  (deftarget "__name_3" #'identity nil nil)
+  (?equal (gen-tmp-name "name") "__name_4"))
+
+(def-targets-test freeing-tmp-names
+  (let ((name (gen-tmp-name "name"))
+	(name2 (gen-tmp-name "name")))
+    (free-tmp-name name2)
+    (?equal (gen-tmp-name "name") name2)
+    (free-tmp-name name)
+    (?equal (gen-tmp-name "name") name)))
+
+(def-targets-test temporal-names-callback
+  (let ((new-name nil))
+    (gen-tmp-name "name" (lambda (x) (setf new-name x)))
+    (defvariable "__name" 123)
+    (?equal new-name "__name_2")
+    (defvariable "__name_2" 234)
+    (?equal new-name "__name_3")
+    (defvariable "__name_4" 345)
+    (defvariable "__name_3" 234)
+    (?equal new-name "__name_5")))
+
+;getvar and $ operations
 
 ;;
 ;;targets hierarchy

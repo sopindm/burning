@@ -1,4 +1,4 @@
-(in-package #:burning-bsdf-variables)
+(in-package #:bsdf-variables)
 
 ;;
 ;; Aux structure macro's
@@ -225,6 +225,8 @@
 (defaccessors variable () (name expression type description visible-p))
 
 (defun make-variable (name expression &key (type t) (description "") (visible-p nil))
+  (unless (or (symbolp name) (stringp name))
+    (bsdf-compilation-error "Wrong variable name '~a'" name))
   (handler-bind ((bsdf-compilation-error (lambda (err) 
 					   (setf (bsdf-condition-format-control err)
 						 (lines* "In definition of variable '~a':"

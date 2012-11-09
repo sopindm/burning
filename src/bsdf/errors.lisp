@@ -1,4 +1,4 @@
-(in-package #:burning-bsdf-errors)
+(in-package #:bsdf-errors)
 
 (define-condition bsdf-condition ()
   ((control :initarg :control :accessor bsdf-condition-format-control)

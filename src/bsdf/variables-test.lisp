@@ -1,4 +1,4 @@
-(in-package #:burning-bsdf-test)
+(in-package #:bsdf-test)
 
 (in-case variables-test)
 
@@ -14,7 +14,11 @@
   (let ((var (make-variable "var3" "789" :visible-p t)))
     (?t (variable-visible-p var))))
 
-;variable name must me string or symbol
+(deftest wrong-variables-name-error
+  (make-variable "var" 1)
+  (make-variable 'var 2)
+  (?bsdf-compilation-error (make-variable 123 1)
+			   (lines "Wrong variable name '123'")))
 
 (defmacro ?expr= ((expr type) value string &optional (test '?equal))
   (let ((var-sym (gensym)))

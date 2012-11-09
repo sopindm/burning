@@ -1,2 +1,2 @@
-(defpackage #:burning-bsdf-test
-  (:use #:burning-lisp #:burning-testing #:burning-bsdf #:burning-filesystem))
+(defpackage #:bsdf-test
+  (:use #:burning-lisp #:burning-testing #:bsdf #:burning-filesystem))

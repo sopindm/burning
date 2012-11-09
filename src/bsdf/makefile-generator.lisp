@@ -4,10 +4,24 @@
 ;; Makefile target structure
 ;;
 
-(defstruct (makefile-target (:constructor make-makefile-target (input output &optional command)))
+(defun escape-makefile-string (string)
+  (labels ((replace-char (char seq string)
+	     (aif (position char string)
+		  (string+ (subseq string 0 it)
+			   seq
+			   (replace-char char seq (subseq string (1+ it))))
+		  string)))
+    (replace-char #\Space "\\ " string)))
+
+(defstruct (makefile-target (:constructor %make-makefile-target))
   input
   output
   command)
+
+(defun make-makefile-target (input output &optional command)
+  (%make-makefile-target :input (mapcar #'escape-makefile-string (if (listp input) input (list input)))
+			 :output (mapcar #'escape-makefile-string (if (listp output) output (list output)))
+			 :command command))
 
 (defun print-makefile-target (target stream)
   (flet ((print-makefile-list (list)
@@ -24,27 +38,17 @@
 ;;
 
 (defun to-makefile-targets (target command)
-  (flet ((to-lists (target)
-	   (with-accessors ((input target-input) 
-			    (output target-output)
-			    (name target-name)
-			    (depends-on target-depends-on)) target
-	     (cond ((and name output) (list (list name ".PHONY")
-					    (list input name command)
-					    (list name output)
-					    (if depends-on (list depends-on output))))
-		   (name (list (list name ".PHONY")
-			       (list input name command)
-			       (if depends-on (list depends-on name))))
-		   ((and output (rest output))
-		    (let ((name (gen-tmp-name (format nil "~{~a~^ ~}" output))))
-		      (list (list name ".PHONY")
-			    (list input name)
-			    (list name output))))
-		   (output (list (list input output command)))
-		   (t (error "Cannot generate makefile entity for target ~a" target))))))
-    (mapcar (lambda (list) (apply #'make-makefile-target list))
-	    (remove-if #'null (to-lists target)))))
+  (let ((input (target-input target))
+	(output (target-output target))
+	(name (target-name target))
+	(depends-on (target-depends-on target)))
+    (when (and output (rest output) (not name))
+      (setf name (gen-tmp-name (format nil "~{~a~^ ~}" output))))
+    (append (if name (list (make-makefile-target name ".PHONY")
+			   (make-makefile-target input name command))
+		(list (make-makefile-target input output command)))
+	    (when (and name output) (list (make-makefile-target name output)))
+	    (when depends-on (list (make-makefile-target depends-on (or output name)))))))
 
 (define-generator makefile)
 

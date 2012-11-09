@@ -24,14 +24,13 @@
 		 (format nil "~c@echo 'Hello, world!!!'" #\Tab)
 		 "")))
 
-;change multiple output behavior
 (def-makefile-test generating-targets-with-multiple-input-and-output
   (deftarget nil nil ("input1" "input2" "input3") ("output1" "output2" "output3"))
   (generate-file)
   (?equal (read-file "Makefile")
-	  (lines ".PHONY: __output1\ output2\ output3"
-		 "__output1\ output2\ output3: input1 input2 input3" 
-		 "output1 output2 output3: __output1\ output2\ output3"
+	  (lines ".PHONY: __output1\\ output2\\ output3"
+		 "__output1\\ output2\\ output3: input1 input2 input3" 
+		 "output1 output2 output3: __output1\\ output2\\ output3"
 		 "")))
 
 (defmacro without-warnings (&body forms)
@@ -80,9 +79,9 @@
   (deftarget "tt" nil ("out1" "out2") "total")
   (generate-file)
   (?equal (read-file "Makefile")
-	  (lines ".PHONY: __out1 out2"
-		 "__out1 out2: in1 in2 in3"
-		 "out1 out2: __out1 out2"
+	  (lines ".PHONY: __out1\\ out2"
+		 "__out1\\ out2: in1 in2 in3"
+		 "out1 out2: __out1\\ out2"
 		 ".PHONY: tt"
 		 "tt: out1 out2"
 		 "total: tt"
@@ -103,6 +102,16 @@
 		 "out1 out2: target2"
 		 "")))
 
+(def-makefile-test compilation-errors-with-source-line
+  (write-file "a.file"
+	      (lines "(defvariable var '(+ 123 :456))"))
+  (?bsdf-compilation-error (generate-from-file "a.file")
+			   (lines "In lines from 1 to 1"
+				  "In definition of variable 'VAR':"
+				  "In argument 'ARGS' of '+':"
+				  "Cannot convert ~a from type ~a to ~a")
+			   '(123 :456) :LIST '(:LIST :INT)))
+
 ;compilation errors with source line
     
 (def-makefile-test generating-with-output-directory
@@ -111,7 +120,7 @@
     (generate-file :path "other.file"))
   (make-directory "a.dir/")
   (generate-file :path "a.dir/")
-  (let ((text (lines ".PHONY: __out1 out2"  "__out1 out2: in1 in2" "out1 out2: __out1 out2" "")))
+  (let ((text (lines ".PHONY: __out1\\ out2"  "__out1\\ out2: in1 in2" "out1 out2: __out1\\ out2" "")))
     (?equal (read-file "Makefile") text)
     (?equal (read-file "a.dir/Makefile") text)))
 
@@ -121,7 +130,12 @@
     (generate-file :generator 'makefile)
     (?equal (read-file "Makefile") (lines "out: f1 f2 f3" ""))))
 
-;escaping spaces
+(def-makefile-test escaping-spaces
+  (without-warnings 
+    (deftarget "a target" nil nil nil))
+  (generate-file)
+  (?equal (read-file "Makefile") (lines ".PHONY: a\\ target" "a\\ target: " "")))
+
 ;escaping dollars
 ;escaping wildcard characters (*, %, ?)
 ;working with newlines

@@ -54,18 +54,36 @@
 	   (generator-write-context generator context))
       (generator-close-context generator context))))
 
+
+
 (defun generate-from-file (path &key (generator nil generator-p)  (output-path nil output-p))
   (let ((*context* (copy-context))
-	(*package* (find-package '#:bsdf-user)))
-    (let ((exprs (make-double-list nil)))
-      (with-open-file (input path :direction :input)
+	(*package* (find-package '#:bsdf-user))
+	(*readtable* (copy-readtable nil))
+	begin-tag end-tag)
+    (set-macro-character #\( (lambda (s c) 
+			       (declare (ignore c))
+			       (setf begin-tag (counting-stream-position s))
+			       (let ((list (let ((*readtable* (copy-readtable nil)))
+					     (read-delimited-list #\) s))))
+				 (setf end-tag (counting-stream-position s))
+				 list)))
+    (with-open-file (input path :direction :input)
+      (let ((input (make-counting-stream input)))
 	(do ((expr #1=(read input nil :eof) #1#))
 	    ((eq expr :eof) nil)
-	  (double-list-push expr exprs)))
-      (eval (cons 'progn (double-list-head exprs))))
+	  (handler-bind ((bsdf-compilation-error (lambda (err)
+						   (setf (bsdf-condition-format-control err)
+							 (lines* "In lines from ~a to ~a" 
+								 (bsdf-condition-format-control err)))
+						   (setf (bsdf-condition-format-args err)
+							 (list* (stream-position-line begin-tag)
+								(stream-position-line end-tag)
+								(bsdf-condition-format-args err))))))
+	    (eval expr)))))
     (apply #'generate-file (append (when generator-p (list :generator generator))
 				   (when output-p (list :path output-path))))))
-	
+       
 
 ;;
 ;; Generator commands basics

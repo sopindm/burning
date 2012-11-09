@@ -23,7 +23,9 @@
   ())
 
 (defun bsdf-condition-message (cond)
-  (lines (apply #'format nil (bsdf-condition-format-control cond) (bsdf-condition-format-args cond))))
+  (let ((message (bsdf-condition-format-control cond))
+	(args (bsdf-condition-format-args cond)))
+    (apply #'format nil (lines message) args)))
 
 (defun %bsdf-error (error message args)
   (error error :control message :args args))

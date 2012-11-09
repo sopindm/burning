@@ -1,5 +1,15 @@
+(defpackage #:bsdf-streams
+  (:use #:burning-lisp #:trivial-gray-streams)
+  (:export counting-stream
+	   make-counting-stream
+
+	   counting-stream-position
+	   stream-position-char
+	   stream-position-line
+	   stream-position-column))
+
 (defpackage #:bsdf-errors
-  (:use #:burning-lisp)
+  (:use #:burning-lisp #:bsdf-streams)
   (:export bsdf-condition
 	   bsdf-condition-message
 	   
@@ -88,7 +98,7 @@
 	   mapc-depends))
 
 (defpackage #:bsdf-generator
-  (:use #:burning-lisp #:bsdf-targets #:burning-filesystem)
+  (:use #:burning-lisp #:burning-filesystem #:bsdf-errors #:bsdf-targets  #:bsdf-streams)
   (:export *bsdf-generator*
 
 	   define-generator
@@ -117,6 +127,7 @@
 	   echo-command))
 
 (burning-lisp:define-merged-package #:bsdf 
+  #:bsdf-streams
   #:bsdf-errors
   #:bsdf-targets
   #:bsdf-generator

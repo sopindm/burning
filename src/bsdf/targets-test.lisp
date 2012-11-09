@@ -356,7 +356,29 @@
     (defvariable "__name_3" 234)
     (?equal new-name "__name_5")))
 
-;getvar and $ operations
+(def-targets-test with-tmp-name-test
+  (defvariable "__name" 123)
+  (with-tmp-name (name "name")
+    (?equal name "__name_2"))
+  (?equal (gen-tmp-name "name") "__name_2")
+  (with-tmp-names ((name1 "name") (name2 "name") (name3 "name2"))
+    (?equal name1 "__name_3")
+    (?equal name2 "__name_4")
+    (?equal name3 "__name2")))
+
+(def-targets-test getvar-operation-test
+  (defvariable "VAR" 123)
+  (?expr= ('(getvar var) :int) 123 "123")
+  (?expr= ('(getvar "VAR") :string) "123" "123")
+  (?wrong-expr (getvar 123) "Wrong variable name '123'")
+  (?wrong-expr (getvar "var2") "Variable 'var2' does not exists")) 
+
+(def-targets-test $-operation-test
+  (defvariable "VAR" '(append (1 2) (3 4)))
+  (let ((var (make-variable "var2" '(second ($ var)))))
+    (?equal (variable-expression var) '(second (append (1 2) (3 4)))))
+  (?wrong-expr ($ 123) "Wrong variable name '123'")
+  (?wrong-expr (getvar "other var") "Variable 'other var' does not exists"))
 
 ;;
 ;;targets hierarchy

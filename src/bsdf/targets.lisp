@@ -254,6 +254,19 @@
     (update-tmp-number name 
 		       (lambda (x) (list nil (remove number x :key #'first))))))
 
+(defmacro with-tmp-name ((var name &optional callback) &body body)
+  `(with-tmp-names ((,var ,name ,@(aif callback (list it)))) ,@body))
+
+(defmacro with-tmp-names ((&rest specs) &body body)
+  (flet ((setup-form (spec)
+	   (dbind (var name &optional callback) spec
+	     `(,var (gen-tmp-name ,name ,@(aif callback (list it))))))
+	 (cleanup-form (spec)
+	   `(free-tmp-name ,(first spec))))
+    `(let (,@(mapcar #'setup-form specs))
+       (unwind-protect (progn ,@body)
+	 ,@(mapcar #'cleanup-form specs)))))
+
 ;;
 ;; Pushing to table
 ;;
@@ -317,9 +330,20 @@
 (defmacro defvariable (name expression &key (type t) (description "") visible-p)
   `(set-variable (make-variable ',name ,expression :type ',type :description ,description :visible-p ,visible-p)))
 
-;;
-;; Removing targets from table
-;;
+(defun get-variable-expression (name)
+  (when (symbolp name) (setf name (symbol-name name)))
+  (unless (stringp name)
+    (bsdf-compilation-error "Wrong variable name '~a'" name))
+  (let ((variable (get-variable name)))
+    (unless variable (bsdf-compilation-error "Variable '~a' does not exists" name))
+    (variable-expression variable)))
+      
+(defoperation getvar (name)
+    (t)
+  (get-variable-expression name))
+
+(defoperation-macro $ (name)
+  (get-variable-expression name))
 
 (defun add-dependency (target dep)
   (unless (target-p target) (setf target (get-target target)))

@@ -62,8 +62,14 @@
 	   set-variable
 	   defvariable
 
+	   getvar
+	   $
+
 	   gen-tmp-name
 	   free-tmp-name
+
+	   with-tmp-name
+	   with-tmp-names
 
 	   add-input
 	   add-output

@@ -119,6 +119,9 @@
 	    `(:list ,(first types))
 	    :list))))
 
+(defmethod bsdf-type-of ((value (eql nil)))
+  :list)
+
 (defmethod bsdf-type-of ((value (eql t)))
   :bool)
 
@@ -128,7 +131,7 @@
 (def-type-of string :string)
 (def-type-of integer :int)
 (def-type-of burning-filesystem:path :path)
-(def-type-of keyword :enum)
+(def-type-of symbol :enum)
 
 (def-type-p :string (args)
   (null args))
@@ -264,11 +267,11 @@
 ;;
 
 (defun try-bind (lambda-list args)
-  (handler-bind ((simple-error (lambda (err)
-				 (let ((control (simple-condition-format-control err))
-				       (args (simple-condition-format-arguments err)))
-				   (change-class err 'bsdf-compilation-error :args args :control control)))))
-    (bind-lambda-list lambda-list args)))
+  (handler-case (bind-lambda-list lambda-list args)
+    (simple-error (err)
+      (error 'bsdf-compilation-error
+	     :format-control (simple-condition-format-control err)
+	     :format-arguments (simple-condition-format-arguments err)))))
 
 (defmacro defoperation (name args type-specs &body body)
   (let ((args-sym (gensym)))

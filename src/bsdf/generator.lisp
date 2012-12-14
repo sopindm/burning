@@ -26,8 +26,13 @@
 ;; Generator interface
 ;;
 
+(defstruct (generator-context (:constructor %make-generator-context))
+  path
+  (targets (make-double-list nil))
+  (variables (make-double-list nil)))
+
 (define-generator-generic generator-make-context (path)
-  (cons path (make-double-list nil)))
+  (%make-generator-context :path path))
 
 (define-generator-generic generator-write-context (context))
 
@@ -37,7 +42,10 @@
 
 (define-generator-generic generator-context-add-target (context target)
   (let ((native (generate-command generator target)))
-    (mapc (lambda (target) (double-list-push target (rest context))) native)))
+    (mapc (lambda (target) (double-list-push target (generator-context-targets context))) native)))
+
+(define-generator-generic generator-context-add-variable (context var)
+  (double-list-push var (generator-context-variables context)))
 
 (defun generate-command (generator target)
   (let ((*bsdf-generator* generator)
@@ -51,10 +59,10 @@
 	 (progn 
 	   (mapc (lambda (target) (generator-context-add-target generator context target))
 		 (get-targets))
+	   (mapc (lambda (var) (generator-context-add-variable generator context var))
+		 (get-variables))
 	   (generator-write-context generator context))
       (generator-close-context generator context))))
-
-
 
 (defun generate-from-file (path &key (generator nil generator-p)  (output-path nil output-p))
   (let ((*context* (copy-context))

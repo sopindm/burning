@@ -22,6 +22,7 @@
 	   bsdf-compilation-error
 	   bsdf-compilation-warning
 
+	   bsdf-warn
 	   bsdf-compilation-warn))
 
 (defpackage #:bsdf-variables
@@ -38,7 +39,9 @@
 	   variable-value
 	   variable-string
 	   
+	   expression-type
 	   expression-value
+	   expression-string
 
 	   ++
 	   substring
@@ -88,6 +91,7 @@
 	   get-file
 
 	   get-targets
+	   get-variables
 
 	   *context*
 	   copy-context
@@ -98,7 +102,7 @@
 	   mapc-depends))
 
 (defpackage #:bsdf-generator
-  (:use #:burning-lisp #:burning-filesystem #:bsdf-errors #:bsdf-targets  #:bsdf-streams)
+  (:use #:burning-lisp #:burning-filesystem #:bsdf-errors #:bsdf-variables #:bsdf-targets #:bsdf-streams)
   (:export *bsdf-generator*
 
 	   define-generator

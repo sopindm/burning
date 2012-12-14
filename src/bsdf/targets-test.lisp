@@ -329,6 +329,13 @@
   (?bsdf-compilation-error (deftarget nil #'identity "input" "a-var")
 			   (lines "File name 'a-var' is already a variable name")))
 
+(def-targets-test getting-variables
+  (defvariable var1 123)
+  (defvariable var2 "345")
+  (defvariable "var3" 123)
+  (?equalp (get-variables)
+	   (mapcar #'get-variable (list "VAR1" "VAR2" "var3"))))
+
 (def-targets-test simple-generating-temporal-names
   (let ((name (gen-tmp-name "name"))
 	(name2 (gen-tmp-name "name")))

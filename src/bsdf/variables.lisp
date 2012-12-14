@@ -257,10 +257,16 @@
 	  (mapcar #'expression-value expr))
       expr))
 
+(defun expression-string (expr)
+  (cast-type (expression-value expr) :string))
+
+(defun expression-type (expr)
+  (bsdf-type-of expr))
+
 (defun variable-value (var) 
   (expression-value (variable-expression var)))
 
-(defun variable-string (var) (cast-type (variable-value var) :string))
+(defun variable-string (var) (expression-string (variable-expression var)))
 
 ;;
 ;; Operations

@@ -131,6 +131,9 @@
 (defun get-targets ()
   (double-list-head (context-targets-list (get-context))))
 
+(defun get-variables ()
+  (double-list-head (context-variables-list (get-context))))
+
 (defun get-target-depends (target)
   (append (target-input target)
 	  (target-depends-on target)))

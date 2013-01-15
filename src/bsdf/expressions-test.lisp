@@ -115,6 +115,7 @@
   (?cast= ('((1 2) (3 4) ((5))) :list) "((1;2);(3;4);((5)))" :string)
   (?cast= ("(1;(2;3);((4));(5;(6)))" :string) '("1" "(2;3)" "((4))" "(5;(6))") :list)
   (?cast= ("(1\\;2)" :string) '("1\\;2") :list)
+  (?cast= ("(1\\\\;2)" :string) '("1\\\\" "2") :list)
   (?cast= ("(\\(1;2\\))" :string) '("\\(1" "2\\)") :list)
   (?wrong-cast "1 2 3" :string :list))
 
@@ -135,33 +136,22 @@
 
 ;string expressions
 
-#|
 (deftest simple-variable-expression
-  (?expr= ('(++ "abc" "def" "ghi") :string) "abcdefghi" "abcdefghi")
-  (?expr= ('(substring "abcdef" 1) :string) "bcdef" "bcdef")
-  (?expr= ('(substring "abcdef" 2 "4") :string) "cd" "cd")
-  (?expr= ('(substring "abcdef" -2) :string) "ef" "ef")
-  (?expr= ('(substring "abcdef" "-1") :string) "f" "f")
-  (?expr= ('(substring "abcdef" -3 "-1") :string) "def" "def"))
-
-(deftest wrong-operation-error
-  (?bsdf-compilation-error (make-variable "var" '(wrong-symbol 1 2 3))
-			   (lines "In definition of variable 'var':"
-				  "Wrong BSDF operation ~a") 'wrong-symbol))
-
-|#
+  (?expr= ('(++ "abc" "def" "ghi") :string) "abcdefghi")
+  (?expr= ('(substring "abcdef" 1) :string) "bcdef")
+  (?expr= ('(substring "abcdef" 2 "4") :string) "cd")
+  (?expr= ('(substring "abcdef" -2) :string) "ef")
+  (?expr= ('(substring "abcdef" "-1") :string) "f")
+  (?expr= ('(substring "abcdef" -3 "-1") :string) "def"))
 
 (defmacro ?wrong-expr ((expr &rest args) error &rest error-args)
-  `(?bsdf-compilation-error (make-variable "var" '(,expr ,@args))
-			    (lines "In definition of variable 'var':"
-				   ,error)
+  `(?bsdf-compilation-error (expression-value (expand-expression '(,expr ,@args)))
+			    (lines ,error)
 			    ,@error-args))
 
 (defmacro ?wrong-expr-arg ((expr &rest args) arg-name error)
   `(?wrong-expr (,expr ,@args) (lines* "In argument '~a' of '~a':" ,error) ',arg-name ',expr))
 
-#|
-	       
 (deftest wrong-arguments-error
   (?wrong-expr-arg (substring "abc" "a") first (wrong-cast-message "a" :STRING :INT))
   (?wrong-expr-arg (substring "abc" "1" "2a") last (wrong-cast-message "2a" :STRING :INT)))
@@ -172,42 +162,42 @@
   (?wrong-expr (substring "abc" 2 1) "Bad interval [2, 1) for string 'abc'"))
 
 (deftest +-expression-test
-  (?expr= ('(+ 1 2) :int) 3 "3")
-  (?expr= ('(+ 1 2 3) :int) 6 "6")
-  (?expr= ('(+) :int) 0 "0")
+  (?expr= ('(+ 1 2) :int) 3)
+  (?expr= ('(+ 1 2 3) :int) 6)
+  (?expr= ('(+) :int) 0)
   (?wrong-expr-arg (+ 1 "a") args (wrong-cast-message '(1 "a") :LIST '(:LIST :INT))))
 
 (deftest --expression-test
-  (?expr= ('(- 2 1) :int) 1 "1")
-  (?expr= ('(- 2) :int) -2 "-2")
+  (?expr= ('(- 2 1) :int) 1)
+  (?expr= ('(- 2) :int) -2)
   (?wrong-expr-arg (- "a" 1) number (wrong-cast-message "a" :STRING :INT))
   (?wrong-expr-arg (- 1 "a") numbers (wrong-cast-message '("a") '(:LIST :STRING) '(:LIST :INT))))
 
 (deftest *-expression-test
-  (?expr= ('(* 2 3) :int) 6 "6")
-  (?expr= ('(* 2 3 4) :int) 24 "24")
-  (?expr= ('(*) :int) 1 "1")
+  (?expr= ('(* 2 3) :int) 6)
+  (?expr= ('(* 2 3 4) :int) 24)
+  (?expr= ('(*) :int) 1)
   (?wrong-expr-arg (* 1 "a") args (wrong-cast-message '(1 "a") :LIST '(:LIST :INT))))
 
 (deftest /-expression-test
-  (?expr= ('(/ 1 2) :int) 0 "0")
-  (?expr= ('(/ 8 2) :int) 4 "4")
-  (?expr= ('(/ 32 3 2) :int) 5 "5")
+  (?expr= ('(/ 1 2) :int) 0)
+  (?expr= ('(/ 8 2) :int) 4)
+  (?expr= ('(/ 32 3 2) :int) 5)
   (?wrong-expr-arg (/ "a" 1) number (wrong-cast-message "a" :STRING :INT))
   (?wrong-expr-arg (/ 1 2 "a") numbers (wrong-cast-message '(2 "a") :LIST '(:LIST :INT)))
   (?wrong-expr (/ 1 0) "Division by zero in (/ 1 0)"))
 
 (deftest mod-expression-test
-  (?expr= ('(mod 2 2) :int) 0 "0")
-  (?expr= ('(mod 10 4) :int) 2 "2")
-  (?expr= ('(mod 7 1) :int) 0 "0")
+  (?expr= ('(mod 2 2) :int) 0)
+  (?expr= ('(mod 10 4) :int) 2)
+  (?expr= ('(mod 7 1) :int) 0)
   (?wrong-expr-arg (mod "a" 1) number (wrong-cast-message "a" :STRING :INT))
   (?wrong-expr-arg (mod 1 "a") divisor (wrong-cast-message "a" :STRING :INT))
   (?wrong-expr (mod 1 0) "Division by zero in (mod 1 0)"))
 
 (deftest cons-expression-test
-  (?expr= ('(cons 1 nil) '(:list :int)) '(1) "(1)")
-  (?expr= ('(cons nil (1 2 3)) :list) '(nil 1 2 3) "(NIL 1 2 3)")
+  (?expr= ('(cons 1 nil) '(:list :int)) '(1))
+  (?expr= ('(cons nil (1 2 3)) :list) '(nil 1 2 3))
   (?wrong-expr-arg (cons 1 2) list (wrong-cast-message 2 :INT :LIST)))
 
 (deftest wrong-arguments-count
@@ -215,31 +205,31 @@
   (?wrong-expr (cons 1) "Not enought arguments for lambda list ~a in ~a." '(item list) '(1)))
 
 (deftest append-test
-  (?expr= ('(append (1 2) (3 4)) '(:list :int)) '(1 2 3 4) "(1 2 3 4)")
-  (?expr= ('(append (1 "2") (3 4) (5 "6")) :list) '(1 "2" 3 4 5 "6") "(1 2 3 4 5 6)")
-  (?expr= ('(append (:a :b :c)) '(:list (:enum :a :b :c))) '(:a :b :c) "(A B C)")
-  (?expr= ('(append) :list) () "()")
-  (?expr= ('(append :a :b :c (1 2 3) 4 5 (6 7)) :list) '(:a :b :c 1 2 3 4 5 6 7) "(A B C 1 2 3 4 5 6 7)"))
+  (?expr= ('(append (1 2) (3 4)) '(:list :int)) '(1 2 3 4))
+  (?expr= ('(append (1 "2") (3 4) (5 "6")) :list) '(1 "2" 3 4 5 "6"))
+  (?expr= ('(append (:a :b :c)) '(:list (:enum :a :b :c))) '(:a :b :c))
+  (?expr= ('(append) :list) ())
+  (?expr= ('(append :a :b :c (1 2 3) 4 5 (6 7)) :list) '(:a :b :c 1 2 3 4 5 6 7)))
 
 (deftest fifth-test
-  (?expr= ('(fifth (1 "a" 2 :b 3)) :int) 3 "3")
+  (?expr= ('(fifth (1 "a" 2 :b 3)) :int) 3)
   (?wrong-expr-arg (fifth "abc") list (wrong-cast-message "abc" :STRING :LIST)))
 
 (deftest nth-test
-  (?expr= ('(nth "2" (1 2 3)) :int) 3 "3")
+  (?expr= ('(nth "2" (1 2 3)) :int) 3)
   (?wrong-expr-arg (nth 0 123) list (wrong-cast-message 123 :INT :LIST))
   (?wrong-expr-arg (nth "a" (1 2 3)) index (wrong-cast-message "a" :STRING '(:INT 0)))
   (?wrong-expr-arg (nth -1 (1 2 3)) index (wrong-cast-message -1 :INT '(:INT 0))))
 
 (deftest remove-test
-  (?expr= ('(remove "123" (123 "123" :123)) :list) '(123 :123) "(123 123)")
-  (?expr= ('(remove 456 (123 (cons 789 nil))) :list) '(123 (789)) "(123 (789))")
-  (?expr= ('(remove (123 456) (123 456 (123 456))) :list) '(123 456) "(123 456)")
+  (?expr= ('(remove "123" (123 "123" :123)) :list) '(123 :123))
+  (?expr= ('(remove 456 (123 (cons 789 nil))) :list) '(123 (789)))
+  (?expr= ('(remove (123 456) (123 456 (123 456))) :list) '(123 456))
   (?wrong-expr-arg (remove 123 456) list (wrong-cast-message 456 :INT :LIST)))
 
 (deftest remove-duplicates-test
   (?expr= ('(remove-duplicates (123 "123" (123 456) :123 (123 456) "123" :123 123)) :list)
-	  '(123 "123" (123 456) :123) "(123 123 (123 456) 123)")
+	  '(123 "123" (123 456) :123))
   (?wrong-expr-arg (remove-duplicates 123) list (wrong-cast-message 123 :INT :LIST)))
 
 (defmacro def-path-test (name &body body)
@@ -248,32 +238,32 @@
        ,@body)))
 
 (def-path-test parent-path-expression
-  (?expr= ('(parent-path "/home/a.file") :string) "/home/" "/home/")
+  (?expr= ('(parent-path "/home/a.file") :string) "/home/")
   (?wrong-expr-arg (parent-path 123) path (wrong-cast-message 123 :INT :PATH)))
 
 (def-path-test directory-path-exression
-  (?expr= ('(directory-path "/home/a.file") :string) "/home/" "/home/")
-  (?expr= ('(directory-path "/home/a.dir/") :string) "/home/a.dir/" "/home/a.dir/"))
+  (?expr= ('(directory-path "/home/a.file") :string) "/home/")
+  (?expr= ('(directory-path "/home/a.dir/") :string) "/home/a.dir/"))
 
 (def-path-test root-path-expression-test
-  (?expr= ('(root-path "/home/a.file") :string) "/" "/")
-  (?expr= ('(root-path "home/a.file") :string) "" ""))
+  (?expr= ('(root-path "/home/a.file") :string) "/")
+  (?expr= ('(root-path "home/a.file") :string) ""))
 
 (def-path-test path+-expression-test
-  (?expr= ('(path+ "/home/" "a.file") :string) "/home/a.file" "/home/a.file")
+  (?expr= ('(path+ "/home/" "a.file") :string) "/home/a.file")
   (?wrong-expr-arg (path+ "/home/" 123) paths (wrong-cast-message '("/home/" 123) ':LIST '(:LIST :PATH))))
 
 (def-path-test as-absolute-test
-  (?expr= ('(as-absolute "a.file") :string) "/work/a.file" "/work/a.file")
+  (?expr= ('(as-absolute "a.file") :string) "/work/a.file")
   (?wrong-expr-arg (as-absolute 123) path (wrong-cast-message 123 :INT :PATH)))
 
 (def-path-test as-relative-test
-  (?expr= ('(as-relative "/home/a.dir/a.file" "/home/b.dir/") :string) "../a.dir/a.file" "../a.dir/a.file"))
+  (?expr= ('(as-relative "/home/a.dir/a.file" "/home/b.dir/") :string) "../a.dir/a.file"))
 
 (def-path-test copy-path-test
-  (?expr= ('(copy-path "/home/a.file" :new-name "other") :string) "/home/other.file" "/home/other.file")
-  (?expr= ('(copy-path "/home/new.file" :new-type "dir") :string) "/home/new.dir" "/home/new.dir")
-  (?expr= ('(copy-path "a.file" :new-name 123) :string) "123.file" "123.file"))
+  (?expr= ('(copy-path "/home/a.file" :new-name "other") :string) "/home/other.file")
+  (?expr= ('(copy-path "/home/new.file" :new-type "dir") :string) "/home/new.dir")
+  (?expr= ('(copy-path "a.file" :new-name 123) :string) "123.file"))
 
 (defoperation-macro ct-eval (operation &rest args)
   (expression-value (cons operation args)))
@@ -283,13 +273,12 @@
       `(* ,n (ct-! ,(1- n)))))
 
 (deftest compile-time-evaluation-test
-  (let ((var (make-variable "var" '(ct-eval + 1 2 3))))
-    (?equal (variable-expression var) 6))
-  (let ((var (make-variable "var" '(first (ct-eval append (1 2 3) (4 5 6))))))
-    (?equal (variable-expression var) '(first (1 2 3 4 5 6))))
-  (let ((var (make-variable "Var" '(ct-! 5))))
-    (?equal (variable-expression var) '(* 5 (* 4 (* 3 (* 2 (* 1 1))))))))
-|#
+  (let ((expr (expand-expression '(ct-eval + 1 2 3))))
+    (?equal expr 6))
+  (let ((expr (expand-expression '(first (ct-eval append (1 2 3) (4 5 6))))))
+    (?equal expr '(first (1 2 3 4 5 6))))
+  (let ((expr (expand-expression '(ct-! 5))))
+    (?equal expr '(* 5 (* 4 (* 3 (* 2 (* 1 1))))))))
 
 ;bool expressions
 ;;and

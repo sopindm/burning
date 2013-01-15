@@ -158,7 +158,7 @@
 
 (defcast (:list args) (:list dest-args) (value)
   (if dest-args
-      (with-restarts (mapcar (lambda (arg) (cast-type arg (first dest-args))) value)
+      (handler-case (mapcar (lambda (arg) (cast-type arg (first dest-args))) value)
 	(bsdf-compilation-error () (call-next-method)))
       value))
 
@@ -166,9 +166,13 @@
   (format nil "(~{~a~^;~})" (mapcar (lambda (val) (cast-type val :string)) value)))
 
 (defcast :string (:list args) (value)
-  (labels ((unescaped-position (char string &key (start 0))
+  (labels ((unescaped-p (string pos)
+	     (or (= pos 0)
+		 (char/= (char string (1- pos)) #\\)
+		 (not (unescaped-p string (1- pos)))))
+	   (unescaped-position (char string &key (start 0))
 	     (aif (position char string :start start)
-		  (if (or (= it 0) (char/= (char string (1- it)) #\\))
+		  (if (unescaped-p string it)
 		      it
 		      (unescaped-position char string :start (1+ it)))))
 	   (do-cast (string &optional (position 0))
@@ -189,7 +193,7 @@
 (defcast :string (:int args) (value)
   (multiple-value-bind (int pos) (parse-integer value :junk-allowed t)
     (if (= pos (length value)) 
-	(with-restarts (cast-type int `(:int ,@args))
+	(handler-case (cast-type int `(:int ,@args))
 	  (bsdf-compilation-error () (call-next-method)))
 	(call-next-method))))
 

@@ -20,6 +20,11 @@
   (?bsdf-compilation-error (make-variable 123 1)
 			   (lines "Wrong variable name '123'")))
 
+(deftest wrong-operation-error
+  (?bsdf-compilation-error (make-variable "var" '(wrong-symbol 1 2 3))
+			   (lines "In definition of variable 'var':"
+				  "Wrong BSDF operation ~a") 'wrong-symbol))
+
 (deftest wrong-variable-expressions-error
   (?bsdf-compilation-error (make-variable "var" "123" :type :list)
 			   (lines "In definition of variable 'var':"
@@ -29,6 +34,15 @@
 			   (lines "In definition of variable 'var2':"
 				  "Unknown BSDF type for ~a")
 			   #(1 2 3)))
+
+(defoperation-macro ct-+ (a b)
+  (+ a b))
+
+(deftest variables-expansion-test
+  (let ((var (make-variable "var" '(* (ct-+ 1 2) 3))))
+    (?equal (variable-expression var) '(* 3 3))))
+
+  
 
 
 

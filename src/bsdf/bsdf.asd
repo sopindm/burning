@@ -9,6 +9,7 @@
     :components ((:file "package")
 		 (:file "streams")
 		 (:file "errors")
+		 (:file "expressions")
 		 (:file "variables")
 		 (:file "targets")
 		 (:file "generator")

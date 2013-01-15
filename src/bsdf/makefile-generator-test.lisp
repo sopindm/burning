@@ -175,9 +175,13 @@
   (?var= :|bla bla| "bla bla"))
 
 (def-makefile-test generating-list-variables
-  (?var= '(1 2 3) "__( 1 __NEXT 2 __NEXT 3 __)")
-  (?var= '("a b c" "d e f" "g h i") "__( a b c __NEXT d e f __NEXT g h i __)")
-  (?var= '((1 2) 3 ((4))) "__( __( 1 __NEXT 2 __) __NEXT 3 __NEXT __( __( 4 __) __) __)"))
+  (?var= '(1 2 3) "__(__NEXT!1__NEXT!2__NEXT!3__NEXT!__)")
+  (?var= '("a b c" "d e f" "g h i") "__(__NEXT!a b c__NEXT!d e f__NEXT!g h i__NEXT!__)")
+  (?var= '((1 2) 3 ((4))) (string+ "__(__NEXT!"
+				   "__(__NEXTT!1__NEXTT!2__NEXTT!__)__NEXT!"
+				   "3__NEXT!"
+				   "__(__NEXTT!__(__NEXTTT!4__NEXTTT!__)__NEXTT!__)"
+				   "__NEXT!__)")))
 
 ;keywords in variable names warnings (__NEXT__, __SPACE__, __(, __))
 ;operation's generation

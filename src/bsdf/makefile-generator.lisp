@@ -75,8 +75,20 @@
 
 (defmethod %print-makefile-value (value (type (eql :list)) type-args)
   (declare (ignore type-args))
-  (format nil "__( ~{~a~^ __NEXT ~} __)" (mapcar (lambda (val) (print-makefile-value val (expression-type val)))
-						 value)))
+  (labels ((replace-all (seq dest string)
+	     (aif (search seq string)
+		  (string+ (subseq string 0 it)
+			   dest
+			   (replace-all seq dest (subseq string (+ it (length seq)))))
+		  string))
+	   (quote-list (string)
+	     (replace-all "__NEXT" "__NEXTT" string))
+	   (print-elem (val)
+	     (let ((string (print-makefile-value val (expression-type val))))
+	       (if (listp val)
+		   (quote-list string)
+		   string))))
+    (format nil "__(__NEXT!~{~a__NEXT!~}__)" (mapcar #'print-elem value))))
 
 (defun print-makefile-variable (var stream)
   (format stream "~a = ~a~%" 

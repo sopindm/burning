@@ -25,8 +25,29 @@
 	   bsdf-warn
 	   bsdf-compilation-warn))
 
+(defpackage #:bsdf-expressions
+  (:use #:burning-lisp #:bsdf-errors #:burning-filesystem)
+  (:export expression-type
+	   expression-value
+	   expression-string
+	   expand-expression
+
+	   cast-type
+	   bsdf-type-p
+
+	   ++
+	   substring
+
+	   as-absolute
+	   as-relative
+
+	   directory-path
+
+	   defoperation
+	   defoperation-macro))
+
 (defpackage #:bsdf-variables
-  (:use #:burning-lisp #:bsdf-errors #:burning-filesystem #:alexandria)
+  (:use #:burning-lisp #:bsdf-errors #:bsdf-expressions #:alexandria)
   (:shadowing-import-from #:burning-filesystem #:copy-file)
   (:export variable
 	   make-variable
@@ -37,25 +58,10 @@
 	   variable-visible-p
 
 	   variable-value
-	   variable-string
-	   
-	   expression-type
-	   expression-value
-	   expression-string
-
-	   ++
-	   substring
-
-	   as-absolute
-	   as-relative
-
-	   directory-path
-	   
-	   defoperation
-	   defoperation-macro))
+	   variable-string))
 
 (defpackage #:bsdf-targets
-  (:use #:burning-lisp #:bsdf-errors #:alexandria #:bsdf-variables)
+  (:use #:burning-lisp #:bsdf-errors #:alexandria #:bsdf-expressions #:bsdf-variables)
   (:export deftarget
 	   make-target
 	   target-name
@@ -102,7 +108,13 @@
 	   mapc-depends))
 
 (defpackage #:bsdf-generator
-  (:use #:burning-lisp #:burning-filesystem #:bsdf-errors #:bsdf-variables #:bsdf-targets #:bsdf-streams)
+  (:use #:burning-lisp 
+	#:burning-filesystem
+	#:bsdf-errors
+	#:bsdf-expressions
+	#:bsdf-variables
+	#:bsdf-targets
+	#:bsdf-streams)
   (:export *bsdf-generator*
 
 	   define-generator
@@ -135,6 +147,7 @@
   #:bsdf-errors
   #:bsdf-targets
   #:bsdf-generator
+  #:bsdf-expressions
   #:bsdf-variables)
 
 (defpackage #:bsdf-user

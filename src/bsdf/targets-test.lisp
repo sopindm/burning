@@ -375,8 +375,8 @@
 
 (def-targets-test getvar-operation-test
   (defvariable "VAR" 123)
-  (?expr= ('(getvar var) :int) 123 "123")
-  (?expr= ('(getvar "VAR") :string) "123" "123")
+  (?expr= ('(getvar var) :int) 123)
+  (?expr= ('(getvar "VAR") :string) "123")
   (?wrong-expr (getvar 123) "Wrong variable name '123'")
   (?wrong-expr (getvar "var2") "Variable 'var2' does not exists")) 
 

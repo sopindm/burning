@@ -36,8 +36,6 @@
 							 (bsdf-condition-format-control err)))
 					   (setf (bsdf-condition-format-args err)
 						 (cons name (bsdf-condition-format-args err))))))
-    (unless (apply #'bsdf-type-p (if (listp type) type (list type)))
-      (bsdf-compilation-error "Wrong BSDF type ~a" type))
     (setf expression (expand-expression expression))
     (let ((real-type (expression-type expression)))
       (unless (equal real-type type) 

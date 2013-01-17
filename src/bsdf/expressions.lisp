@@ -1,254 +1,50 @@
 (in-package #:bsdf-expressions)
 
 ;;
-;; Operation generic and macro's
+;; Functions generic and macro's
 ;;
 
-(defvar *operations* (make-hash-table :test #'eq))
+(defvar *functions* (make-hash-table :test #'eq))
 
-(defun bsdf-operation-p (symbol-or-expr)
-  (let ((symbol (if (listp symbol-or-expr) (first symbol-or-expr) symbol-or-expr)))
-    (and (symbolp symbol) (not (typep symbol 'boolean)) 
-	 (not (eq (symbol-package symbol) (find-package "KEYWORD"))))))
+(defun bsdf-function-p (expr)
+  (aif (and (listp expr) (first expr))
+       (and (symbolp it) (not (typep it 'boolean))
+	    (not (eq (symbol-package it) (find-package "KEYWORD"))))))
 
-(defun set-operation (name)
-  (setf (gethash name *operations*) t))
+(defun set-function (name)
+  (setf (gethash name *functions*) t))
 
-(defgeneric bsdf-operation-expansion (operation args))
-(defmethod bsdf-operation-expansion (operation args)
-  (values (cons operation (mapcar #'expand-expression args)) t))
+(defgeneric bsdf-macroexpand (name args))
+(defmethod bsdf-macroexpand (name args)  
+  (values (cons name (mapcar #'expand-expression args)) t))
 
 (defun expand-expression (expr)
   (if (and expr (listp expr))
-      (multiple-value-bind (value last-p) (bsdf-operation-expansion (first expr) (rest expr))
-	(if last-p value
+      (multiple-value-bind (value last-p) (bsdf-macroexpand (first expr) (rest expr))
+	(if last-p 
+	    value
 	    (expand-expression value)))
       expr))
 
-(defgeneric bsdf-operation-type (operation args))
+(defgeneric bsdf-function-type (func args))
 
-(defmethod bsdf-operation-type (operation args)
+(defmethod bsdf-function-type (func args)
   (declare (ignore args))
-  (bsdf-compilation-error "Wrong BSDF operation ~a" operation))
+  (bsdf-compilation-error "Wrong BSDF function ~a" func))
 
-(defgeneric bsdf-operation-value (operation args))
+(defgeneric bsdf-function-value (func args))
+(defgeneric bsdf-atom-value (atom))
+(defmethod bsdf-atom-value (atom) atom)
 
-;;
-;; Type generics and macro's
-;;
+(defgeneric bsdf-function-dependencies (func args))
+(defmethod bsdf-function-dependencies (func args)
+  (declare (ignore func))
+  (list-dependencies args))
 
-(defgeneric bsdf-type-p (type &rest args))
-
-(defmethod bsdf-type-p (type &rest args)
-  (declare (ignore type args))
-  nil)
-
-(defmacro def-type-p (type (args-var) &body body)
-  `(defmethod bsdf-type-p ((type (eql ',type)) &rest ,args-var)
-     ,@body))
-
-(defgeneric bsdf-type-of (value))
-
-(defmethod bsdf-type-of (value)
-  (bsdf-compilation-error "Unknown BSDF type for ~a" value))
-
-(defmacro def-type-of (type inner-type)
-  `(defmethod bsdf-type-of ((value ,type))
-     ,inner-type))
-
-(defun cast-type (value dest-type &optional (type (bsdf-type-of value)))
-  (unless (apply #'bsdf-type-p (if (listp type) type (list type)))
-    (bsdf-compilation-error "Wrong BSDF type ~a" type))
-  (unless (apply #'bsdf-type-p (if (listp dest-type) dest-type (list dest-type)))
-    (bsdf-compilation-error "Wrong BSDF type ~a" dest-type))
-  (cond ((eq dest-type t) value)
-	((equal dest-type type) value)
-	((bsdf-operation-p value) `(cast ,value ,dest-type))
-	((eq type t) (cast-type value dest-type))
-	(t (let ((type (if (listp type) (first type) type))
-		 (type-args (if (listp type) (rest type)))
-		 (dest-type (if (listp dest-type) (first dest-type) dest-type))
-		 (dest-type-args (if (listp dest-type) (rest dest-type))))
-	     (%cast-type value type dest-type type-args dest-type-args)))))
-
-(defgeneric %cast-type (value type dest-type type-args dest-type-args))
-
-(defmethod %cast-type (value type dest-type type-args dest-type-args)
-  (flet ((type-name (type args)
-	   (if args (cons type args) type)))
-    (bsdf-compilation-error "Cannot convert ~a from type ~a to ~a" value 
-			    (type-name type type-args)
-			    (type-name dest-type dest-type-args))))
-
-(defmethod %cast-type (value type (dest-type (eql t)) type-args dest-type-args)
-  (declare (ignore type type-args dest-type-args))
-  value)
-
-(defmacro defcast (type-and-args dest-type-and-args (value) &body body)
-  (let ((type-sym (gensym)) (dest-sym (gensym)))
-    (let ((type (if (listp type-and-args) (first type-and-args) type-and-args))
-	  (type-args (if (listp type-and-args) (second type-and-args) (gensym)))
-	  (dest-type (if (listp dest-type-and-args) (first dest-type-and-args) dest-type-and-args))
-	  (dest-type-args (if (listp dest-type-and-args) (second dest-type-and-args) (gensym))))
-      `(defmethod %cast-type (,value (,type-sym (eql ,type)) (,dest-sym (eql ,dest-type)) ,type-args ,dest-type-args)
-	 (declare (ignorable ,type-args ,dest-type-args))
-	 ,@body))))
-
-;;
-;; Types
-;;
-
-(defmethod bsdf-type-of ((value list))
-  (if (bsdf-operation-p (first value)) (bsdf-operation-type (first value) (rest value))
-      (let ((types (mapcar #'bsdf-type-of value)))
-	(if (every (lambda (type) (equal type (first types))) (rest types))
-	    `(:list ,(first types))
-	    :list))))
-
-(defmethod bsdf-type-of ((value (eql nil)))
-  :list)
-
-(defmethod bsdf-type-of ((value (eql t)))
-  :bool)
-
-(def-type-p t (args)
-  (null args))
-
-(def-type-of string :string)
-(def-type-of integer :int)
-(def-type-of burning-filesystem:path :path)
-(def-type-of symbol :enum)
-
-(def-type-p :string (args)
-  (null args))
-
-(defcast :int :string (value)
-  (format nil "~d" value))
-
-(def-type-p :int (args)
-  (< (length args) 3))
-
-(defcast :path :string (value)
-  (path-to-string value))
-
-(defcast :file :string (value)
-  (cast-type (cast-type value :path :file) :string))
-
-(defcast :directory :string (value)
-  (cast-type (cast-type value :path :directory) :string))
-
-(defcast :bool :string (value)
-  (if value "t" "nil"))
-
-(defcast :string :bool (value)
-  (cond ((string= value "t") t)
-	((string= value "nil") nil)
-	(t (call-next-method))))
-
-(defcast :enum :string (value)
-  (symbol-name value))
-
-(defcast :string :enum (value)
-  (intern value (find-package "KEYWORD")))
-
-(def-type-p :list (args)
-  (and (<= (length args) 1)
-       (or (not args)
-	   (apply #'bsdf-type-p (if (listp (first args)) (first args) (list (first args)))))))
-
-(defcast (:list args) (:list dest-args) (value)
-  (if dest-args
-      (handler-case (mapcar (lambda (arg) (cast-type arg (first dest-args))) value)
-	(bsdf-compilation-error () (call-next-method)))
-      value))
-
-(defcast (:list args) :string (value)
-  (format nil "(~{~a~^;~})" (mapcar (lambda (val) (cast-type val :string)) value)))
-
-(defcast :string (:list args) (value)
-  (labels ((unescaped-p (string pos)
-	     (or (= pos 0)
-		 (char/= (char string (1- pos)) #\\)
-		 (not (unescaped-p string (1- pos)))))
-	   (unescaped-position (char string &key (start 0))
-	     (aif (position char string :start start)
-		  (if (unescaped-p string it)
-		      it
-		      (unescaped-position char string :start (1+ it)))))
-	   (do-cast (string &optional (position 0))
-	     (aif (unescaped-position #\; string :start position)
-		  (let ((ob-pos (or (unescaped-position #\( string) (length string)))
-			(cb-pos (or (unescaped-position #\) string) (length string))))
-		    (if (or (< it ob-pos) (> it cb-pos))
-			(cons (subseq string 0 it) (do-cast (subseq string (1+ it))))
-			(do-cast string (1+ cb-pos))))
-		  (list string))))
-    (setf value (string-trim '(#\Space #\Tab #\Newline) value))
-    (unless (char= (char value 0) #\()
-      (call-next-method))
-    (unless (char= (char value (1- (length value))) #\))
-      (call-next-method))
-    (cast-type (do-cast (subseq value 1 (1- (length value)))) `(:list ,@args))))
-
-(defcast :string (:int args) (value)
-  (multiple-value-bind (int pos) (parse-integer value :junk-allowed t)
-    (if (= pos (length value)) 
-	(handler-case (cast-type int `(:int ,@args))
-	  (bsdf-compilation-error () (call-next-method)))
-	(call-next-method))))
-
-(defcast (:int args) (:int dest-args) (value)
-  (declare (ignore args))
-  (if (and dest-args
-	   (dbind (min &optional (max '*)) dest-args
-	     (or (and (not (eq min '*)) (< value min)) 
-		 (and (not (eq max '*)) (> value max)))))
-      (call-next-method)
-      value))
-
-(defcast :list :bool (value)
-  (if (null value) nil t))
-
-(defcast :path :file (value)
-  (if (file-path-p value) value (call-next-method)))
-
-(defcast :path :directory (value)
-  (if (directory-path-p value) value (call-next-method)))
-
-(defcast :file :path (value)
-  value)
-
-(defcast :directory :path (value)
-  value)
-
-(defcast :string :path (value)
-  (path-from-string value))
-
-(defcast :string :file (value)
-  (cast-type (cast-type value :path :string) :file :path))
-
-(defcast :string :directory (value)
-  (cast-type (cast-type value :path :string) :directory :path))
-
-(def-type-p :path (args)
-  (null args))
-
-(def-type-p :file (args)
-  (apply #'bsdf-type-p :path args))
-
-(def-type-p :directory (args)
-  (apply #'bsdf-type-p :path args))
-
-(def-type-p :bool (args)
-  (null args))
-
-(defcast :enum (:enum dest-args) (value)
-  (if (or (not dest-args) (member value dest-args)) value
-      (call-next-method)))
-
-(def-type-p :enum (args)
-  (every (lambda (x) (and (symbolp x) (eq (symbol-package x) (find-package "KEYWORD"))))
-	 args))
+(defgeneric bsdf-atom-dependencies (atom))
+(defmethod bsdf-atom-dependencies (atom)
+  (declare (ignore atom))
+  (list () () ()))
 
 ;;
 ;; Expressions
@@ -256,19 +52,32 @@
 
 (defun expression-value (expr)
   (if (listp expr)
-      (if (bsdf-operation-p expr)
-	  (bsdf-operation-value (first expr) (mapcar #'expression-value (rest expr)))
+      (if (bsdf-function-p expr)
+	  (bsdf-function-value (first expr) (mapcar #'expression-value (rest expr)))
 	  (mapcar #'expression-value expr))
-      expr))
-
-(defun expression-string (expr)
-  (cast-type (expression-value expr) :string))
+      (bsdf-atom-value expr)))
 
 (defun expression-type (expr)
   (bsdf-type-of expr))
 
+(defun check-expression (expr)
+  (and (expression-type expr) (expression-value expr) t))
+
+(defun list-dependencies (list)
+  (let ((mapped (mapcar #'expression-dependencies list)))
+    (list (remove-duplicates (mapcan #'first mapped) :test #'bsdf=)
+	  (remove-duplicates (mapcan #'second mapped) :test #'bsdf=)
+	  (remove-duplicates (mapcan #'third mapped) :test #'bsdf=))))
+
+(defun expression-dependencies (expr)
+  (if (listp expr)
+      (if (bsdf-function-p expr)
+	  (bsdf-function-dependencies (first expr) (rest expr))
+	  (list-dependencies expr))
+      (bsdf-atom-dependencies expr)))
+
 ;;
-;; Operations
+;; Functions
 ;;
 
 (defun try-bind (lambda-list args)
@@ -278,7 +87,7 @@
 	     :format-control (simple-condition-format-control err)
 	     :format-arguments (simple-condition-format-arguments err)))))
 
-(defmacro defoperation (name args type-specs &body body)
+(defmacro bsdf-defun (name args type-specs &body body)
   (let ((args-sym (gensym)))
     (labels ((var-handler (var)
 	       `(lambda (err)
@@ -290,39 +99,39 @@
 	       (dbind (var type) spec
 		 `(,var (handler-bind ((bsdf-compilation-error ,(var-handler var)))
 			  (cast-type ,var ',type))))))
-      `(progn (set-operation ',name)
-	      (defmethod bsdf-operation-type ((operation (eql ',name)) ,args-sym)
+      `(progn (set-function ',name)
+	      (defmethod bsdf-function-type ((function (eql ',name)) ,args-sym)
 		(try-bind ',args ,args-sym)
 		(dbind ,args ,args-sym
 		  (declare (ignorable ,@(lambda-list-arguments args)))
 		  ,(first type-specs)))
-	      (defmethod bsdf-operation-value ((operation (eql ',name)) ,args-sym)
+	      (defmethod bsdf-function-value ((function (eql ',name)) ,args-sym)
 		(try-bind ',args ,args-sym)
 		(dbind ,args ,args-sym
 		  (let (,@(mapcar #'cast-expr (rest type-specs)))
-		    (cast-type (progn ,@body) (bsdf-operation-type ',name ,args-sym)))))))))
+		    (cast-type (progn ,@body) (bsdf-function-type ',name ,args-sym)))))))))
 
-(defmacro defoperation-macro (name args &body body)
+(defmacro bsdf-defmacro (name args &body body)
   (let ((args-sym (gensym)))
-    `(progn (set-operation ',name)
-	    (defmethod bsdf-operation-expansion ((operation (eql ',name)) ,args-sym)
+    `(progn (set-function ',name)
+	    (defmethod bsdf-macroexpand ((function (eql ',name)) ,args-sym)
 	      (try-bind ',args ,args-sym)
 	      (dbind ,args ,args-sym
 		,@body)))))
 
-(defoperation cast (value type)
+(bsdf-defun cast (value type)
     (type)
   (cast-type value type))
 
-(defoperation quote (item)
+(bsdf-defun quote (item)
     (t)
   item)
 
-(defoperation ++ (&rest args)
+(bsdf-defun ++ (&rest args)
     (:string (args (:list :string)))
   (apply #'concatenate 'string args))
 
-(defoperation substring (string first &optional (last (length string)))
+(bsdf-defun substring (string first &optional (last (length string)))
     (:string (string :string) (first :int) (last :int))
   (when (< first 0) (setf first (+ (length string) first)))
   (when (< last 0) (setf last (+ (length string) last 1)))
@@ -334,25 +143,25 @@
 ;; Int type
 ;;
 
-(defoperation + (&rest args)
+(bsdf-defun + (&rest args)
     (:int (args (:list :int)))
   (apply #'+ args))
 
-(defoperation - (number &rest numbers)
+(bsdf-defun - (number &rest numbers)
     (:int (number :int) (numbers (:list :int)))
   (apply #'- number numbers))
 
-(defoperation * (&rest args)
+(bsdf-defun * (&rest args)
     (:int (args (:list :int)))
   (apply #'* args))
 
-(defoperation / (number &rest numbers)
+(bsdf-defun / (number &rest numbers)
     (:int (number :int) (numbers (:list :int)))
   (when (some (lambda (x) (= x 0)) numbers)
     (bsdf-compilation-error "Division by zero in (/ ~a ~{~a~^ ~})" number numbers))
   (floor (apply #'/ number numbers)))
 
-(defoperation mod (number divisor)
+(bsdf-defun mod (number divisor)
     (:int (number :int) (divisor :int))
   (when (= 0 divisor)
     (bsdf-compilation-error "Division by zero in (mod ~a ~a)" number divisor))
@@ -362,18 +171,18 @@
 ;; List type
 ;; 
 
-(defoperation cons (item list)
+(bsdf-defun cons (item list)
     (:list (list :list))
   (cons item list))
 
-(defoperation append (&rest lists)
+(bsdf-defun append (&rest lists)
     (:list)
   (apply #'append 
 	 (mapcar (lambda (x) (if (listp x) x (list x))) lists)))
 
 (defmacro def-nth (n)
   (let ((name (intern (string-upcase (format nil "~:r" n)))))
-    `(defoperation ,name (list)
+    `(bsdf-defun ,name (list)
 	 (t (list :list))
        (,name list))))
 
@@ -385,15 +194,15 @@
 
 (def-nths 10)
 
-(defoperation nth (index list)
+(bsdf-defun nth (index list)
     (t (index (:int 0)) (list :list))
   (nth index list))
 
-(defoperation remove (item list)
+(bsdf-defun remove (item list)
     (:list (list :list))
   (remove item list :test #'equal))
 
-(defoperation remove-duplicates (list)
+(bsdf-defun remove-duplicates (list)
     (:list (list :list))
   (labels ((do-remove (list)
 	     (if (null list) nil
@@ -405,31 +214,31 @@
 ;; Path type
 ;;
 
-(defoperation parent-path (path)
+(bsdf-defun parent-path (path)
     (:path (path :path))
   (parent-path path))
 
-(defoperation directory-path (path)
+(bsdf-defun directory-path (path)
     (:path (path :path))
   (copy-path path :new-filename nil))
 
-(defoperation root-path (path)
+(bsdf-defun root-path (path)
     (:path (path :path))
   (root-path path))
 
-(defoperation path+ (&rest paths)
+(bsdf-defun path+ (&rest paths)
     (:path (paths (:list :path)))
   (apply #'path+ paths))
 
-(defoperation as-absolute (path)
+(bsdf-defun as-absolute (path)
     (:path (path :path))
   (as-absolute-path path))
 
-(defoperation as-relative (path base-path)
+(bsdf-defun as-relative (path base-path)
     (:path (path :path) (base-path :path))
   (as-relative-path path base-path))
 
-(defoperation copy-path (path 
+(bsdf-defun copy-path (path 
 			 &key (new-name (path-name path) new-name-p) (new-type (path-type path) new-type-p))
     (:path (path :path) (new-name :string) (new-type :string))
   (apply #'copy-path path

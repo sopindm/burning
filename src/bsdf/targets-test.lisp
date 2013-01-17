@@ -294,98 +294,57 @@
     (?equal (target-depends-on target) '("target2"))))
 
 (def-targets-test setting-and-accessing-variables
-  (let ((var (make-variable "var" 123)))
+  (let ((var (make-variable 'var 123)))
     (set-variable var)
-    (?equal (get-variable "var") var)
-    (?equal (get-variable '|var|) var)
-    (?equal (get-variable '#:|var|) var))
-  (let ((var (make-variable '#:other-var 456)))
-    (set-variable var)
-    (?equal (get-variable "OTHER-VAR") var)))
+    (?equal (get-variable 'var) var)
+    (?null (get-variable '|var|))))
 
 (def-targets-test defining-variables
   (defvariable var '(append 1 2 3)
-    :type (:list :int)
-    :description "simple integer variable"
-    :visible-p t)
-  (?equalp (get-variable "VAR")
+    :type (:list :int))
+  (?equalp (get-variable 'var)
 	   (make-variable 'var '(append 1 2 3)
-			  :type '(:list :int)
-			  :description "simple integer variable"
-			  :visible-p t)))
+			  :type '(:list :int))))
 
 (def-targets-test variables-name-conflicts
   (deftarget "var" #'identity () ())
-  (?bsdf-compilation-error (set-variable (make-variable "var" 123))
-			   (lines "Variable name 'var' is already a target name"))
-  (deftarget nil #'identity "input" "output")
-  (?bsdf-compilation-error (set-variable (make-variable "output" 456))
-			   (lines "Variable name 'output' is already a file name"))
-  (defvariable "a-var" 123)
-  (?bsdf-compilation-error (set-variable (make-variable "a-var" 789))
-			   (lines "Variable with name 'a-var' already exists"))
-  (?bsdf-compilation-error (deftarget "a-var" #'identity () ())
-			   (lines "Target name 'a-var' is already a variable name"))
-  (?bsdf-compilation-error (deftarget nil #'identity "input" "a-var")
-			   (lines "File name 'a-var' is already a variable name")))
+  (?condition-safe (set-variable (make-variable 'var 123)))
+  (deftarget nil #'identity "input" "OUTPUT")
+  (?condition-safe (set-variable (make-variable 'output 456)))
+  (defvariable a-var 123)
+  (?bsdf-compilation-error (set-variable (make-variable 'a-var 789))
+			   (lines "Variable with name 'A-VAR' already exists"))
+  (?condition-safe (deftarget "A-VAR" #'identity () ()))
+  (?condition-safe (deftarget nil #'identity "input" "VAR")))
 
 (def-targets-test getting-variables
   (defvariable var1 123)
   (defvariable var2 "345")
-  (defvariable "var3" 123)
+  (defvariable var3 123)
   (?equalp (get-variables)
-	   (mapcar #'get-variable (list "VAR1" "VAR2" "var3"))))
+	   (mapcar #'get-variable '(var1 var2 var3))))
 
-(def-targets-test simple-generating-temporal-names
-  (let ((name (gen-tmp-name "name"))
-	(name2 (gen-tmp-name "name")))
-    (?equal name "__name")
-    (?equal name2 "__name_2"))
-  (deftarget "__name_3" #'identity nil nil)
-  (?equal (gen-tmp-name "name") "__name_4"))
+;;
+;; Using uninterned symbols as:
+;;
 
-(def-targets-test freeing-tmp-names
-  (let ((name (gen-tmp-name "name"))
-	(name2 (gen-tmp-name "name")))
-    (free-tmp-name name2)
-    (?equal (gen-tmp-name "name") name2)
-    (free-tmp-name name)
-    (?equal (gen-tmp-name "name") name)))
+(def-targets-test using-uninterned-symbols-in-variable-names
+  (defvariable #:var 123)
+  (?condition-safe (defvariable #:var 234)))
 
-(def-targets-test temporal-names-callback
-  (let ((new-name nil))
-    (gen-tmp-name "name" (lambda (x) (setf new-name x)))
-    (defvariable "__name" 123)
-    (?equal new-name "__name_2")
-    (defvariable "__name_2" 234)
-    (?equal new-name "__name_3")
-    (defvariable "__name_4" 345)
-    (defvariable "__name_3" 234)
-    (?equal new-name "__name_5")))
-
-(def-targets-test with-tmp-name-test
-  (defvariable "__name" 123)
-  (with-tmp-name (name "name")
-    (?equal name "__name_2"))
-  (?equal (gen-tmp-name "name") "__name_2")
-  (with-tmp-names ((name1 "name") (name2 "name") (name3 "name2"))
-    (?equal name1 "__name_3")
-    (?equal name2 "__name_4")
-    (?equal name3 "__name2")))
+; target names
 
 (def-targets-test getvar-operation-test
-  (defvariable "VAR" 123)
-  (?expr= ('(getvar var) :int) 123)
-  (?expr= ('(getvar "VAR") :string) "123")
-  (?wrong-expr (getvar 123) "Wrong variable name '123'")
-  (?wrong-expr (getvar "var2") "Variable 'var2' does not exists")) 
+  (defvariable var 123)
+  (?expr= ('var :int) 123)
+  (?wrong-expr (+ var2 1) "Variable 'VAR2' does not exists"))
 
 (def-targets-test $-operation-test
-  (defvariable "VAR" '(append (1 2) (3 4)))
-  (let ((var (make-variable "var2" '(second ($ var)))))
+  (defvariable var '(append (1 2) (3 4)))
+  (let ((var (make-variable 'var2 '(second ($ var)))))
     (?equal (variable-expression var) '(second (append (1 2) (3 4)))))
   (?wrong-expr ($ 123) "Wrong variable name '123'")
-  (?wrong-expr (getvar "other var") "Variable 'other var' does not exists"))
+  (?wrong-expr (+ 1 |other var|) "Variable 'other var' does not exists"))
 
 ;;
 ;;targets hierarchy
@@ -393,10 +352,7 @@
 
 ;; generators (separate files)
 
-;generating makefile's
-;generating ninja files?
 ;generating bsc files
 ;generating lisp sources
 ;generating pure lisp sources
-;generating asd systesm???
 

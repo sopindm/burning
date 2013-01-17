@@ -22,7 +22,6 @@
   `(?bsdf-compilation-error (cast-type ,value ,expected-type ,type)
 			    (lines (wrong-cast-message ,value ,type ,expected-type))
 			    ,value ,type ,expected-type))
-				   
 
 (deftest making-simple-integer-expressions
   (?expr= (123 :int) 123)
@@ -136,7 +135,7 @@
 
 ;string expressions
 
-(deftest simple-variable-expression
+(deftest simple-string-expression
   (?expr= ('(++ "abc" "def" "ghi") :string) "abcdefghi")
   (?expr= ('(substring "abcdef" 1) :string) "bcdef")
   (?expr= ('(substring "abcdef" 2 "4") :string) "cd")
@@ -145,12 +144,16 @@
   (?expr= ('(substring "abcdef" -3 "-1") :string) "def"))
 
 (defmacro ?wrong-expr ((expr &rest args) error &rest error-args)
-  `(?bsdf-compilation-error (expression-value (expand-expression '(,expr ,@args)))
+  `(?bsdf-compilation-error (check-expression (expand-expression '(,expr ,@args)))
 			    (lines ,error)
 			    ,@error-args))
 
 (defmacro ?wrong-expr-arg ((expr &rest args) arg-name error)
   `(?wrong-expr (,expr ,@args) (lines* "In argument '~a' of '~a':" ,error) ',arg-name ',expr))
+
+(deftest wrong-function-error
+  (?bsdf-compilation-error (check-expression '(wrong-symbol 1 2 3)) 
+			   (lines "Wrong BSDF function ~a") 'wrong-symbol))
 
 (deftest wrong-arguments-error
   (?wrong-expr-arg (substring "abc" "a") first (wrong-cast-message "a" :STRING :INT))
@@ -265,10 +268,10 @@
   (?expr= ('(copy-path "/home/new.file" :new-type "dir") :string) "/home/new.dir")
   (?expr= ('(copy-path "a.file" :new-name 123) :string) "123.file"))
 
-(defoperation-macro ct-eval (operation &rest args)
+(bsdf-defmacro ct-eval (operation &rest args)
   (expression-value (cons operation args)))
 
-(defoperation-macro ct-! (n)
+(bsdf-defmacro ct-! (n)
   (if (= n 0) 1
       `(* ,n (ct-! ,(1- n)))))
 
@@ -292,3 +295,27 @@
 ;conditionals
 ;;if
 ;;cond???
+
+;;
+;; Dependencies
+;;
+
+(defmacro ?depends= (expr &optional input-variables input-files output-files)
+  `(?equal (expression-dependencies (expand-expression ',expr)) (list ,input-variables ,input-files ,output-files)))
+
+(deftest empty-expression-dependencies-test
+  (?depends= (+ 1 2 3)))
+
+(defmacro def-context-test (name &body body)
+  `(deftest ,name 
+     (let ((*context* (copy-context)))
+       ,@body)))
+
+(def-context-test simple-expression-dependencies-test
+  (defvariable var '(+ 1 2 3))
+  (?depends= var (list 'var))
+  (?depends= ($ var))
+  (?depends= (+ var 3 var) (list 'var))
+  (defvariable var2 "a.file" :type :path)
+  (?depends= (++ (as-absolute var2) var2 (+ 1 (* var 2))) (list 'var2 'var))) 
+    

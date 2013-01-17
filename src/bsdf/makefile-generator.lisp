@@ -67,7 +67,7 @@
 
 (defmethod %print-makefile-value (value type type-args)
   (declare (ignore type type-args))
-  (expression-string value))
+  (cast-type (expression-value value) :string))
 
 (defmethod %print-makefile-value (value (type (eql :bool)) type-args)
   (declare (ignore type-args))
@@ -93,7 +93,7 @@
 (defun print-makefile-variable (var stream)
   (format stream "~a = ~a~%" 
 	  (escape-makefile-name (variable-name var))
-	  (print-makefile-value (variable-value var) (variable-type var))))
+	  (print-makefile-value (expression-value (variable-expression var)) (variable-type var))))
 
 ;;
 ;; Makefile generation
@@ -105,7 +105,7 @@
 	(name (target-name target))
 	(depends-on (target-depends-on target)))
     (when (and output (rest output) (not name))
-      (setf name (gen-tmp-name (format nil "~{~a~^ ~}" output))))
+      (setf name (format nil "__~{~a~^ ~}" output)))
     (setf name (escape-makefile-name name))
     (setf input (mapcar #'escape-makefile-name input))
     (setf output (mapcar #'escape-makefile-name output))

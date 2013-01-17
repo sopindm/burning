@@ -23,13 +23,12 @@
 ;;
 
 (defstruct (variable (:constructor %make-variable) (:conc-name %variable-))
-  name expression type description visible-p)
+  name expression type)
 
-(defaccessors variable () (name expression type description visible-p))
+(defaccessors variable () (name expression type))
 
-(defun make-variable (name expression &key (type t) (description "") (visible-p nil))
-  (unless (or (symbolp name) (stringp name))
-    (bsdf-compilation-error "Wrong variable name '~a'" name))
+(defun make-variable (name expression &key (type t))
+  (unless (symbolp name) (bsdf-compilation-error "Wrong variable name '~a'" name))
   (handler-bind ((bsdf-compilation-error (lambda (err) 
 					   (setf (bsdf-condition-format-control err)
 						 (lines* "In definition of variable '~a':"
@@ -39,17 +38,12 @@
     (setf expression (expand-expression expression))
     (let ((real-type (expression-type expression)))
       (unless (equal real-type type) 
-	(setf expression (cast-type expression type real-type))))
+	(setf expression (cast-type expression type real-type)))
+      (check-expression expression))
     (let ((var (%make-variable :name name
 			       :type type
-			       :expression expression
-			       :description description
-			       :visible-p visible-p)))
-      (variable-value var)
+			       :expression expression)))
       var)))
 
-(defun variable-value (var) 
-  (expression-value (variable-expression var)))
 
-(defun variable-string (var) (expression-string (variable-expression var)))
 

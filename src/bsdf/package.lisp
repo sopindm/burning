@@ -27,13 +27,16 @@
 
 (defpackage #:bsdf-expressions
   (:use #:burning-lisp #:bsdf-errors #:burning-filesystem)
-  (:export expression-type
+  (:export cast-type
+	   bsdf-type-p
+
+	   expression-type
 	   expression-value
 	   expression-string
-	   expand-expression
+	   expression-dependencies
 
-	   cast-type
-	   bsdf-type-p
+	   check-expression
+	   expand-expression
 
 	   ++
 	   substring
@@ -43,22 +46,17 @@
 
 	   directory-path
 
-	   defoperation
-	   defoperation-macro))
+	   bsdf-defmacro))
 
 (defpackage #:bsdf-variables
   (:use #:burning-lisp #:bsdf-errors #:bsdf-expressions #:alexandria)
   (:shadowing-import-from #:burning-filesystem #:copy-file)
   (:export variable
 	   make-variable
+
 	   variable-name
 	   variable-expression
-	   variable-type
-	   variable-description
-	   variable-visible-p
-
-	   variable-value
-	   variable-string))
+	   variable-type))
 
 (defpackage #:bsdf-targets
   (:use #:burning-lisp #:bsdf-errors #:alexandria #:bsdf-expressions #:bsdf-variables)
@@ -83,12 +81,6 @@
 
 	   getvar
 	   $
-
-	   gen-tmp-name
-	   free-tmp-name
-
-	   with-tmp-name
-	   with-tmp-names
 
 	   add-input
 	   add-output

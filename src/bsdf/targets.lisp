@@ -124,8 +124,6 @@
   (setf (gethash name (context-targets (get-context))) value))
 
 (defun get-variable (name)
-  (when (symbolp name)
-    (setf name (symbol-name name)))
   (gethash name (context-variables (get-context))))
 
 (defun get-targets ()
@@ -311,17 +309,11 @@
   (push-target-to-list target)
   target)
 
-(defun variable-namestring (var)
-  (let ((name (variable-name var)))
-    (cond ((stringp name) name)
-	  ((symbolp name) (symbol-name name))
-	  (t (bsdf-compilation-error "Wrong variable name ~a." name)))))
-
 (defun push-var-to-list (var)
   (double-list-push var (context-variables-list (get-context))))
 
 (defun push-var-to-table (var)
-  (let ((name (variable-namestring var)))
+  (let ((name (variable-name var)))
     (check-name name :variable)
     (setf (gethash name (context-variables (get-context))) var)))
 
@@ -330,22 +322,39 @@
   (push-var-to-list var)
   var)
 
-(defmacro defvariable (name expression &key (type t) (description "") visible-p)
-  `(set-variable (make-variable ',name ,expression :type ',type :description ,description :visible-p ,visible-p)))
+(defmacro defvariable (name expression &key (type t))
+  `(set-variable (make-variable ',name ,expression :type ',type)))
 
 (defun get-variable-expression (name)
-  (when (symbolp name) (setf name (symbol-name name)))
-  (unless (stringp name)
+  (unless (symbolp name)
     (bsdf-compilation-error "Wrong variable name '~a'" name))
   (let ((variable (get-variable name)))
     (unless variable (bsdf-compilation-error "Variable '~a' does not exists" name))
     (variable-expression variable)))
       
-(defoperation getvar (name)
-    (t)
-  (get-variable-expression name))
+(defun variable-symbol-p (symbol)
+  (and (symbolp symbol) 
+       (not (or (eq symbol t) (null symbol) 
+		(eq (symbol-package symbol) (find-package "KEYWORD"))))))
 
-(defoperation-macro $ (name)
+(defmethod bsdf-expressions::bsdf-type-of ((value symbol))
+  (if (variable-symbol-p value)
+      (aif (get-variable value)
+	   (expression-type (variable-expression it))
+	   t)
+      :enum))
+
+(defmethod bsdf-expressions::bsdf-atom-value ((atom symbol))
+  (if (variable-symbol-p atom)
+      (expression-value (get-variable-expression atom))
+      (call-next-method)))
+
+(defmethod bsdf-expressions::bsdf-atom-dependencies ((atom symbol))
+  (if (variable-symbol-p atom)
+      (list (list atom) () ())
+      (call-next-method)))
+
+(bsdf-defmacro $ (name)
   (get-variable-expression name))
 
 (defun add-dependency (target dep)

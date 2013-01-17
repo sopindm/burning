@@ -3,46 +3,29 @@
 (in-case variables-test)
 
 (deftest making-variables
-  (let ((var (make-variable "var" "123")))
-    (?equal (variable-name var) "var")
+  (let ((var (make-variable 'var "123")))
+    (?eq (variable-name var) 'var)
     (?equal (variable-expression var) "123")
-    (?equal (variable-description var) "")
-    (?eq (variable-type var) t)
-    (?null (variable-visible-p var)))
-  (let ((var (make-variable "var2" "456" :description "sample variable")))
-    (?equal (variable-description var) "sample variable"))
-  (let ((var (make-variable "var3" "789" :visible-p t)))
-    (?t (variable-visible-p var))))
+    (?eq (variable-type var) t)))
 
 (deftest wrong-variables-name-error
-  (make-variable "var" 1)
-  (make-variable 'var 2)
   (?bsdf-compilation-error (make-variable 123 1)
 			   (lines "Wrong variable name '123'")))
 
-(deftest wrong-operation-error
-  (?bsdf-compilation-error (make-variable "var" '(wrong-symbol 1 2 3))
-			   (lines "In definition of variable 'var':"
-				  "Wrong BSDF operation ~a") 'wrong-symbol))
-
 (deftest wrong-variable-expressions-error
-  (?bsdf-compilation-error (make-variable "var" "123" :type :list)
-			   (lines "In definition of variable 'var':"
+  (?bsdf-compilation-error (make-variable 'var "123" :type :list)
+			   (lines "In definition of variable '~a':"
 				  "Cannot convert ~a from type ~a to ~a")
-			   "123" :string :list)
-  (?bsdf-compilation-error (make-variable "var2" #(1 2 3))
-			   (lines "In definition of variable 'var2':"
+			   'var "123" :string :list)
+  (?bsdf-compilation-error (make-variable 'var2 #(1 2 3))
+			   (lines "In definition of variable '~a':"
 				  "Unknown BSDF type for ~a")
-			   #(1 2 3)))
+			   'var2 #(1 2 3)))
 
-(defoperation-macro ct-+ (a b)
+(bsdf-defmacro ct-+ (a b)
   (+ a b))
 
 (deftest variables-expansion-test
-  (let ((var (make-variable "var" '(* (ct-+ 1 2) 3))))
+  (let ((var (make-variable 'var '(* (ct-+ 1 2) 3))))
     (?equal (variable-expression var) '(* 3 3))))
-
-  
-
-
 

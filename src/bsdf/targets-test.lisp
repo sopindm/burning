@@ -337,7 +337,9 @@
 (def-targets-test getvar-operation-test
   (defvariable var 123)
   (?expr= ('var :int) 123)
-  (?wrong-expr (+ var2 1) "Variable 'VAR2' does not exists"))
+  (defvariable var2 'var :type :string)
+  (?equal (variable-expression (get-variable 'var2)) '(bsdf-expressions::cast var :string))
+  (?wrong-expr (+ var var3 1) "Variable 'VAR3' does not exists"))
 
 (def-targets-test $-operation-test
   (defvariable var '(append (1 2) (3 4)))

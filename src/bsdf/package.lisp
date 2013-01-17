@@ -46,7 +46,10 @@
 
 	   directory-path
 
-	   bsdf-defmacro))
+	   bsdf-defmacro
+
+	   with-input-files
+	   with-output-files))
 
 (defpackage #:bsdf-variables
   (:use #:burning-lisp #:bsdf-errors #:bsdf-expressions #:alexandria)

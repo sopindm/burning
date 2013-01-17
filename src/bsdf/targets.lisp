@@ -332,20 +332,15 @@
     (unless variable (bsdf-compilation-error "Variable '~a' does not exists" name))
     (variable-expression variable)))
       
-(defun variable-symbol-p (symbol)
-  (and (symbolp symbol) 
-       (not (or (eq symbol t) (null symbol) 
-		(eq (symbol-package symbol) (find-package "KEYWORD"))))))
-
 (defmethod bsdf-expressions::bsdf-type-of ((value symbol))
-  (if (variable-symbol-p value)
+  (if (bsdf-expressions::bsdf-variable-p value)
       (aif (get-variable value)
 	   (expression-type (variable-expression it))
 	   t)
       :enum))
 
 (defmethod bsdf-expressions::bsdf-atom-value ((atom symbol))
-  (if (variable-symbol-p atom)
+  (if (bsdf-expressions::bsdf-variable-p atom)
       (expression-value (get-variable-expression atom))
       (call-next-method)))
 

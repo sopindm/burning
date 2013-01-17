@@ -301,7 +301,9 @@
 ;;
 
 (defmacro ?depends= (expr &optional input-variables input-files output-files)
-  `(?equal (expression-dependencies (expand-expression ',expr)) (list ,input-variables ,input-files ,output-files)))
+  `(progn (check-expression (expand-expression ',expr))
+	  (?equal (expression-dependencies (expand-expression ',expr))
+		  (list ,input-variables ,input-files ,output-files))))
 
 (deftest empty-expression-dependencies-test
   (?depends= (+ 1 2 3)))
@@ -317,5 +319,15 @@
   (?depends= ($ var))
   (?depends= (+ var 3 var) (list 'var))
   (defvariable var2 "a.file" :type :path)
-  (?depends= (++ (as-absolute var2) var2 (+ 1 (* var 2))) (list 'var2 'var))) 
+  (?depends= (++ (as-absolute var2) var2 (+ 1 (* var 2))) (list 'var2 'var)))
+
+(def-context-test with-input-files-test
+  (defvariable var 1)
+  (?depends= (with-input-files (+ 1 var 3) ("a.file" "b.file")) (list 'var) (list "a.file" "b.file"))
+  (?expr= ('(with-input-files (third (++ "(aa;" "bb;" "cc)")) ("a.file" "b.file")) :string) "cc"))
+
+(def-context-test with-output-files-test
+  (defvariable var 2)
+  (?depends= (with-output-files (+ 1 2 var) ("a.file" "b.file")) (list 'var) () (list "a.file" "b.file"))
+  (?expr= ('(with-output-files (third (++ "(aa;" "bb;" "cc)")) ("a.file" "b.file")) :string) "cc"))
     

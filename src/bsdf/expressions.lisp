@@ -11,6 +11,11 @@
        (and (symbolp it) (not (typep it 'boolean))
 	    (not (eq (symbol-package it) (find-package "KEYWORD"))))))
 
+(defun bsdf-variable-p (symbol)
+  (and (symbolp symbol) 
+       (not (or (eq symbol t) (null symbol) 
+		(eq (symbol-package symbol) (find-package "KEYWORD"))))))
+
 (defun set-function (name)
   (setf (gethash name *functions*) t))
 
@@ -63,11 +68,13 @@
 (defun check-expression (expr)
   (and (expression-type expr) (expression-value expr) t))
 
+(defun dependencies+ (dep1 dep2)
+  (list (remove-duplicates (append (first dep1) (first dep2)) :test #'equal)
+	(remove-duplicates (append (second dep1) (second dep2)) :test #'equal)
+	(remove-duplicates (append (third dep1) (third dep2)) :test #'equal)))
+
 (defun list-dependencies (list)
-  (let ((mapped (mapcar #'expression-dependencies list)))
-    (list (remove-duplicates (mapcan #'first mapped) :test #'bsdf=)
-	  (remove-duplicates (mapcan #'second mapped) :test #'bsdf=)
-	  (remove-duplicates (mapcan #'third mapped) :test #'bsdf=))))
+  (reduce #'dependencies+ (mapcar #'expression-dependencies list)))
 
 (defun expression-dependencies (expr)
   (if (listp expr)
@@ -244,3 +251,22 @@
   (apply #'copy-path path
 	 (append (when new-name-p (list :new-name new-name))
 		 (when new-type-p (list :new-type new-type)))))
+
+;; Aux functions
+
+(bsdf-defun with-input-files (expr files)
+    (t (files (:list :path)))
+  (expression-value expr))
+
+(defmethod bsdf-function-dependencies ((func (eql 'with-input-files)) args)
+  (dependencies+ (expression-dependencies (first args))
+		 (list () (mapcar (lambda (x) (cast-type x :string)) (second args)) ())))
+
+(bsdf-defun with-output-files (expr files)
+    (t (files (:list :path)))
+  (expression-value expr))
+
+(defmethod bsdf-function-dependencies ((func (eql 'with-output-files)) args)
+  (dependencies+ (expression-dependencies (first args))
+		 (list () () (mapcar (lambda (x) (cast-type x :string)) (second args)))))
+

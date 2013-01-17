@@ -4,10 +4,6 @@
 ;; Type generics and macro's
 ;;
 
-(defgeneric bsdf= (arg1 arg2))
-(defmethod bsdf= (arg1 arg2)
-  (equal arg1 arg2))
-
 (defgeneric bsdf-type-p (type &rest args))
 
 (defmethod bsdf-type-p (type &rest args)
@@ -34,7 +30,7 @@
     (bsdf-compilation-error "Wrong BSDF type ~a" dest-type))
   (cond ((eq dest-type t) value)
 	((equal dest-type type) value)
-	((bsdf-function-p value) `(cast ,value ,dest-type))
+	((or (bsdf-function-p value) (bsdf-variable-p value)) `(cast ,value ,dest-type))
 	((eq type t) (cast-type value dest-type))
 	(t (let ((type (if (listp type) (first type) type))
 		 (type-args (if (listp type) (rest type)))

@@ -1,45 +1,55 @@
 (in-package #:bsdf-expressions)
 
 ;;
-;; Functions generic and macro's
+;; BSDF primitives
 ;;
 
-(defvar *functions* (make-hash-table :test #'eq))
+(defun bsdf-symbol-p (expr)
+  (and (symbolp expr) 
+       (not (typep expr 'boolean))
+       (not (eq (symbol-package expr) (find-package "KEYWORD")))))
 
 (defun bsdf-function-p (expr)
-  (aif (and (listp expr) (first expr))
-       (and (symbolp it) (not (typep it 'boolean))
-	    (not (eq (symbol-package it) (find-package "KEYWORD"))))))
+  (if (listp expr) (bsdf-symbol-p (first expr))))
 
-(defun bsdf-variable-p (symbol)
-  (and (symbolp symbol) 
-       (not (or (eq symbol t) (null symbol) 
-		(eq (symbol-package symbol) (find-package "KEYWORD"))))))
+(defun bsdf-list-p (expr)
+  (and (listp expr) (not (bsdf-variable-p (first expr)))))
 
-(defun set-function (name)
-  (setf (gethash name *functions*) t))
+(defun bsdf-kind-of (value)
+  (cond ((bsdf-function-p value) :function)
+	((bsdf-list-p value) :list)
+	((bsdf-symbol-p value) :symbol)
+	(t :value)))
+
+(defun bsdf-value-p (expr)
+  (eq (bsdf-kind-of expr) :value))
+
+(defun bsdf-constant-p (expr)
+  (ecase (bsdf-kind-of expr)
+    (:function nil)
+    (:list (every #'bsdf-constant-p expr))
+    (:symbol nil)
+    (:value t)))
+
+;;
+;; Macroexpansion
+;;
 
 (defgeneric bsdf-macroexpand (name args))
 (defmethod bsdf-macroexpand (name args)  
   (values (cons name (mapcar #'expand-expression args)) t))
 
 (defun expand-expression (expr)
-  (if (and expr (listp expr))
+  (if (bsdf-function-p expr)
       (multiple-value-bind (value last-p) (bsdf-macroexpand (first expr) (rest expr))
 	(if last-p 
 	    value
 	    (expand-expression value)))
       expr))
 
-(defgeneric bsdf-function-type (func args))
-
-(defmethod bsdf-function-type (func args)
-  (declare (ignore args))
-  (bsdf-compilation-error "Wrong BSDF function ~a" func))
-
-(defgeneric bsdf-function-value (func args))
-(defgeneric bsdf-atom-value (atom))
-(defmethod bsdf-atom-value (atom) atom)
+;;
+;; Functions generic and macro's
+;;
 
 (defgeneric bsdf-function-dependencies (func args))
 (defmethod bsdf-function-dependencies (func args)
@@ -55,23 +65,29 @@
 ;; Expressions
 ;;
 
-(defun expression-value (expr)
-  (if (listp expr)
-      (if (bsdf-function-p expr)
-	  (bsdf-function-value (first expr) (mapcar #'expression-value (rest expr)))
-	  (mapcar #'expression-value expr))
-      (bsdf-atom-value expr)))
-
-(defun expression-type (expr)
-  (bsdf-type-of expr))
-
 (defun check-expression (expr)
-  (and (expression-type expr) (expression-value expr) t))
+  t)
 
-(defun dependencies+ (dep1 dep2)
-  (list (remove-duplicates (append (first dep1) (first dep2)) :test #'equal)
-	(remove-duplicates (append (second dep1) (second dep2)) :test #'equal)
-	(remove-duplicates (append (third dep1) (third dep2)) :test #'equal)))
+(defun dependencies+ (&rest deps)
+  (labels ((do-append (expr1 expr2)
+	     (let ((list1 (if (and (listp expr1) (eq (first expr1) 'append)) (rest expr1) (list expr1)))
+		   (list2 (if (and (listp expr2) (eq (first expr2) 'append)) (rest expr2) (list expr2))))
+	       `(append ,@(remove-duplicates (append list1 list2) :test #'equal :from-end t))))
+	   (files+ (f1 f2)
+	     (let ((const1 (if (bsdf-constant-p (first f1)) (first f1)))
+		   (rest1 (if (bsdf-constant-p (first f1)) (second f1) (first f1)))
+		   (const2 (if (bsdf-constant-p (first f2)) (first f2)))
+		   (rest2 (if (bsdf-constant-p (first f2)) (second f2) (first f2))))
+	       (append (aif (remove-duplicates (append const1 const2) :test #'equal) (list it))
+		       (cond ((and (null rest1) (null rest2)) nil)
+			     ((null rest1) (list rest2))
+			     ((null rest2) (list rest1))
+			     (t (list (do-append rest1 rest2)))))))
+	   (do+ (dep1 dep2)
+	     (list (remove-duplicates (append (first dep1) (first dep2)) :test #'equal :from-end t)
+		   (remove-duplicates (files+ (second dep1) (second dep2)) :test #'equal :from-end t)
+		   (remove-duplicates (files+ (third dep1) (third dep2)) :test #'equal :from-end t))))
+    (reduce #'do+ deps)))
 
 (defun list-dependencies (list)
   (reduce #'dependencies+ (mapcar #'expression-dependencies list)))
@@ -94,104 +110,69 @@
 	     :format-control (simple-condition-format-control err)
 	     :format-arguments (simple-condition-format-arguments err)))))
 
-(defmacro bsdf-defun (name args type-specs &body body)
-  (let ((args-sym (gensym)))
-    (labels ((var-handler (var)
-	       `(lambda (err)
-		  (setf (bsdf-condition-format-control err)
-			(lines* (format nil "In argument '~a' of '~a':" ',var ',name)
-				(bsdf-condition-format-control err)))
-		  err))
-	     (cast-expr (spec)
-	       (dbind (var type) spec
-		 `(,var (handler-bind ((bsdf-compilation-error ,(var-handler var)))
-			  (cast-type ,var ',type))))))
-      `(progn (set-function ',name)
-	      (defmethod bsdf-function-type ((function (eql ',name)) ,args-sym)
-		(try-bind ',args ,args-sym)
-		(dbind ,args ,args-sym
-		  (declare (ignorable ,@(lambda-list-arguments args)))
-		  ,(first type-specs)))
-	      (defmethod bsdf-function-value ((function (eql ',name)) ,args-sym)
-		(try-bind ',args ,args-sym)
-		(dbind ,args ,args-sym
-		  (let (,@(mapcar #'cast-expr (rest type-specs)))
-		    (cast-type (progn ,@body) (bsdf-function-type ',name ,args-sym)))))))))
+(defstruct %bsdf-function 
+  lambda-list
+  type
+  argument-types)
+
+(defvar *bsdf-functions* (make-hash-table :test #'eq))
+
+(defun set-bsdf-function (name value)
+  (setf (gethash name *bsdf-functions*) value))
+
+(defmacro bsdf-declfun (name args &body type-specs)
+  `(set-bsdf-function ',name
+		      (make-%bsdf-function :lambda-list ',args
+					   :type ',(first type-specs)
+					   :argument-types ',(rest type-specs))))
 
 (defmacro bsdf-defmacro (name args &body body)
   (let ((args-sym (gensym)))
-    `(progn (set-function ',name)
-	    (defmethod bsdf-macroexpand ((function (eql ',name)) ,args-sym)
+    `(progn (defmethod bsdf-macroexpand ((function (eql ',name)) ,args-sym)
 	      (try-bind ',args ,args-sym)
 	      (dbind ,args ,args-sym
 		,@body)))))
 
-(bsdf-defun cast (value type)
-    (type)
-  (cast-type value type))
-
-(bsdf-defun quote (item)
-    (t)
-  item)
-
-(bsdf-defun ++ (&rest args)
-    (:string (args (:list :string)))
-  (apply #'concatenate 'string args))
-
-(bsdf-defun substring (string first &optional (last (length string)))
-    (:string (string :string) (first :int) (last :int))
-  (when (< first 0) (setf first (+ (length string) first)))
-  (when (< last 0) (setf last (+ (length string) last 1)))
-  (when (or (> last (length string)) (> first last))
-    (bsdf-compilation-error "Bad interval [~a, ~a) for string '~a'" first last string))
-  (subseq string first last))
-
 ;;
-;; Int type
+;; String functions
 ;;
 
-(bsdf-defun + (&rest args)
-    (:int (args (:list :int)))
-  (apply #'+ args))
+(bsdf-declfun ++ (&rest args)
+  :string (args (:list :string)))
 
-(bsdf-defun - (number &rest numbers)
-    (:int (number :int) (numbers (:list :int)))
-  (apply #'- number numbers))
+(bsdf-declfun substring (string first &optional last))
+  :string (string :string) (first :int) (last :int))
 
-(bsdf-defun * (&rest args)
-    (:int (args (:list :int)))
-  (apply #'* args))
-
-(bsdf-defun / (number &rest numbers)
-    (:int (number :int) (numbers (:list :int)))
-  (when (some (lambda (x) (= x 0)) numbers)
-    (bsdf-compilation-error "Division by zero in (/ ~a ~{~a~^ ~})" number numbers))
-  (floor (apply #'/ number numbers)))
-
-(bsdf-defun mod (number divisor)
-    (:int (number :int) (divisor :int))
-  (when (= 0 divisor)
-    (bsdf-compilation-error "Division by zero in (mod ~a ~a)" number divisor))
-  (mod number divisor))
+(bsdf-declfun length (seq)
+  :int)
 
 ;;
-;; List type
+;; Int functions
+;;
+
+(bsdf-declfun + (&rest args)
+  :int (args (:list :int)))
+
+(bsdf-declfun - (number &rest numbers)
+  :int (number :int) (numbers (:list :int)))
+
+;;
+;; List functions
 ;; 
 
-(bsdf-defun cons (item list)
-    (:list (list :list))
-  (cons item list))
+(bsdf-declfun cons (item list)
+  :list (list :list))
 
-(bsdf-defun append (&rest lists)
-    (:list)
-  (apply #'append 
-	 (mapcar (lambda (x) (if (listp x) x (list x))) lists)))
+(bsdf-declfun list (&rest args)
+  :list)
+
+(bsdf-declfun append (&rest lists)
+  :list (list (:list :list)))
 
 (defmacro def-nth (n)
   (let ((name (intern (string-upcase (format nil "~:r" n)))))
-    `(bsdf-defun ,name (list)
-	 (t (list :list))
-       (,name list))))
+    `(bsdf-declfun ,name (list)
+	 t (list :list))))
 
 (defmacro def-nths (max)
   `(progn ,@(do ((n 1 (1+ n))
@@ -201,72 +182,61 @@
 
 (def-nths 10)
 
-(bsdf-defun nth (index list)
-    (t (index (:int 0)) (list :list))
-  (nth index list))
+(bsdf-declfun nth (index list)
+  t (index (:int 0)) (list :list))
 
-(bsdf-defun remove (item list)
-    (:list (list :list))
-  (remove item list :test #'equal))
+(bsdf-declfun remove (item list)
+  :list (list :list))
 
-(bsdf-defun remove-duplicates (list)
-    (:list (list :list))
-  (labels ((do-remove (list)
-	     (if (null list) nil
-		 (cons (first list)
-		       (do-remove (remove (first list) (rest list) :test #'equal))))))
-    (do-remove list)))
+(bsdf-declfun remove-duplicates (list)
+  :list (list :list))
 
 ;;
 ;; Path type
 ;;
 
-(bsdf-defun parent-path (path)
-    (:path (path :path))
-  (parent-path path))
+(bsdf-declfun parent-path (path)
+  :path (path :path))
 
-(bsdf-defun directory-path (path)
-    (:path (path :path))
-  (copy-path path :new-filename nil))
+(bsdf-declfun directory-path (path)
+  :path (path :path))
 
-(bsdf-defun root-path (path)
-    (:path (path :path))
-  (root-path path))
+(bsdf-declfun root-path (path)
+  :path (path :path))
 
-(bsdf-defun path+ (&rest paths)
-    (:path (paths (:list :path)))
-  (apply #'path+ paths))
+(bsdf-declfun path+ (&rest paths)
+  :path (paths (:list :path)))
 
-(bsdf-defun as-absolute (path)
-    (:path (path :path))
-  (as-absolute-path path))
+(bsdf-declfun as-absolute (path)
+  :path (path :path))
 
-(bsdf-defun as-relative (path base-path)
-    (:path (path :path) (base-path :path))
-  (as-relative-path path base-path))
+(bsdf-declfun as-relative (path base-path)
+  :path (path :path) (base-path :path))
 
-(bsdf-defun copy-path (path 
-			 &key (new-name (path-name path) new-name-p) (new-type (path-type path) new-type-p))
-    (:path (path :path) (new-name :string) (new-type :string))
-  (apply #'copy-path path
-	 (append (when new-name-p (list :new-name new-name))
-		 (when new-type-p (list :new-type new-type)))))
+(bsdf-declfun copy-path (path &key new-name new-type)
+  :path (path :path) (new-name :string) (new-type :string))
 
 ;; Aux functions
 
-(bsdf-defun with-input-files (expr files)
-    (t (files (:list :path)))
-  (expression-value expr))
+(bsdf-declfun with-input-files (expr files)
+  t (files (:list :path)))
+
+(defun %file-list-as-dependencies (list)
+  (if (bsdf-list-p list)
+      (append (aif (remove-if-not #'bsdf-constant-p list) (list it))
+	      (aif (remove-if #'bsdf-constant-p list) (list `(append ,@it))))
+      (list list)))
 
 (defmethod bsdf-function-dependencies ((func (eql 'with-input-files)) args)
   (dependencies+ (expression-dependencies (first args))
-		 (list () (mapcar (lambda (x) (cast-type x :string)) (second args)) ())))
+		 (expression-dependencies (second args))
+		 (list () (%file-list-as-dependencies (second args)) ())))
 
-(bsdf-defun with-output-files (expr files)
-    (t (files (:list :path)))
-  (expression-value expr))
+(bsdf-declfun with-output-files (expr files)
+  t (files (:list :path)))
 
 (defmethod bsdf-function-dependencies ((func (eql 'with-output-files)) args)
   (dependencies+ (expression-dependencies (first args))
-		 (list () () (mapcar (lambda (x) (cast-type x :string)) (second args)))))
+		 (expression-dependencies (second args))
+		 (list () () (%file-list-as-dependencies (second args)))))
 

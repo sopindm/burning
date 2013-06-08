@@ -36,10 +36,6 @@
 					   (setf (bsdf-condition-format-args err)
 						 (cons name (bsdf-condition-format-args err))))))
     (setf expression (expand-expression expression))
-    (let ((real-type (expression-type expression)))
-      (unless (equal real-type type) 
-	(setf expression (cast-type expression type real-type)))
-      (check-expression expression))
     (let ((var (%make-variable :name name
 			       :type type
 			       :expression expression)))

@@ -1,3 +1,8 @@
+(defpackage #:burning-cgen-test-generated
+  (:use #:burning-cgen-source)
+  (:export def-empty-function
+	   def-var))
+
 (defpackage #:burning-cgen-test
-  (:use #:burning-lisp #:burning-testing #:burning-cgen #:alexandria #:burning-filesystem)
-  (:shadowing-import-from #:burning-filesystem #:copy-file))
+  (:use #:burning-lisp #:burning-testing #:burning-cgen #:burning-cgen-test-generated))
+

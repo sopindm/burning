@@ -335,7 +335,7 @@
 (defmethod bsdf-expressions::bsdf-type-of ((value symbol))
   (if (bsdf-expressions::bsdf-variable-p value)
       (aif (get-variable value)
-	   (expression-type (variable-expression it))
+	   (variable-type it)
 	   t)
       :enum))
 
@@ -345,7 +345,7 @@
       (call-next-method)))
 
 (defmethod bsdf-expressions::bsdf-atom-dependencies ((atom symbol))
-  (if (variable-symbol-p atom)
+  (if (bsdf-expressions::bsdf-variable-p atom)
       (list (list atom) () ())
       (call-next-method)))
 

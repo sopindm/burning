@@ -18,7 +18,7 @@ void compare_and_swap( int* a, int* b )
     swap( a, b );
 }
 
-void sort( int* array, int length )
+void sort( int array[], int length )
 {
   int i,j;
 

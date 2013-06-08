@@ -30,6 +30,8 @@
   (:export cast-type
 	   bsdf-type-p
 
+	   bsdf-check-type
+
 	   expression-type
 	   expression-value
 	   expression-string

@@ -10,9 +10,8 @@
 		 (:file "streams-test")
 		 (:file "errors-test")
 		 (:file "expressions-test")
-		 (:file "variables-test")
-		 (:file "targets-test")
-		 (:file "makefile-generator-test"))
+		 #+never(:file "variables-test")
+		 #+never(:file "targets-test"))
     :depends-on (#:burning-bsdf #:burning-testing #:burning-filesystem))
 
 

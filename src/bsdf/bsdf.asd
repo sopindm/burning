@@ -13,8 +13,7 @@
 		 (:file "expressions")
 		 (:file "variables")
 		 (:file "targets")
-		 (:file "generator")
-		 (:file "makefile-generator"))
+		 (:file "generator"))
     :depends-on (#:burning-lisp #:burning-filesystem #:trivial-gray-streams))
 
 

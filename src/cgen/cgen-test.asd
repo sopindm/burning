@@ -7,10 +7,6 @@
     :licence "PRIVATE"
     :serial t
     :components ((:file "test-package")
-		 (:file "expander-test")
-		 (:file "reader-test")
-		 (:module "c"
-			  :serial t
-			  :components ((:file "macros-test"))))
-    :depends-on (#:burning-cgen #:burning-lisp #:alexandria #:burning-testing #:burning-filesystem))
+		 (:file "generator-test"))
+    :depends-on (#:burning-cgen #:burning-lisp #:burning-testing))
 

@@ -2,162 +2,29 @@
 
 (in-case expressions-test)
 
-(defmacro ?expr= ((expr type) value &optional (test '?equal))
-  (let ((expr-sym (gensym)))
-    `(let ((,expr-sym (cast-type ,expr ,type)))
-       (?condition-safe (,test (expression-value ,expr-sym) ,value) bsdf-warning))))
-
-(defmacro ?cast= ((expr type) value dest-type &optional (test '?equal))
-  (let ((expr-sym (gensym)))
-    `(let ((,expr-sym (cast-type ,expr ,type)))
-       (?condition-safe (,test (cast-type ,expr-sym ,dest-type ,type) ,value)))))
-
-(deftest string-expressions
-  (?expr= ("123" :string) "123"))
-
-(defun wrong-cast-message (value type expected-type)
-  (format nil "Cannot convert ~a from type ~a to ~a" value type expected-type))
-
-(defmacro ?wrong-cast (value type expected-type)
-  `(?bsdf-compilation-error (cast-type ,value ,expected-type ,type)
-			    (lines (wrong-cast-message ,value ,type ,expected-type))
-			    ,value ,type ,expected-type))
-
-(deftest making-simple-integer-expressions
-  (?expr= (123 :int) 123)
-  (?expr= ("123" :int) 123))
-
-(deftest making-wrong-integers
-  (?wrong-cast :value :enum :int)
-  (?wrong-cast t :bool :int)
-  (?wrong-cast (path-from-string "123") :path :int)
-  (?wrong-cast "123 is a wrong integer" :string :int))
-
-(deftest making-integers-with-boundaries
-  (?expr= (123 '(:int -100 123)) 123)
-  (?expr= (-200 '(:int -200 -200)) -200)
-  (?expr= (10 '(:int 0)) 10)
-  (?expr= (10 '(:int * 100)) 10)
-  (?wrong-cast "123" :string '(:int 0 100))
-  (?wrong-cast 123 :int '(:int 0 100))
-  (?wrong-cast -201 :int '(:int -200 0))
-  (?wrong-cast 98 :int '(:int 99))
-  (?wrong-cast 101 :int '(:int * 100)))
-
-(deftest casting-integers-to-strings
-  (macrolet ((test-cast (&rest numbers)
-	       `(progn ,@(mapcar (lambda (number) `(?cast= (,number :int) ,(format nil "~a" number) :string))
-				 numbers))))
-    (test-cast 123 -100)))
-
-(deftest making-bool-expressions
-  (?expr= (nil :bool) nil)
-  (?expr= (t :bool) t))
-
-(deftest casting-bool-expressions
-  (?cast= (nil :bool) "nil" :string)
-  (?cast= (t :bool) "t" :string)
-  (?wrong-cast 123 :int :bool)
-  (?wrong-cast (path-from-string "t") :path :bool)
-  (?wrong-cast :value :enum :bool))
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (define-equality-check path=))
-
-(deftest making-path-expressions
-  (let ((path (path-from-string "a.file")))
-    (?expr= (path :path) path ?path=)
-    (?expr= (path :file) path ?path=))
-  (let ((path (path-from-string "a.dir/")))
-    (?expr= (path :path) path ?path=)
-    (?expr= (path :directory) path ?path=)))
-  
-(deftest casting-path-expressions
-  (?cast= ("a.file" :string) (path-from-string "a.file") :path ?path=)
-  (?cast= ("a.file" :string) (path-from-string "a.file") :file ?path=)
-  (?cast= ("a.dir/" :string) (path-from-string "a.dir/") :path ?path=)
-  (?cast= ("a.dir/" :string) (path-from-string "a.dir/") :directory ?path=)
-  (let ((path (path-from-string "a.file")))
-    (?cast= (path :path) "a.file" :string)
-    (?cast= (path :file) path :path)
-    (?cast= (path :file) "a.file" :string))
-  (let ((path (path-from-string "a.dir/")))
-    (?cast= (path :path) "a.dir/" :string)
-    (?cast= (path :directory) path :path)
-    (?cast= (path :directory) "a.dir/" :string))
-  (?wrong-cast 123 :int :path)
-  (?wrong-cast :path :enum :path)
-  (?wrong-cast (path-from-string "a.file") :path :directory)
-  (?wrong-cast (path-from-string "a.dir/") :path :file))
-
-(deftest making-enum-expressions
-  (?expr= (:var :enum) :var)
-  (?expr= (:a '(:enum :a :b :c)) :a))
-
-(deftest casting-enum-expressions
-  (?cast= (:value :enum) "VALUE" :string)
-  (?cast= ("some value" :string) :|some value| :enum)
-  (?wrong-cast :value :enum '(:enum :other-value)))
-
-(deftest defining-list-expressions
-  (?expr= ('(1 2 3) :list) '(1 2 3))
-  (?expr= ('("a" 2 :c) '(:list :string)) '("a" "2" "C"))
-  (?expr= ('(((1 2 "3") ("4" "5" "6")) (("7" 8 9))) '(:list (:list (:list :string))))
-	  '((("1" "2" "3") ("4" "5" "6")) (("7" "8" "9")))))
-
-(deftest casting-list-expressions
-  (?wrong-cast '(1 2 :3) :list '(:list :int))
-  (?cast= ('(1 2 3) :list) "(1;2;3)" :string)
-  (?cast= ("(1 2 3)" :string) '("1 2 3") :list)
-  (?cast= ("  (1   )        " :list) '("1   ") :list)
-  (?cast= ("(1;2;3)" :string) '(1 2 3) '(:list :int))
-  (?cast= ('((1 2) (3 4) ((5))) :list) "((1;2);(3;4);((5)))" :string)
-  (?cast= ("(1;(2;3);((4));(5;(6)))" :string) '("1" "(2;3)" "((4))" "(5;(6))") :list)
-  (?cast= ("(1\\;2)" :string) '("1\\;2") :list)
-  (?cast= ("(1\\\\;2)" :string) '("1\\\\" "2") :list)
-  (?cast= ("(\\(1;2\\))" :string) '("\\(1" "2\\)") :list)
-  (?wrong-cast "1 2 3" :string :list))
-
-(defmacro ?wrong-type (expr type)
-  `(?bsdf-compilation-error (cast-type ,expr ',type)
-			    (lines "Wrong BSDF type ~a") ',type))
+(defmacro ?wrong-type (type &rest args)
+  `(?bsdf-error (bsdf-check-type ',(cons type args))
+		(lines "Wrong BSDF type ~a") ',(if args (cons type args) type)))
 
 (deftest wrong-type-error
-  (?wrong-type "123" (:string "bla"))
-  (?wrong-type "456" :wrong)
-  (?wrong-type '(1 2 3) (:list :wrong-type))
-  (?wrong-type '(1 2 3) (:list (:list (:list :wrong-type))))
-  (?wrong-type 123 (t 1 2 3))
-  (?wrong-type 123 (:int 1 2 3))
-  (?wrong-type "a.file" (:path 1))
-  (?wrong-type :a (:enum :a :b 1 2 3))
-  (?wrong-type nil (:bool 1)))
+  (?wrong-type :string "bla")
+  (?wrong-type :wrong)
+  (?wrong-type :list :wrong-type)
+  (?wrong-type :list (:list (:list :wrong-type)))
+  (?wrong-type t 1 2 3)
+  (?wrong-type :int 1 2 3)
+  (?wrong-type :path 1)
+  (?wrong-type :file 1)
+  (?wrong-type :enum :a :b 1 2 3)
+  (?wrong-type :bool 1))
 
+(deftest declared-function-specs
+  (?equal (bsdf-function-lambda-list '++) '(&rest args))
+  (?equal (bsdf-function-type '++) :string)
+  (?equal (bsdf-function-argument-types '++) '((args (:list :string)))))
+
+#|
 ;string expressions
-
-(deftest simple-string-expression
-  (?expr= ('(++ "abc" "def" "ghi") :string) "abcdefghi")
-  (?expr= ('(substring "abcdef" 1) :string) "bcdef")
-  (?expr= ('(substring "abcdef" 2 "4") :string) "cd")
-  (?expr= ('(substring "abcdef" -2) :string) "ef")
-  (?expr= ('(substring "abcdef" "-1") :string) "f")
-  (?expr= ('(substring "abcdef" -3 "-1") :string) "def"))
-
-(defmacro ?wrong-expr ((expr &rest args) error &rest error-args)
-  `(?bsdf-compilation-error (check-expression (expand-expression '(,expr ,@args)))
-			    (lines ,error)
-			    ,@error-args))
-
-(defmacro ?wrong-expr-arg ((expr &rest args) arg-name error)
-  `(?wrong-expr (,expr ,@args) (lines* "In argument '~a' of '~a':" ,error) ',arg-name ',expr))
-
-(deftest wrong-function-error
-  (?bsdf-compilation-error (check-expression '(wrong-symbol 1 2 3)) 
-			   (lines "Wrong BSDF function ~a") 'wrong-symbol))
-
-(deftest wrong-arguments-error
-  (?wrong-expr-arg (substring "abc" "a") first (wrong-cast-message "a" :STRING :INT))
-  (?wrong-expr-arg (substring "abc" "1" "2a") last (wrong-cast-message "2a" :STRING :INT)))
 
 (deftest wrong-substring-arguments
   (?wrong-expr (substring "abc" 10) "Bad interval [10, 3) for string 'abc'")
@@ -300,10 +167,10 @@
 ;; Dependencies
 ;;
 
-(defmacro ?depends= (expr &optional input-variables input-files output-files)
+(defmacro ?depends= (expr &optional variables input output)
   `(progn (check-expression (expand-expression ',expr))
 	  (?equal (expression-dependencies (expand-expression ',expr))
-		  (list ,input-variables ,input-files ,output-files))))
+		  (list ',variables ',input ',output))))
 
 (deftest empty-expression-dependencies-test
   (?depends= (+ 1 2 3)))
@@ -314,20 +181,46 @@
        ,@body)))
 
 (def-context-test simple-expression-dependencies-test
-  (defvariable var '(+ 1 2 3))
-  (?depends= var (list 'var))
+  (defvariable var (+ 1 2 3))
+  (?depends= var (var))
   (?depends= ($ var))
-  (?depends= (+ var 3 var) (list 'var))
+  (?depends= (+ var 3 var) (var))
   (defvariable var2 "a.file" :type :path)
-  (?depends= (++ (as-absolute var2) var2 (+ 1 (* var 2))) (list 'var2 'var)))
+  (?depends= (++ (as-absolute var2) var2 (+ 1 (* var 2))) (var2 var)))
 
-(def-context-test with-input-files-test
+(def-context-test simple-with-input-files-test
   (defvariable var 1)
-  (?depends= (with-input-files (+ 1 var 3) ("a.file" "b.file")) (list 'var) (list "a.file" "b.file"))
+  (?depends= (with-input-files (+ 1 var 3) ("a.file" "b.file")) (var) (("a.file" "b.file")))
   (?expr= ('(with-input-files (third (++ "(aa;" "bb;" "cc)")) ("a.file" "b.file")) :string) "cc"))
 
+(def-context-test with-input-files-with-more-complex-expressions
+  (defvariable var '("a.file" "b.file"))
+  (defvariable var2 '("c.file" "d.file"))
+  (?depends= (with-input-files (+ 1 2 3) (append var "c.file"))
+	     (var) ((append var "c.file")))
+  (?depends= (with-input-files (with-input-files (+ 1 2) var) ("a.file" "b.file"))
+	     (var) (("a.file" "b.file") var))
+  (?depends= (with-input-files 
+		 (with-input-files 
+		     (with-input-files 
+			 (with-input-files (+ 1 2) var) ("e.file")) var2) ("f.file"))
+	     (var var2) (("e.file" "f.file") (append var var2)))
+  (defvariable var3 "e.file")
+  (?depends= (with-input-files (+ 1 2) ("a.file" "b.file" var3 "d.file"))
+	     (var3) (("a.file" "b.file" "d.file") (list var3)))
+  (?depends= (with-input-files (with-input-files (+ 1 2) (append var)) (append var2))
+	     (var var2) ((append var var2)))
+  (?depends= (with-input-files (with-input-files (+ 1 2) (append var var2)) (append var2 var))
+	     (var var2) ((append var var2))))
+  
 (def-context-test with-output-files-test
   (defvariable var 2)
-  (?depends= (with-output-files (+ 1 2 var) ("a.file" "b.file")) (list 'var) () (list "a.file" "b.file"))
+  (?depends= (with-output-files (+ 1 2 var) ("a.file" "b.file")) (var) () (("a.file" "b.file")))
+  (defvariable var2 '("a.file" "b.file"))
+  (defvariable var3 '("c.file" "d.file"))
+  (defvariable var4 "e.file")
+  (?depends= (with-output-files (with-output-files (with-output-files var var2) (append "f.file" var4)) 
+	       (append var3 "g.file" "h.file" "f.file"))
+	     ((var var2 var4 var3) () (("f.file" "g.file" "h.file") (append var2 var4 var3))))
   (?expr= ('(with-output-files (third (++ "(aa;" "bb;" "cc)")) ("a.file" "b.file")) :string) "cc"))
-    
+|#

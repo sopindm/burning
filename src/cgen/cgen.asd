@@ -7,13 +7,5 @@
     :licence "GPL v3"
     :serial t
     :components ((:file "package")
-		 (:file "reader")
-		 (:file "core")
-		 (:file "errors")
-		 (:file "expander")
-		 (:module "c"
-			  :serial t
-			  :components ((:file "macros")
-				       (:file "generator"))))
-    :depends-on (#:burning-lisp #:alexandria #:trivial-gray-streams #:burning-filesystem))
-
+		 (:file "generator"))
+    :depends-on (#:burning-lisp))

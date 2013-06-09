@@ -10,6 +10,13 @@
   (:import-from #:burning-lisp #:in-package)
   (:export defun
 	   defvar
+	   setf
+
+	   + - * /
+
+	   let
+
+	   if
 
 	   in-package))
 

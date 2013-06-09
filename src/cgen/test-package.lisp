@@ -1,6 +1,7 @@
 (defpackage #:burning-cgen-test-generated
   (:use #:burning-cgen-source)
   (:export def-empty-function
+	   def-fun
 	   def-var))
 
 (defpackage #:burning-cgen-test

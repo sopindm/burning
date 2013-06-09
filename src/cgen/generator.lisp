@@ -25,10 +25,10 @@
 ;;
 
 (defun generate-code ()
-  (reduce #'string+ (mapcar #'funcall (reverse (generator-sources))) :initial-value ""))
+  (format nil "~{~a~^~%~}" (mapcar #'funcall (reverse (generator-sources)))))
 
 (defun generate-call (name namespace)
-  (format nil "~a()" (generate-name name)))
+  (format nil "~a~a" (generate-name name) (if (eq namespace :function) "()" "")))
 
 (defun generate-name (name)
   (setf name (symbol-name name))
@@ -38,18 +38,69 @@
 ;; Basic generation macro's
 ;;
 
-(defmacro burning-cgen-source:defun (name ())
-  `(progn (defun ,name ()
-	    (generate-call ',name :function))
-	  (generator-add-source (flet ((,name ()
-					 (lines (format nil "~a ()" (generate-name ',name))
-						"{"
-						"}")))
-				  #',name))))
-		
+(defun generate-arguments-list (args)
+  (format nil "~{~a~^, ~}" (mapcar #'generate-name args)))
+
+(defun generate-block (&rest forms)
+  (flet ((generate-line (line)
+	   (search-and-replace-all (format nil "  ~a" line) (format nil "~%") (format nil "~%  "))))
+    (format nil "{~a~{~a~^~%~}~%}" 
+	    (if forms #\Newline "")
+	    (mapcar #'generate-line forms))))
+
+(defmacro burning-cgen-source:defun (name (&rest args) &body body)
+  (flet ((bind-argument (arg)
+	   `(,arg (generate-call ',arg :variable))))
+    `(progn (defun ,name ()
+	      (generate-call ',name :function))
+	    (generator-add-source (named-lambda ,(make-symbol (symbol-name name)) ()
+				    (format nil "~a (~a)~%~a~%" 
+					    (generate-name ',name)
+					    (generate-arguments-list ',args)
+					    (let (,@(mapcar #'bind-argument args))
+					      (generate-block ,@body))))))))
+
+(defmacro burning-cgen-source:setf (place value)
+  `(format nil "~a = ~a" (generate-call ',place :variable) ,value))
+
+(defmacro burning-cgen-source:if (expr then-form &optional (else-form nil else-form-p))
+  (flet ((make-then-form (form)
+	   `(generate-block ,form))
+	 (make-else-form (form)
+	   `(lines* ""
+		    "else"
+		    (generate-block ,form))))
+    `(format nil "if( ~a )~%~a~a" 
+	     ,expr 
+	     ,(make-then-form then-form)
+	     ,(if else-form-p (make-else-form else-form) ""))))
 
 (defmacro burning-cgen-source:defvar (name value)
   `(progn (defparameter ,name (generate-call ',name :variable))
-	  (generator-add-source (flet ((,name ()
-					 (lines (format nil "~a = ~a;" (generate-name ',name) ,value))))
-				  #',name))))
+	  (generator-add-source (named-lambda ,(make-symbol (symbol-name name)) ()
+				  (lines (burning-cgen-source:setf ,name ,value))))))
+
+(defun burning-cgen-source:+ (arg1 arg2)
+  (format nil "~a + ~a" arg1 arg2))
+
+(defun burning-cgen-source:- (arg1 arg2)
+  (format nil "~a - ~a" arg1 arg2))
+
+(defun burning-cgen-source:* (arg1 arg2)
+  (format nil "~a * ~a" arg1 arg2))
+
+(defun burning-cgen-source:/ (arg1 arg2)
+  (format nil "~a / ~a" arg1 arg2))
+
+(defmacro burning-cgen-source:let ((&rest bindings) &body body)
+  (flet ((make-binding (binding)
+	   (let ((arg (first binding)))
+	     `(,arg (generate-call ',arg :variable))))
+	 (make-initializator (binding)
+	   (let ((arg (first binding))
+		 (value (second binding)))
+	     `(burning-cgen-source:setf ,arg ,value))))
+    `(let (,@(mapcar #'make-binding bindings))
+       (generate-block ,@(mapcar #'make-initializator bindings)
+		       ,@body))))
+

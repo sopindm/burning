@@ -27,8 +27,11 @@
 (defun generate-code ()
   (format nil "~{~a~^~%~}" (mapcar #'funcall (reverse (generator-sources)))))
 
-(defun generate-call (name namespace)
-  (format nil "~a~a" (generate-name name) (if (eq namespace :function) "()" "")))
+(defun generate-call (name &rest args)
+  (format nil "~a~a" (generate-name name) "()"))
+
+(defun generate-reference (name)
+  (format nil "~a" (generate-name name)))
 
 (defun generate-name (name)
   (setf name (symbol-name name))
@@ -50,9 +53,9 @@
 
 (defmacro burning-cgen-source:defun (name (&rest args) &body body)
   (flet ((bind-argument (arg)
-	   `(,arg (generate-call ',arg :variable))))
-    `(progn (defun ,name ()
-	      (generate-call ',name :function))
+	   `(,arg (generate-reference ',arg))))
+    `(progn (defun ,name (,@args)
+	      (generate-call ',name ,@args))
 	    (generator-add-source (named-lambda ,(make-symbol (symbol-name name)) ()
 				    (format nil "~a (~a)~%~a~%" 
 					    (generate-name ',name)
@@ -61,7 +64,7 @@
 					      (generate-block ,@body))))))))
 
 (defmacro burning-cgen-source:setf (place value)
-  `(format nil "~a = ~a" (generate-call ',place :variable) ,value))
+  `(format nil "~a = ~a" (generate-reference ',place) ,value))
 
 (defmacro burning-cgen-source:if (expr then-form &optional (else-form nil else-form-p))
   (flet ((make-then-form (form)
@@ -76,7 +79,7 @@
 	     ,(if else-form-p (make-else-form else-form) ""))))
 
 (defmacro burning-cgen-source:defvar (name value)
-  `(progn (defparameter ,name (generate-call ',name :variable))
+  `(progn (defparameter ,name (generate-reference ',name))
 	  (generator-add-source (named-lambda ,(make-symbol (symbol-name name)) ()
 				  (lines (burning-cgen-source:setf ,name ,value))))))
 
@@ -95,7 +98,7 @@
 (defmacro burning-cgen-source:let ((&rest bindings) &body body)
   (flet ((make-binding (binding)
 	   (let ((arg (first binding)))
-	     `(,arg (generate-call ',arg :variable))))
+	     `(,arg (generate-reference ',arg))))
 	 (make-initializator (binding)
 	   (let ((arg (first binding))
 		 (value (second binding)))

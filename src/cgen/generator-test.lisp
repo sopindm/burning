@@ -110,6 +110,8 @@
 		  "  a + b - a"
 		  "}")))
 
+;ariphmetic with multiple args
+
 (defmacro cg-let ((&rest bindings) &body body)
   `(burning-cgen-source:let (,@bindings) ,@body))
 

@@ -7,5 +7,6 @@
     :licence "GPL v3"
     :serial t
     :components ((:file "package")
+		 (:file "statments")
 		 (:file "generator"))
     :depends-on (#:burning-lisp))

@@ -25,46 +25,37 @@
 ;;
 
 (defun generate-code ()
-  (format nil "~{~a~^~%~}" (mapcar #'funcall (reverse (generator-sources)))))
+  (format nil "~{~a~^~%~}" (mapcar #'generate-statment (mapcar #'funcall (reverse (generator-sources))))))
 
+#|
 (defun generate-call (name &rest args)
   (format nil "~a~a" (generate-name name) "()"))
 
 (defun generate-reference (name)
   (format nil "~a" (generate-name name)))
-
-(defun generate-name (name)
-  (setf name (symbol-name name))
-  (search-and-replace-all (string-downcase name) "-" "_"))
+|#
 
 ;;
 ;; Basic generation macro's
 ;;
 
-(defun generate-arguments-list (args)
-  (format nil "~{~a~^, ~}" (mapcar #'generate-name args)))
-
 (defun generate-block (&rest forms)
-  (flet ((generate-line (line)
-	   (search-and-replace-all (format nil "  ~a" line) (format nil "~%") (format nil "~%  "))))
-    (format nil "{~a~{~a~^~%~}~%}" 
-	    (if forms #\Newline "")
-	    (mapcar #'generate-line forms))))
+  (make-instance 'block-statment :forms forms))
 
 (defmacro burning-cgen-source:defun (name (&rest args) &body body)
   (flet ((bind-argument (arg)
-	   `(,arg (generate-reference ',arg))))
+	   `(,arg (make-instance 'variable-expression :name ',arg))))
     `(progn (defun ,name (,@args)
-	      (generate-call ',name ,@args))
+	      (make-instance 'funcall-expression :name ',name :args-list (list ,@args)))
 	    (generator-add-source (named-lambda ,(make-symbol (symbol-name name)) ()
-				    (format nil "~a (~a)~%~a~%" 
-					    (generate-name ',name)
-					    (generate-arguments-list ',args)
-					    (let (,@(mapcar #'bind-argument args))
-					      (generate-block ,@body))))))))
+				    (make-instance 'defun-statment
+						   :name (make-cgen-symbol ',name :function)
+						   :arglist ',args
+						   :body (let (,@(mapcar #'bind-argument args))
+							   (generate-block ,@body))))))))
 
 (defmacro burning-cgen-source:setf (place value)
-  `(format nil "~a = ~a" (generate-reference ',place) ,value))
+  `(make-instance 'setf-statment :place ,place :value ,value))
 
 (defmacro burning-cgen-source:if (expr then-form &optional (else-form nil else-form-p))
   (flet ((make-then-form (form)
@@ -79,26 +70,26 @@
 	     ,(if else-form-p (make-else-form else-form) ""))))
 
 (defmacro burning-cgen-source:defvar (name value)
-  `(progn (defparameter ,name (generate-reference ',name))
+  `(progn (defparameter ,name (make-instance 'variable-expression :name ',name))
 	  (generator-add-source (named-lambda ,(make-symbol (symbol-name name)) ()
-				  (lines (burning-cgen-source:setf ,name ,value))))))
+				  (make-instance 'defvar-statment :name ,name :value ,value)))))
 
-(defun burning-cgen-source:+ (arg1 arg2)
-  (format nil "~a + ~a" arg1 arg2))
+(defun burning-cgen-source:+ (num &rest more-nums)
+  (make-instance '+-expression :num num :nums more-nums))
 
-(defun burning-cgen-source:- (arg1 arg2)
-  (format nil "~a - ~a" arg1 arg2))
+(defun burning-cgen-source:- (num &rest more-nums)
+  (make-instance '--expression :num num :nums more-nums))
 
-(defun burning-cgen-source:* (arg1 arg2)
-  (format nil "~a * ~a" arg1 arg2))
+(defun burning-cgen-source:* (num &rest more-nums)
+  (make-instance '*-expression :num num :nums more-nums))
 
-(defun burning-cgen-source:/ (arg1 arg2)
-  (format nil "~a / ~a" arg1 arg2))
+(defun burning-cgen-source:/ (num &rest more-nums)
+  (make-instance '/-expression :num num :nums more-nums))
 
 (defmacro burning-cgen-source:let ((&rest bindings) &body body)
   (flet ((make-binding (binding)
 	   (let ((arg (first binding)))
-	     `(,arg (generate-reference ',arg))))
+	     `(,arg (make-instance 'variable-expression :name ',arg))))
 	 (make-initializator (binding)
 	   (let ((arg (first binding))
 		 (value (second binding)))

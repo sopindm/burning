@@ -14,6 +14,12 @@
 
 	   + - * /
 
+	   bool
+	   int
+	   float
+
+	   cast
+
 	   let
 
 	   if

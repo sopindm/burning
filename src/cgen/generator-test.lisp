@@ -54,6 +54,13 @@
   (?lines= (generate-code)
 	   (lines "float a_var = 1.23")))
 
+(def-generator-test defvar-with-bool-type
+  (cg-defvar a-var nil)
+  (cg-defvar b-var t)
+  (?lines= (generate-code)
+	   (lines "bool a_var = false"
+		  "bool b_var = true")))
+
 (def-generator-test defvar-with-variable-value
   (let* ((var1 (cg-defvar a-var 1.23))
 	 (var2 (cg-defvar b-var 234)))
@@ -64,10 +71,6 @@
 		    "int b_var = 234"
 		    "float c_var = a_var"
 		    "int d_var = b_var"))))
-
-;defvar with variable type
-;defvar with other variables in value
-;defvar with expressions in value
 
 (def-generator-test defining-function-with-body
   (cg-defun simple-fun () 42)
@@ -138,6 +141,31 @@
 		  "  1 + 2 * 4 * 6 * 8 + 3 + 4 / 7 / 10 + 5 - 3 - 1 + 6"
 		  "}")))
 
+(defun cg-cast (value type)
+  (burning-cgen-source:cast value type))
+
+(defvar cg-float 'burning-cgen-source:float)
+
+(def-generator-test cast-expressions
+  (cg-defvar a-var (cg-cast 1 cg-float))
+  (?lines= (generate-code)
+	   (lines "float a_var = type_cast<float>( 1 )")))
+
+(def-generator-test defvars-with-expressions
+  (let* ((var1 (cg-defvar a-var (cg-+ 1 2 3)))
+	 (var2 (cg-defvar b-var (cg-- 1 1.5))))
+    (eval `(cg-defvar c-var (cg-* ,var1 5)))
+    (cg-defvar d-var (cg-/ 1 2)))
+  (?lines= (generate-code)
+	   (lines "int a_var = 1 + 2 + 3"
+		  "float b_var = 1 - 1.5"
+		  "int c_var = a_var * 5"
+		  "float d_var = 1 / 2")))
+	   
+;cast expressions
+;/ with integers returns float (5 / 2 = 2.5)
+;if expression type
+
 (defmacro cg-let ((&rest bindings) &body body)
   `(burning-cgen-source:let (,@bindings) ,@body))
 
@@ -200,13 +228,27 @@
 		   "}")))
 
 (def-generator-test calling-functions-with-arguments
-  (burning-cgen-source:defun function-calling-function-with-arguments (a int b int)
-    (function-with-if-and-else a b 0))
-  (?string= (generate-code)
-	    (lines "function_calling_function_with_arguments (int a, int b)"
-		   "{"
-		   "  function_with_if_and_else(a, b, 0)"
-		   "}")))
+  (let ((f1 (cg-defun sample-function (a bool b int c int)
+	      (cg-if a b c))))
+    (eval `(cg-defun function-calling-function-with-arguments (a int b int)
+	     (,f1 a b 0))))
+  (?lines= (generate-code)
+	   (lines "sample_function (bool a, int b, int c)"
+		  "{"
+		  "  if( a )"
+		  "  {"
+		  "    b"
+		  "  }"
+		  "  else"
+		  "  {"
+		  "    c"
+		  "  }"
+		  "}"
+		  ""
+		  "function_calling_function_with_arguments (int a, int b)"
+		  "{"
+		  "  sample_function(a, b, 0)"
+		  "}")))
 
 (def-generator-test integer-variable-type
   (burning-cgen-source:defun function-with-int-arg (a int)

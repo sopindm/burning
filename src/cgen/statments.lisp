@@ -40,6 +40,22 @@
 (defgeneric expression-type (expr))
 
 ;;
+;; Boolean
+;;
+
+(defmethod expression-type ((value (eql nil)))
+  'bool)
+
+(defmethod generate-statment ((value (eql nil)))
+  "false")
+
+(defmethod expression-type ((value (eql t)))
+  'bool)
+
+(defmethod generate-statment ((value (eql t)))
+  "true")
+
+;;
 ;; Numbers
 ;;
 
@@ -47,10 +63,10 @@
   (format nil "~a" value))
 
 (defmethod expression-type ((value integer))
-  (make-cgen-symbol 'int :type))
+  'int)
 
 (defmethod expression-type ((value float))
-  (make-cgen-symbol 'float :type))
+  'float)
 
 ;;
 ;; Defun statment
@@ -113,7 +129,7 @@
 (defmethod generate-statment ((statment defvar-statment))
   (with-slots (name value type) statment
     (format nil "~a ~a = ~a~%" 
-	    (generate-symbol type)
+	    (generate-symbol (make-cgen-symbol type :type))
 	    (generate-symbol name)
 	    (generate-statment value))))
 
@@ -177,6 +193,11 @@
 	    (generate-statment (slot-value expr 'num))
 	    (mapcar #'generate-statment (slot-value expr 'nums)))))
 
+(defmethod expression-type ((expr ariphmetic-expression))
+  (with-slots (num nums) expr
+    (let ((types (cons (expression-type num) (mapcar #'expression-type nums))))
+      (if (some (lambda (x) (eq x 'float)) types) 'float 'int))))
+
 (defclass +-expression (ariphmetic-expression) ())
 
 (defmethod generate-statment ((statment +-expression))
@@ -197,3 +218,5 @@
 (defmethod generate-statment ((statment /-expression))
   (generate-ariphmetic-statment "/" statment))
 
+(defmethod expression-type ((expr /-expression))
+  'float)

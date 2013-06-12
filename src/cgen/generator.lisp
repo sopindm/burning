@@ -76,6 +76,9 @@
 						     :value ,value-sym
 						     :type (expression-type ,value-sym))))))))
 
+(defun burning-cgen-source:cast (value type)
+  (make-instance 'cast-expression :value value :type type))
+
 (defun burning-cgen-source:+ (num &rest more-nums)
   (make-instance '+-expression :num num :nums more-nums))
 

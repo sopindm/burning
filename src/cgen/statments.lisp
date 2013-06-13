@@ -69,6 +69,21 @@
   'float)
 
 ;;
+;; Cast
+;;
+
+(defclass cast-expression (expression)
+  ((expr :initarg :expr)
+   (type :initarg :type)))
+
+(defmethod expression-type ((expr cast-expression))
+  (slot-value expr 'type))
+
+(defmethod generate-statment ((expr cast-expression))
+  (with-slots (expr type) expr
+    (format nil "type_cast<~a>( ~a )" (generate-symbol (make-cgen-symbol type :type)) (generate-statment expr))))
+
+;;
 ;; Defun statment
 ;;
 
@@ -216,7 +231,14 @@
 (defclass /-expression (ariphmetic-expression) ())
 
 (defmethod generate-statment ((statment /-expression))
-  (generate-ariphmetic-statment "/" statment))
+  (with-slots (num nums) statment
+    (if (eq (expression-type num) 'float)
+	(generate-ariphmetic-statment "/" statment)
+	(generate-ariphmetic-statment "/" (make-instance 'ariphmetic-expression 
+							 :num (make-instance 'cast-expression
+									     :expr num
+									     :type 'float)
+							 :nums nums)))))
 
 (defmethod expression-type ((expr /-expression))
   'float)

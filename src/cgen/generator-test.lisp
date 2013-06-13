@@ -105,7 +105,7 @@
   (cg-defun simple-plus-function (a int b int) (cg-+ a b))
   (cg-defun simple-minus-function (a int b int) (cg-- a b))
   (cg-defun simple-multiply-function (a int b int) (cg-* a b))
-  (cg-defun simple-divide-function (a int b int) (cg-/ a b))
+  (cg-defun simple-divide-function (a float b int) (cg-/ a b))
   (cg-defun complex-ariphmetic-function (a int b int) (cg-+ a (cg-- b a)))
   (?lines= (generate-code)
 	   (lines "simple_plus_function (int a, int b)"
@@ -123,7 +123,7 @@
 		  "  a * b"
 		  "}"
 		  ""
-		  "simple_divide_function (int a, int b)"
+		  "simple_divide_function (float a, int b)"
 		  "{"
 		  "  a / b"
 		  "}"
@@ -134,11 +134,11 @@
 		  "}")))
 
 (def-generator-test ariphmetic-functions-with-multiple-args
-  (cg-defun multiple-ariphmetic-function () (cg-+ 1 (cg-* 2 4 6 8) 3 (cg-/ 4 7 10) (cg-- 5 3 1) 6))
+  (cg-defun multiple-ariphmetic-function () (cg-+ 1 (cg-* 2 4 6 8) 3 (cg-/ 4.0 7 10) (cg-- 5 3 1) 6))
   (?lines= (generate-code)
 	   (lines "multiple_ariphmetic_function ()"
 		  "{"
-		  "  1 + 2 * 4 * 6 * 8 + 3 + 4 / 7 / 10 + 5 - 3 - 1 + 6"
+		  "  1 + 2 * 4 * 6 * 8 + 3 + 4.0 / 7 / 10 + 5 - 3 - 1 + 6"
 		  "}")))
 
 (defun cg-cast (value type)
@@ -148,8 +148,10 @@
 
 (def-generator-test cast-expressions
   (cg-defvar a-var (cg-cast 1 cg-float))
+  (cg-defvar b-var (cg-cast (cg-+ 1 (cg-* 2 3)) cg-float))
   (?lines= (generate-code)
-	   (lines "float a_var = type_cast<float>( 1 )")))
+	   (lines "float a_var = type_cast<float>( 1 )"
+		  "float b_var = type_cast<float>( 1 + 2 * 3 )")))
 
 (def-generator-test defvars-with-expressions
   (let* ((var1 (cg-defvar a-var (cg-+ 1 2 3)))
@@ -160,10 +162,8 @@
 	   (lines "int a_var = 1 + 2 + 3"
 		  "float b_var = 1 - 1.5"
 		  "int c_var = a_var * 5"
-		  "float d_var = 1 / 2")))
+		  "float d_var = type_cast<float>( 1 ) / 2")))
 	   
-;cast expressions
-;/ with integers returns float (5 / 2 = 2.5)
 ;if expression type
 
 (defmacro cg-let ((&rest bindings) &body body)

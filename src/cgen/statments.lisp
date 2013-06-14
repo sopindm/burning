@@ -182,17 +182,19 @@
 ;;
 
 (defclass block-statment ()
-  ((forms :initarg :forms)))
+  ((type-table :initarg :type-table)
+   (forms :initarg :forms)))
 
 (defmethod generate-statment ((statment block-statment))
-  (with-slots (forms) statment
-    (flet ((generate-line (line)
-	     (search-and-replace-all (format nil "  ~a" (generate-statment line)) 
-				     (format nil "~%")
-				     (format nil "~%  "))))
-      (format nil "{~a~{~a~^~%~}~%}" 
-	      (if forms #\Newline "")
-	      (mapcar #'generate-line forms)))))
+  (with-slots (forms type-table) statment
+    (let ((*generator* (make-generator :type-table type-table)))
+      (flet ((generate-line (line)
+	       (search-and-replace-all (format nil "  ~a" (generate-statment line)) 
+				       (format nil "~%")
+				       (format nil "~%  "))))
+	(format nil "{~a~{~a~^~%~}~%}" 
+		(if forms #\Newline "")
+		(mapcar #'generate-line forms))))))
 
 ;;
 ;; Ariphmetic

@@ -4,9 +4,23 @@
 ;; Generator
 ;;
 
-(defstruct (generator (:conc-name %generator-))
+(defstruct type-table
+  (table (make-hash-table :test #'equal))
+  (parent nil))
+
+(defun get-symbol-type (symbol table)
+  (flet ((get1 (table)
+	   (gethash (cons (cgen-symbol-symbol symbol) (cgen-symbol-namespace symbol)) (type-table-table table))))
+    (or (get1 table)
+	(aif (type-table-parent table) (get-symbol-type symbol it)))))
+
+(defun (setf get-symbol-type) (value symbol table)
+  (setf (gethash (cons (cgen-symbol-symbol symbol) (cgen-symbol-namespace symbol)) (type-table-table table))
+	value))
+
+(defstruct (generator (:conc-name %generator-) (:copier nil))
   (sources ())
-  (type-table (make-hash-table :test #'equal)))
+  (type-table (make-type-table)))
 
 (defparameter *generator* (make-generator))
 
@@ -19,14 +33,29 @@
 (defun generator-add-source (value)
   (push value (generator-sources)))
 
+(defun copy-generator ()
+  (make-generator :sources (generator-sources)
+		  :type-table (make-type-table :table (make-hash-table :test #'equal)
+					       :parent (%generator-type-table *generator*))))
+
 (defun generator-symbol-type (symbol)
   (let ((table (%generator-type-table *generator*)))
-    (gethash (cons (cgen-symbol-symbol symbol) (cgen-symbol-namespace symbol)) table)))
+    (get-symbol-type symbol table)))
 
 (defun (setf generator-symbol-type) (value symbol)
   (let ((table (%generator-type-table *generator*)))
-    (setf (gethash (cons (cgen-symbol-symbol symbol) (cgen-symbol-namespace symbol)) table) value)))
+    (setf (get-symbol-type symbol table) value)))
 
+(defmacro cgen-let ((&rest bindings) &body body)
+  (flet ((make-binding (binding)
+	   `(,(first binding) (make-instance 'variable-expression :name ',(first binding))))
+	 (define-type (binding)
+	   `(setf (generator-symbol-type (make-cgen-symbol ',(first binding) :variable)) ,(second binding))))
+    `(let (,@(mapcar #'make-binding bindings)
+	   (*generator* (copy-generator)))
+       ,@(mapcar #'define-type bindings)
+       (make-block ,@body))))
+     
 ;;
 ;; Basic generation
 ;;
@@ -35,15 +64,15 @@
   (generate-statments (mapcar #'funcall (reverse (generator-sources)))))
 
 (defun make-block (&rest forms)
-  (make-instance 'block-statment :forms forms))
+  (make-instance 'block-statment :type-table (%generator-type-table *generator*) :forms forms))
 
 (defmacro burning-cgen-source:defun (name (&rest typed-lambda-list) &body body)
-  (flet ((bind-argument (arg)
-	   `(,arg (make-instance 'variable-expression :name ',arg)))
-	 (untyped-lambda-list (list)
-	   (every-nth list 2))
-	 (make-arguments-list (list)
-	   (group list 2)))
+  (labels ((untyped-lambda-list (list)
+	     (every-nth list 2))
+	   (make-arguments-list (list)
+	     (group list 2))
+	   (make-bind-list (list)
+	     (mapcar (lambda (arg) `(,(first arg) ',(second arg))) (make-arguments-list list))))
     (let ((lambda-list (untyped-lambda-list typed-lambda-list)))
       `(progn (defun ,name (,@lambda-list)
 		(make-instance 'funcall-expression 
@@ -53,8 +82,8 @@
 				      (make-instance 'defun-statment
 						     :name (make-cgen-symbol ',name :function)
 						     :arglist ',(make-arguments-list typed-lambda-list)
-						     :body (let (,@(mapcar #'bind-argument lambda-list))
-							     (make-block ,@body)))))))))
+						     :body (cgen-let (,@(make-bind-list typed-lambda-list))
+							     ,@body))))))))
 
 (defun burning-cgen-source:setf (place value)
   (make-instance 'setf-statment :place place :value value))

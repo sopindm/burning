@@ -8,11 +8,12 @@
 + move to 2-step generation
 + function calls
 + function argument types (bool, int, float)
+* make separate *type-table* variable
 * defvar types (bool, int, float)
 * let types (bool, int, float)
 * function types (...)
 * return in functions
-
+* move types definition to block
 * ; at end of statments
 * no generate-symbol in statments.lisp
 * operations priority

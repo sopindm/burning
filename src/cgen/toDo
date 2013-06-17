@@ -8,7 +8,7 @@
 + move to 2-step generation
 + function calls
 + function argument types (bool, int, float)
-* make separate *type-table* variable
++ make separate *type-table* variable
 * defvar types (bool, int, float)
 * let types (bool, int, float)
 * function types (...)

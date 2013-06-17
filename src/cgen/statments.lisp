@@ -1,6 +1,33 @@
 (in-package #:burning-cgen)
 
 ;;
+;; Type table
+;;
+
+
+
+(defstruct (type-table (:copier nil))
+  (table (make-hash-table :test #'equal))
+  (parent nil))
+
+(defvar *type-table* (make-type-table))
+
+(defun symbol-type (symbol &optional (table *type-table*))
+  (flet ((get1 (table)
+	   (gethash (cons (cgen-symbol-symbol symbol) (cgen-symbol-namespace symbol)) (type-table-table table))))
+    (or (get1 table)
+	(aif (type-table-parent table) (symbol-type symbol it)))))
+
+(defun (setf symbol-type) (value symbol &optional (table *type-table*))
+  (setf (gethash (cons (cgen-symbol-symbol symbol) (cgen-symbol-namespace symbol)) (type-table-table table))
+	value))
+
+(defun copy-type-table ()
+  (let ((table *type-table*))
+    (make-type-table :table (make-hash-table :test #'equal)
+		     :parent table)))
+
+;;
 ;; Symbols
 ;;
 
@@ -122,7 +149,7 @@
   ((name :initarg :name)))
 
 (defmethod expression-type ((expr variable-expression))
-  (generator-symbol-type (make-cgen-symbol (slot-value expr 'name) :variable)))
+  (symbol-type (make-cgen-symbol (slot-value expr 'name) :variable)))
 
 (defmethod generate-statment ((expr variable-expression))
   (generate-symbol (make-cgen-symbol (slot-value expr 'name) :variable)))
@@ -139,7 +166,7 @@
 
 (defmethod initialize-instance :after ((st defvar-statment) &key &allow-other-keys)
   (with-slots (name type) st
-    (setf (generator-symbol-type name) type)))
+    (setf (symbol-type name) type)))
 
 (defmethod generate-statment ((statment defvar-statment))
   (with-slots (name value type) statment
@@ -181,13 +208,13 @@
 ;; Block statment
 ;;
 
-(defclass block-statment ()
+(defclass block ()
   ((type-table :initarg :type-table)
    (forms :initarg :forms)))
 
-(defmethod generate-statment ((statment block-statment))
+(defmethod generate-statment ((statment block))
   (with-slots (forms type-table) statment
-    (let ((*generator* (make-generator :type-table type-table)))
+    (let ((*type-table* type-table))
       (flet ((generate-line (line)
 	       (search-and-replace-all (format nil "  ~a" (generate-statment line)) 
 				       (format nil "~%")

@@ -4,23 +4,8 @@
 ;; Generator
 ;;
 
-(defstruct type-table
-  (table (make-hash-table :test #'equal))
-  (parent nil))
-
-(defun get-symbol-type (symbol table)
-  (flet ((get1 (table)
-	   (gethash (cons (cgen-symbol-symbol symbol) (cgen-symbol-namespace symbol)) (type-table-table table))))
-    (or (get1 table)
-	(aif (type-table-parent table) (get-symbol-type symbol it)))))
-
-(defun (setf get-symbol-type) (value symbol table)
-  (setf (gethash (cons (cgen-symbol-symbol symbol) (cgen-symbol-namespace symbol)) (type-table-table table))
-	value))
-
 (defstruct (generator (:conc-name %generator-) (:copier nil))
-  (sources ())
-  (type-table (make-type-table)))
+  (sources ()))
 
 (defparameter *generator* (make-generator))
 
@@ -33,26 +18,13 @@
 (defun generator-add-source (value)
   (push value (generator-sources)))
 
-(defun copy-generator ()
-  (make-generator :sources (generator-sources)
-		  :type-table (make-type-table :table (make-hash-table :test #'equal)
-					       :parent (%generator-type-table *generator*))))
-
-(defun generator-symbol-type (symbol)
-  (let ((table (%generator-type-table *generator*)))
-    (get-symbol-type symbol table)))
-
-(defun (setf generator-symbol-type) (value symbol)
-  (let ((table (%generator-type-table *generator*)))
-    (setf (get-symbol-type symbol table) value)))
-
 (defmacro cgen-let ((&rest bindings) &body body)
   (flet ((make-binding (binding)
 	   `(,(first binding) (make-instance 'variable-expression :name ',(first binding))))
 	 (define-type (binding)
-	   `(setf (generator-symbol-type (make-cgen-symbol ',(first binding) :variable)) ,(second binding))))
+	   `(setf (symbol-type (make-cgen-symbol ',(first binding) :variable)) ,(second binding))))
     `(let (,@(mapcar #'make-binding bindings)
-	   (*generator* (copy-generator)))
+	   (*type-table* (copy-type-table)))
        ,@(mapcar #'define-type bindings)
        (make-block ,@body))))
      
@@ -64,7 +36,7 @@
   (generate-statments (mapcar #'funcall (reverse (generator-sources)))))
 
 (defun make-block (&rest forms)
-  (make-instance 'block-statment :type-table (%generator-type-table *generator*) :forms forms))
+  (make-instance 'block :type-table *type-table* :forms forms))
 
 (defmacro burning-cgen-source:defun (name (&rest typed-lambda-list) &body body)
   (labels ((untyped-lambda-list (list)

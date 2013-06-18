@@ -20,7 +20,7 @@
 
 (defmacro cgen-let ((&rest bindings) &body body)
   (flet ((make-binding (binding)
-	   `(,(first binding) (make-instance 'variable-expression :name ',(first binding))))
+	   `(,(first binding) (make-instance 'variable :name ',(first binding))))
 	 (define-type (binding)
 	   `(setf (symbol-type (make-cgen-symbol ',(first binding) :variable)) ,(second binding))))
     `(let (,@(mapcar #'make-binding bindings)
@@ -47,21 +47,21 @@
 	     (mapcar (lambda (arg) `(,(first arg) ',(second arg))) (make-arguments-list list))))
     (let ((lambda-list (untyped-lambda-list typed-lambda-list)))
       `(progn (defun ,name (,@lambda-list)
-		(make-instance 'funcall-expression 
+		(make-instance 'funcall 
 			       :name (make-cgen-symbol ',name :function)
 			       :args-list (list ,@lambda-list)))
 	      (generator-add-source (named-lambda ,(make-symbol (symbol-name name)) ()
-				      (make-instance 'defun-statment
+				      (make-instance 'defun
 						     :name (make-cgen-symbol ',name :function)
 						     :arglist ',(make-arguments-list typed-lambda-list)
 						     :body (cgen-let (,@(make-bind-list typed-lambda-list))
 							     ,@body))))))))
 
 (defun burning-cgen-source:setf (place value)
-  (make-instance 'setf-statment :place place :value value))
+  (make-instance 'setf :place place :value value))
 
 (defun burning-cgen-source:if (expr then-form &optional (else-form nil else-form-p))
-  (make-instance 'if-statment
+  (make-instance 'if
 		 :expr expr
 		 :then-form (make-block then-form)
 		 :else-form (if else-form-p (make-block else-form))
@@ -69,38 +69,43 @@
 
 (defmacro burning-cgen-source:defvar (name value)
   (let ((value-sym (gensym)))
-    `(progn (defparameter ,name (make-instance 'variable-expression :name ',name))
+    `(progn (defparameter ,name (make-instance 'variable :name ',name))
 	    (let ((,value-sym ,value))
 	      (generator-add-source (named-lambda ,(make-symbol (symbol-name name)) ()
-				      (make-instance 'defvar-statment 
+				      (make-instance 'defvar 
 						     :name (make-cgen-symbol ',name :variable)
 						     :value ,value-sym
 						     :type (expression-type ,value-sym))))))))
 
 (defun burning-cgen-source:cast (expr type)
-  (make-instance 'cast-expression :expr expr :type type))
+  (make-instance 'cast :expr expr :type type))
 
 (defun burning-cgen-source:+ (num &rest more-nums)
-  (make-instance '+-expression :num num :nums more-nums))
+  (make-instance '+ :num num :nums more-nums))
 
 (defun burning-cgen-source:- (num &rest more-nums)
-  (make-instance '--expression :num num :nums more-nums))
+  (make-instance '- :num num :nums more-nums))
 
 (defun burning-cgen-source:* (num &rest more-nums)
-  (make-instance '*-expression :num num :nums more-nums))
+  (make-instance '* :num num :nums more-nums))
 
 (defun burning-cgen-source:/ (num &rest more-nums)
-  (make-instance '/-expression :num num :nums more-nums))
+  (make-instance '/ :num num :nums more-nums))
+
+(defun burning-cgen-source::def-local-var (name value)
+  (make-instance 'def-local-var :name name :value value))
 
 (defmacro burning-cgen-source:let ((&rest bindings) &body body)
-  (flet ((make-binding (binding)
+  (flet ((make-binding (binding sym)
 	   (let ((arg (first binding)))
-	     `(,arg (make-instance 'variable-expression :name ',arg))))
+	     `(,arg (expression-type ,sym))))
 	 (make-initializator (binding)
 	   (let ((arg (first binding))
 		 (value (second binding)))
-	     `(burning-cgen-source:setf ,arg ,value))))
-    `(let (,@(mapcar #'make-binding bindings))
-       (make-block ,@(mapcar #'make-initializator bindings)
-		       ,@body))))
+	     `(burning-cgen-source::def-local-var ,arg ,value))))
+    (let ((expression-syms (mapcar (lambda (x) (gensym)) bindings)))
+      `(let (,@(mapcar (lambda (sym binding) `(,sym ,(second binding))) expression-syms bindings))
+	 (cgen-let (,@(mapcar #'make-binding bindings expression-syms))
+	   ,@(mapcar #'make-initializator bindings)
+	   ,@body)))))
 

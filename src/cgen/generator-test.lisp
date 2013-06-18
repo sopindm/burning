@@ -163,8 +163,6 @@
 		  "float b_var = 1 - 1.5"
 		  "int c_var = a_var * 5"
 		  "float d_var = type_cast<float>( 1 ) / 2")))
-	   
-;if expression type
 
 (defmacro cg-let ((&rest bindings) &body body)
   `(burning-cgen-source:let (,@bindings) ,@body))
@@ -177,8 +175,8 @@
 	   (lines "function_with_local_bindings (int a)"
 		  "{"
 		  "  {"
-		  "    b = 1"
-		  "    c = 2"
+		  "    int b = 1"
+		  "    int c = 2"
 		  "    b * a + c"
 		  "  }"
 		  "}")))
@@ -259,4 +257,25 @@
 		   "  a + 1"
 		   "}")))
     
+(def-generator-test let-expression-type
+  (burning-cgen-source:defun let-expression-type (a int)
+    (cg-let ((b 2) (c 3) (d 4.5) (e (cg-+ a 1)) (f (cg-* a 0.5)))
+      (cg-+ b c d e f)))
+  (?lines= (generate-code)
+	   (lines "let_expression_type (int a)"
+		  "{"
+		  "  {"
+		  "    int b = 2"
+		  "    int c = 3"
+		  "    float d = 4.5"
+		  "    int e = a + 1"
+		  "    float f = a * 0.5"
+		  "    b + c + d + e + f"
+		  "  }"
+		  "}")))
+
+;let with type argument
+;type-of form
+
+;if expression type
 

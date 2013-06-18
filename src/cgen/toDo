@@ -1,19 +1,11 @@
-+ functions
-+ don't generate by symbol, generate by *generator-sources*
-+ defining global variables
-+ functions with arguments
-+ +, -, *, /
-+ local variables
-+ if-then-else
-+ move to 2-step generation
-+ function calls
-+ function argument types (bool, int, float)
-+ make separate *type-table* variable
-* defvar types (bool, int, float)
 * let types (bool, int, float)
 * function types (...)
 * return in functions
+
+* errors handling (in generating functions)
+
 * move types definition to block
+* dispatch by generator too
 * ; at end of statments
 * no generate-symbol in statments.lisp
 * operations priority
@@ -22,5 +14,3 @@
 
 * macro's
 * loops
-
-* errors handling (in generating functions)

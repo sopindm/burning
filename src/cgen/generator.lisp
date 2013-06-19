@@ -26,7 +26,7 @@
     `(let (,@(mapcar #'make-binding bindings)
 	   (*type-table* (copy-type-table)))
        ,@(mapcar #'define-type bindings)
-       (make-block ,@body))))
+       ,@body)))
      
 ;;
 ;; Basic generation
@@ -55,7 +55,7 @@
 						     :name (make-cgen-symbol ',name :function)
 						     :arglist ',(make-arguments-list typed-lambda-list)
 						     :body (cgen-let (,@(make-bind-list typed-lambda-list))
-							     ,@body))))))))
+							     (make-block ,@body)))))))))
 
 (defun burning-cgen-source:setf (place value)
   (make-instance 'setf :place place :value value))
@@ -92,20 +92,16 @@
 (defun burning-cgen-source:/ (num &rest more-nums)
   (make-instance '/ :num num :nums more-nums))
 
-(defun burning-cgen-source::def-local-var (name value)
-  (make-instance 'def-local-var :name name :value value))
-
 (defmacro burning-cgen-source:let ((&rest bindings) &body body)
   (flet ((make-binding (binding sym)
 	   (let ((arg (first binding)))
-	     `(,arg (expression-type ,sym))))
-	 (make-initializator (binding)
-	   (let ((arg (first binding))
-		 (value (second binding)))
-	     `(burning-cgen-source::def-local-var ,arg ,value))))
+	     `(,arg (expression-type ,sym)))))
     (let ((expression-syms (mapcar (lambda (x) (gensym)) bindings)))
       `(let (,@(mapcar (lambda (sym binding) `(,sym ,(second binding))) expression-syms bindings))
 	 (cgen-let (,@(mapcar #'make-binding bindings expression-syms))
-	   ,@(mapcar #'make-initializator bindings)
-	   ,@body)))))
+	   (make-instance 'let
+			  :args (list ,@(mapcar #'first bindings))
+			  :values (list ,@expression-syms)
+			  :body (list ,@body)))))))
+
 

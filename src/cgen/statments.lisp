@@ -236,6 +236,22 @@
 		(if forms #\Newline "")
 		(mapcar #'generate-line forms))))))
 
+
+;;
+;; Let statment
+;;
+
+(defclass let ()
+  ((args :initarg :args)
+   (values :initarg :values)
+   (body :initarg :body)))
+
+(defmethod generate-statment ((statment let))
+  (with-slots (args values body) statment
+    (flet ((make-setup (arg value)
+	     (make-instance 'def-local-var :name arg :value value)))
+      (generate-statment (apply #'make-block (append (mapcar #'make-setup args values) body))))))
+
 ;;
 ;; Ariphmetic
 ;;

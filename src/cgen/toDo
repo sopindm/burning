@@ -1,8 +1,9 @@
-* let types (bool, int, float)
+* errors handling (in generating functions)
+
+* rename statments to forms, make forms subclasses
+
 * function types (...)
 * return in functions
-
-* errors handling (in generating functions)
 
 * move types definition to block
 * dispatch by generator too
@@ -11,6 +12,6 @@
 * operations priority
 * generate casts in c-style, not c++
 * type generation subsystem
-
 * macro's
 * loops
+* type-of form

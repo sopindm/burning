@@ -94,14 +94,15 @@
 
 (defmacro burning-cgen-source:let ((&rest bindings) &body body)
   (flet ((make-binding (binding sym)
-	   (let ((arg (first binding)))
-	     `(,arg (expression-type ,sym)))))
+	   (let ((arg (first binding))
+		 (type (third binding)))
+	     `(,arg ,(if type `',type `(expression-type ,sym))))))
     (let ((expression-syms (mapcar (lambda (x) (gensym)) bindings)))
       `(let (,@(mapcar (lambda (sym binding) `(,sym ,(second binding))) expression-syms bindings))
 	 (cgen-let (,@(mapcar #'make-binding bindings expression-syms))
 	   (make-instance 'let
 			  :args (list ,@(mapcar #'first bindings))
 			  :values (list ,@expression-syms)
+			  :types (list ,@(mapcar (lambda (x) `',(third x)) bindings))
 			  :body (list ,@body)))))))
-
 

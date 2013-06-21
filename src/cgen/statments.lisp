@@ -56,6 +56,11 @@
 
 (defgeneric generate-statment (statment))
 
+(defgeneric return-type (statment))
+
+(defmethod return-type (statment)
+  (expression-type statment))
+
 ;;
 ;; Expressions
 ;;
@@ -117,21 +122,29 @@
    (arglist :initarg :arglist)
    (body :initarg :body)))
 
+(defmethod initialize-instance :after ((obj defun) &key &allow-other-keys)
+  (with-slots (name body) obj
+    (setf (symbol-type name) (return-type body))))
+
 (defmethod generate-statment ((statment defun))
-  (labels ((generate-argument (arg)
-	     (format nil "~a ~a" 
-		     (generate-symbol (make-cgen-symbol (second arg) :type))
-		     (generate-symbol (make-cgen-symbol (first arg) :variable))))
-	   (generate-arglist (args)
-	     (format nil "~{~a~^, ~}" (mapcar #'generate-argument args))))
-    (with-slots (name arglist body) statment
-      (format nil "~a (~a)~%~a~%" (generate-symbol name) (generate-arglist arglist) (generate-statment body)))))
+  (with-slots (name arglist body) statment
+    (labels ((generate-argument (arg)
+	       (format nil "~a ~a" 
+		       (generate-symbol (make-cgen-symbol (second arg) :type))
+		       (generate-symbol (make-cgen-symbol (first arg) :variable))))
+	     (generate-arglist (args)
+	       (format nil "~{~a~^, ~}" (mapcar #'generate-argument args))))
+      (format nil "~a ~a (~a)~%~a~%" 
+	      (generate-symbol (make-cgen-symbol (return-type body) :type))
+	      (generate-symbol name)
+	      (generate-arglist arglist)
+	      (generate-statment body)))))
 
 ;;
 ;; Funcall expression
 ;;
 
-(defclass funcall ()
+(defclass funcall (expression)
   ((name :initarg :name)
    (args-list :initarg :args-list)))
 
@@ -139,11 +152,14 @@
   (with-slots (name args-list) expr
     (format nil "~a(~{~a~^, ~})" (generate-symbol name) (mapcar #'generate-statment args-list))))
 
+(defmethod expression-type ((expr funcall))
+  (symbol-type (slot-value expr 'name)))
+
 ;;
 ;; Variable expression
 ;;
 
-(defclass variable ()
+(defclass variable (expression)
   ((name :initarg :name)))
 
 (defmethod expression-type ((expr variable))
@@ -191,12 +207,13 @@
 
 (defclass def-local-var ()
   ((name :initarg :name)
-   (value :initarg :value)))
+   (value :initarg :value)
+   (type :initarg :type)))
 
 (defmethod generate-statment ((statment def-local-var))
-  (with-slots (name value) statment
+  (with-slots (name value type) statment
     (format nil "~a ~a = ~a" 
-	    (generate-symbol (make-cgen-symbol (expression-type value) :type)) 
+	    (generate-symbol (make-cgen-symbol (aif type it (expression-type value)) :type))
 	    (generate-statment name)
 	    (generate-statment value))))
 
@@ -209,6 +226,11 @@
    (then-form :initarg :then-form)
    (else-form :initarg :else-form)
    (else-form-p :initarg :else-form-p)))
+
+(defmethod return-type ((statment if))
+  (let ((type1 (return-type (slot-value statment 'then-form)))
+	(type2 (aif (slot-value statment 'else-form) (return-type it))))
+    type1))
 
 (defmethod generate-statment ((statment if))
   (with-slots (expr then-form else-form else-form-p) statment
@@ -236,27 +258,35 @@
 		(if forms #\Newline "")
 		(mapcar #'generate-line forms))))))
 
+(defmethod return-type ((statment block))
+  (let ((*type-table* (slot-value statment 'type-table))
+	(forms (slot-value statment 'forms)))
+    (if forms (return-type (first (last forms))) 'void)))
 
 ;;
 ;; Let statment
 ;;
 
 (defclass let ()
-  ((args :initarg :args)
-   (values :initarg :values)
-   (body :initarg :body)))
+  ((body :initarg :body)))
+
+(defmethod initialize-instance :after ((obj let) &key args values types body &allow-other-keys)
+  (flet ((make-setup (arg value type)
+	   (make-instance 'def-local-var :name arg :value value :type type)))
+    (setf (slot-value obj 'body)
+	  (apply #'make-block (append (mapcar #'make-setup args values types) body)))))
 
 (defmethod generate-statment ((statment let))
-  (with-slots (args values body) statment
-    (flet ((make-setup (arg value)
-	     (make-instance 'def-local-var :name arg :value value)))
-      (generate-statment (apply #'make-block (append (mapcar #'make-setup args values) body))))))
+  (generate-statment (slot-value statment 'body)))
+
+(defmethod return-type ((statment let))
+  (return-type (slot-value statment 'body)))
 
 ;;
 ;; Ariphmetic
 ;;
 
-(defclass ariphmetic-expression ()
+(defclass ariphmetic-expression (expression)
   ((num :initarg :num)
    (nums :initarg :nums)))
 

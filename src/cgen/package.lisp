@@ -3,6 +3,9 @@
   (:export *generator*
 	   make-generator
 
+	   *type-table*
+	   make-type-table
+
 	   generate-code))
 
 (defpackage #:burning-cgen-source

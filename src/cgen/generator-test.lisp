@@ -6,7 +6,8 @@
 
 (defmacro def-generator-test (name &body body)
   `(deftest ,name 
-     (let ((*generator* (make-generator)))
+     (let ((*generator* (make-generator))
+	   (*type-table* (make-type-table)))
        ,@body)))
 
 (defmacro cg-defun (name (&rest args) &body body)
@@ -23,14 +24,14 @@
 (def-generator-test empty-function-generation
   (cg-defun empty-function ())
   (?lines= (generate-code)
-	   (lines "empty_function ()"
+	   (lines "void empty_function ()"
 		  "{"
 		  "}")))
 
 (def-generator-test generated-function-names
   (cg-defun other-empty-function ())
   (?lines= (generate-code)
-	   (lines "other_empty_function ()"
+	   (lines "void other_empty_function ()"
 		  "{"
 		  "}")))
 
@@ -45,7 +46,7 @@
   (?lines= (generate-code)
 	   (lines "int a_var = 222"
 		  ""
-		  "my_function ()"
+		  "void my_function ()"
 		  "{"
 		  "}")))
 
@@ -75,7 +76,7 @@
 (def-generator-test defining-function-with-body
   (cg-defun simple-fun () 42)
   (?lines= (generate-code)
-	   (lines "simple_fun ()"
+	   (lines "int simple_fun ()"
 		  "{"
 		  "  42"
 		  "}")))
@@ -83,7 +84,7 @@
 (def-generator-test defining-functions-with-args
   (cg-defun one-more-fun (a int b int c int) 123)
   (?lines= (generate-code)
-	   (lines "one_more_fun (int a, int b, int c)"
+	   (lines "int one_more_fun (int a, int b, int c)"
 		  "{"
 		  "  123"
 		  "}")))
@@ -91,7 +92,7 @@
 (def-generator-test defining-function-returing-argument
   (cg-defun func-returning-arg (a int) a)
   (?lines= (generate-code)
-	   (lines "func_returning_arg (int a)"
+	   (lines "int func_returning_arg (int a)"
 		  "{"
 		  "  a"
 		  "}")))
@@ -108,27 +109,27 @@
   (cg-defun simple-divide-function (a float b int) (cg-/ a b))
   (cg-defun complex-ariphmetic-function (a int b int) (cg-+ a (cg-- b a)))
   (?lines= (generate-code)
-	   (lines "simple_plus_function (int a, int b)"
+	   (lines "int simple_plus_function (int a, int b)"
 		  "{"
 		  "  a + b"
 		  "}"
 		  ""
-		  "simple_minus_function (int a, int b)"
+		  "int simple_minus_function (int a, int b)"
 		  "{"
 		  "  a - b"
 		  "}"
 		  ""
-		  "simple_multiply_function (int a, int b)"
+		  "int simple_multiply_function (int a, int b)"
 		  "{"
 		  "  a * b"
 		  "}"
 		  ""
-		  "simple_divide_function (float a, int b)"
+		  "float simple_divide_function (float a, int b)"
 		  "{"
 		  "  a / b"
 		  "}"
 		  ""
-		  "complex_ariphmetic_function (int a, int b)"
+		  "int complex_ariphmetic_function (int a, int b)"
 		  "{"
 		  "  a + b - a"
 		  "}")))
@@ -136,7 +137,7 @@
 (def-generator-test ariphmetic-functions-with-multiple-args
   (cg-defun multiple-ariphmetic-function () (cg-+ 1 (cg-* 2 4 6 8) 3 (cg-/ 4.0 7 10) (cg-- 5 3 1) 6))
   (?lines= (generate-code)
-	   (lines "multiple_ariphmetic_function ()"
+	   (lines "float multiple_ariphmetic_function ()"
 		  "{"
 		  "  1 + 2 * 4 * 6 * 8 + 3 + 4.0 / 7 / 10 + 5 - 3 - 1 + 6"
 		  "}")))
@@ -172,7 +173,7 @@
     (cg-let ((b 1) (c 2))
       (cg-+ (cg-* b a) c)))
   (?string= (generate-code)
-	   (lines "function_with_local_bindings (int a)"
+	   (lines "int function_with_local_bindings (int a)"
 		  "{"
 		  "  {"
 		  "    int b = 1"
@@ -190,7 +191,7 @@
   (burning-cgen-source:defun function-with-if-and-else (a bool b int c int)
     (cg-if a (cg-+ b 1) (cg-+ c 2)))
   (?string= (generate-code)
-	    (lines "function_with_if (bool a, int b)"
+	    (lines "int function_with_if (bool a, int b)"
 		   "{"
 		   "  if( a )"
 		   "  {"
@@ -198,7 +199,7 @@
 		   "  }"
 		   "}"
 		   ""
-		   "function_with_if_and_else (bool a, int b, int c)"
+		   "int function_with_if_and_else (bool a, int b, int c)"
 		   "{"
 		   "  if( a )"
 		   "  {"
@@ -216,11 +217,11 @@
 	     (eval `(cg-defun function-calling-function () (,arg)))))
       (form callee)))
   (?string= (generate-code)
-	    (lines "empty_function ()"
+	    (lines "void empty_function ()"
 		   "{"
 		   "}"
 		   ""
-		   "function_calling_function ()"
+		   "void function_calling_function ()"
 		   "{"
 		   "  empty_function()"
 		   "}")))
@@ -231,7 +232,7 @@
     (eval `(cg-defun function-calling-function-with-arguments (a int b int)
 	     (,f1 a b 0))))
   (?lines= (generate-code)
-	   (lines "sample_function (bool a, int b, int c)"
+	   (lines "int sample_function (bool a, int b, int c)"
 		  "{"
 		  "  if( a )"
 		  "  {"
@@ -243,7 +244,7 @@
 		  "  }"
 		  "}"
 		  ""
-		  "function_calling_function_with_arguments (int a, int b)"
+		  "int function_calling_function_with_arguments (int a, int b)"
 		  "{"
 		  "  sample_function(a, b, 0)"
 		  "}")))
@@ -252,17 +253,17 @@
   (burning-cgen-source:defun function-with-int-arg (a int)
     (cg-+ a 1))
   (?string= (generate-code)
-	    (lines "function_with_int_arg (int a)"
+	    (lines "int function_with_int_arg (int a)"
 		   "{"
 		   "  a + 1"
 		   "}")))
     
 (def-generator-test let-expression-type
-  (burning-cgen-source:defun let-expression-type (a int)
+  (cg-defun let-expression-type (a int)
     (cg-let ((b 2) (c 3) (d 4.5) (e (cg-+ a 1)) (f (cg-* a 0.5)))
       (cg-+ b c d e f)))
   (?lines= (generate-code)
-	   (lines "let_expression_type (int a)"
+	   (lines "float let_expression_type (int a)"
 		  "{"
 		  "  {"
 		  "    int b = 2"
@@ -274,8 +275,43 @@
 		  "  }"
 		  "}")))
 
-;let with type argument
-;type-of form
+(def-generator-test let-with-type-argument
+  (cg-defun let-with-type-argument ()
+    (cg-let ((a 2 float)) (cg-+ a 3)))
+  (?lines= (generate-code)
+	   (lines "float let_with_type_argument ()"
+		  "{"
+		  "  {"
+		  "    float a = 2"
+		  "    a + 3"
+		  "  }"
+		  "}")))
 
-;if expression type
+(def-generator-test simple-function-type
+  (cg-defun simple-function-with-type ()
+    (cg-+ 2 2))
+  (?lines= (generate-code)
+	   (lines "int simple_function_with_type ()"
+		  "{"
+		  "  2 + 2"
+		  "}")))
+
+;if type
+;return statment
+
+;defun errors
+;;name errors
+;;;name isn't a symbol
+;;;name already used (may be a warning
+;;;name has wrong characters
+;;arg list errors - wrong lambda lists
+;;;no type for argument
+;;;wrong types
+;;body errors
+;;;body isn't a statment
+
+
+  
+
+
 

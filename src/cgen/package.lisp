@@ -14,6 +14,8 @@
   (:export defun
 	   defvar
 	   setf
+	   
+	   return
 
 	   + - * /
 

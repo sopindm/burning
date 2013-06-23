@@ -3,7 +3,6 @@
 * rename statments to forms, make forms subclasses
 
 * function types (...)
-* return in functions
 
 * move types definition to block
 * dispatch by generator too
@@ -15,3 +14,5 @@
 * macro's
 * loops
 * type-of form
+
+* printer subsystem

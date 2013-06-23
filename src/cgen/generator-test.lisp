@@ -78,7 +78,7 @@
   (?lines= (generate-code)
 	   (lines "int simple_fun ()"
 		  "{"
-		  "  42"
+		  "  return 42"
 		  "}")))
 
 (def-generator-test defining-functions-with-args
@@ -86,7 +86,7 @@
   (?lines= (generate-code)
 	   (lines "int one_more_fun (int a, int b, int c)"
 		  "{"
-		  "  123"
+		  "  return 123"
 		  "}")))
 
 (def-generator-test defining-function-returing-argument
@@ -94,7 +94,7 @@
   (?lines= (generate-code)
 	   (lines "int func_returning_arg (int a)"
 		  "{"
-		  "  a"
+		  "  return a"
 		  "}")))
 
 (defun cg-+ (&rest args) (apply #'burning-cgen-source:+ args))
@@ -111,27 +111,27 @@
   (?lines= (generate-code)
 	   (lines "int simple_plus_function (int a, int b)"
 		  "{"
-		  "  a + b"
+		  "  return a + b"
 		  "}"
 		  ""
 		  "int simple_minus_function (int a, int b)"
 		  "{"
-		  "  a - b"
+		  "  return a - b"
 		  "}"
 		  ""
 		  "int simple_multiply_function (int a, int b)"
 		  "{"
-		  "  a * b"
+		  "  return a * b"
 		  "}"
 		  ""
 		  "float simple_divide_function (float a, int b)"
 		  "{"
-		  "  a / b"
+		  "  return a / b"
 		  "}"
 		  ""
 		  "int complex_ariphmetic_function (int a, int b)"
 		  "{"
-		  "  a + b - a"
+		  "  return a + b - a"
 		  "}")))
 
 (def-generator-test ariphmetic-functions-with-multiple-args
@@ -139,7 +139,7 @@
   (?lines= (generate-code)
 	   (lines "float multiple_ariphmetic_function ()"
 		  "{"
-		  "  1 + 2 * 4 * 6 * 8 + 3 + 4.0 / 7 / 10 + 5 - 3 - 1 + 6"
+		  "  return 1 + 2 * 4 * 6 * 8 + 3 + 4.0 / 7 / 10 + 5 - 3 - 1 + 6"
 		  "}")))
 
 (defun cg-cast (value type)
@@ -178,7 +178,7 @@
 		  "  {"
 		  "    int b = 1"
 		  "    int c = 2"
-		  "    b * a + c"
+		  "    return b * a + c"
 		  "  }"
 		  "}")))
 
@@ -191,7 +191,7 @@
   (burning-cgen-source:defun function-with-if-and-else (a bool b int c int)
     (cg-if a (cg-+ b 1) (cg-+ c 2)))
   (?string= (generate-code)
-	    (lines "int function_with_if (bool a, int b)"
+	    (lines "void function_with_if (bool a, int b)"
 		   "{"
 		   "  if( a )"
 		   "  {"
@@ -203,11 +203,11 @@
 		   "{"
 		   "  if( a )"
 		   "  {"
-		   "    b + 1"
+		   "    return b + 1"
 		   "  }"
 		   "  else"
 		   "  {"
-		   "    c + 2"
+		   "    return c + 2"
 		   "  }"
 		   "}")))
 
@@ -223,7 +223,7 @@
 		   ""
 		   "void function_calling_function ()"
 		   "{"
-		   "  empty_function()"
+		   "  return empty_function()"
 		   "}")))
 
 (def-generator-test calling-functions-with-arguments
@@ -236,17 +236,17 @@
 		  "{"
 		  "  if( a )"
 		  "  {"
-		  "    b"
+		  "    return b"
 		  "  }"
 		  "  else"
 		  "  {"
-		  "    c"
+		  "    return c"
 		  "  }"
 		  "}"
 		  ""
 		  "int function_calling_function_with_arguments (int a, int b)"
 		  "{"
-		  "  sample_function(a, b, 0)"
+		  "  return sample_function(a, b, 0)"
 		  "}")))
 
 (def-generator-test integer-variable-type
@@ -255,7 +255,7 @@
   (?string= (generate-code)
 	    (lines "int function_with_int_arg (int a)"
 		   "{"
-		   "  a + 1"
+		   "  return a + 1"
 		   "}")))
     
 (def-generator-test let-expression-type
@@ -271,7 +271,7 @@
 		  "    float d = 4.5"
 		  "    int e = a + 1"
 		  "    float f = a * 0.5"
-		  "    b + c + d + e + f"
+		  "    return b + c + d + e + f"
 		  "  }"
 		  "}")))
 
@@ -283,7 +283,7 @@
 		  "{"
 		  "  {"
 		  "    float a = 2"
-		  "    a + 3"
+		  "    return a + 3"
 		  "  }"
 		  "}")))
 
@@ -293,11 +293,63 @@
   (?lines= (generate-code)
 	   (lines "int simple_function_with_type ()"
 		  "{"
-		  "  2 + 2"
+		  "  return 2 + 2"
 		  "}")))
 
-;if type
-;return statment
+(def-generator-test if-function-type
+  (cg-defun function-with-if ()
+    (cg-if t 10))
+  (?lines= (generate-code)
+	   (lines "void function_with_if ()"
+		  "{"
+		  "  if( true )"
+		  "  {"
+		  "    10"
+		  "  }"
+		  "}")))
+
+(defun cg-return (&optional (value nil value-p))
+  (if value-p (burning-cgen-source:return value) (burning-cgen-source:return)))
+
+(def-generator-test explicit-return
+  (cg-defun function-with-return (a bool b int)
+    (cg-if a (cg-return b))
+    0)
+  (?lines= (generate-code)
+	   (lines "int function_with_return (bool a, int b)"
+		  "{"
+		  "  if( a )"
+		  "  {"
+		  "    return b"
+		  "  }"
+		  "  return 0"
+		  "}")))
+
+(def-generator-test last-form-without-return
+  (cg-defun last-form-without-return ()
+    (cg-if nil 10))
+  (?lines= (generate-code)
+	   (lines "void last_form_without_return ()"
+		  "{"
+		  "  if( false )"
+		  "  {"
+		  "    10"
+		  "  }"
+		  "}")))
+
+(def-generator-test void-return
+  (cg-defun void-return ()
+    (cg-if t (cg-return)))
+  (?lines= (generate-code)
+	   (lines "void void_return ()"
+		  "{"
+		  "  if( true )"
+		  "  {"
+		  "    return"
+		  "  }"
+		  "}")))
+
+
 
 ;defun errors
 ;;name errors

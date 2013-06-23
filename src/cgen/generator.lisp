@@ -106,3 +106,6 @@
 			  :types (list ,@(mapcar (lambda (x) `',(third x)) bindings))
 			  :body (list ,@body)))))))
 
+(defun burning-cgen-source:return (&optional (value nil value-p))
+  (apply #'make-instance 'return (if value-p `(:value ,value))))
+

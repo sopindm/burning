@@ -62,6 +62,28 @@
   (expression-type statment))
 
 ;;
+;; Return
+;;
+
+(defclass return ()
+  ((value :initarg :value)))
+
+(defmethod generate-statment ((statment return))
+  (if (slot-boundp statment 'value)
+      (format nil "return ~a" (generate-statment (slot-value statment 'value)))
+      "return"))
+
+(defgeneric make-return-form (form))
+
+(defmethod make-return-form (form)
+  (make-instance 'return :value form))
+
+(defmethod return-type ((obj return))
+  (if (slot-boundp obj 'value) 
+      (return-type (slot-value obj 'value))
+      'void))
+
+;;
 ;; Expressions
 ;;
 
@@ -124,7 +146,8 @@
 
 (defmethod initialize-instance :after ((obj defun) &key &allow-other-keys)
   (with-slots (name body) obj
-    (setf (symbol-type name) (return-type body))))
+    (setf (symbol-type name) (return-type body))
+    (setf body (make-return-form body))))
 
 (defmethod generate-statment ((statment defun))
   (with-slots (name arglist body) statment
@@ -228,9 +251,10 @@
    (else-form-p :initarg :else-form-p)))
 
 (defmethod return-type ((statment if))
-  (let ((type1 (return-type (slot-value statment 'then-form)))
-	(type2 (aif (slot-value statment 'else-form) (return-type it))))
-    type1))
+  (with-slots (expr then-form else-form else-form-p) statment
+      (let ((type1 (return-type then-form))
+	    (type2 (if else-form-p (return-type else-form))))
+	(if type2 type1 'void))))
 
 (defmethod generate-statment ((statment if))
   (with-slots (expr then-form else-form else-form-p) statment
@@ -238,6 +262,14 @@
 	    (generate-statment expr)
 	    (generate-statment then-form)
 	    (if else-form-p (lines* "" "else" (generate-statment else-form)) ""))))
+
+(defmethod make-return-form ((form if))
+  (with-slots (then-form else-form) form
+    (when else-form
+      (setf then-form (make-return-form then-form))
+      (setf else-form (make-return-form else-form))))
+  form)
+	
 
 ;;
 ;; Block statment
@@ -250,10 +282,11 @@
 (defmethod generate-statment ((statment block))
   (with-slots (forms type-table) statment
     (let ((*type-table* type-table))
-      (flet ((generate-line (line)
-	       (search-and-replace-all (format nil "  ~a" (generate-statment line)) 
-				       (format nil "~%")
-				       (format nil "~%  "))))
+      (flet ((generate-line (value)
+	       (let ((statment (generate-statment value)))
+		 (search-and-replace-all (format nil "  ~a" statment)
+					 (format nil "~%")
+					 (format nil "~%  ")))))
 	(format nil "{~a~{~a~^~%~}~%}" 
 		(if forms #\Newline "")
 		(mapcar #'generate-line forms))))))
@@ -262,6 +295,12 @@
   (let ((*type-table* (slot-value statment 'type-table))
 	(forms (slot-value statment 'forms)))
     (if forms (return-type (first (last forms))) 'void)))
+
+(defmethod make-return-form ((form block))
+  (with-slots (type-table forms) form
+    (make-instance 'block 
+		   :type-table type-table
+		   :forms (if forms (append (butlast forms) (list (make-return-form (first (last forms)))))))))
 
 ;;
 ;; Let statment
@@ -281,6 +320,9 @@
 
 (defmethod return-type ((statment let))
   (return-type (slot-value statment 'body)))
+
+(defmethod make-return-form ((form let))
+  (setf (slot-value form 'body) (make-return-form (slot-value form 'body))))
 
 ;;
 ;; Ariphmetic
@@ -330,3 +372,4 @@
 
 (defmethod expression-type ((expr /))
   'float)
+

@@ -146,6 +146,10 @@
 
 (defmethod initialize-instance :after ((obj defun) &key &allow-other-keys)
   (with-slots (name body) obj
+    (when (symbol-type name)
+      (error "Function with name ~a already defined." (cgen-symbol-symbol name)))
+    (when (symbol-type (make-cgen-symbol (cgen-symbol-symbol name) :variable))
+      (error "~a already a variable's name." (cgen-symbol-symbol name)))
     (setf (symbol-type name) (return-type body))
     (setf body (make-return-form body))))
 

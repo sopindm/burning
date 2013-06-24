@@ -33,7 +33,7 @@
 ;;
 
 (defun generate-code ()
-  (generate-statments (mapcar #'funcall (reverse (generator-sources)))))
+  (generate-statments (reverse (generator-sources))))
 
 (defun make-block (&rest forms)
   (make-instance 'block :type-table *type-table* :forms forms))
@@ -50,12 +50,11 @@
 		(make-instance 'funcall 
 			       :name (make-cgen-symbol ',name :function)
 			       :args-list (list ,@lambda-list)))
-	      (generator-add-source (named-lambda ,(make-symbol (symbol-name name)) ()
-				      (make-instance 'defun
-						     :name (make-cgen-symbol ',name :function)
-						     :arglist ',(make-arguments-list typed-lambda-list)
-						     :body (cgen-let (,@(make-bind-list typed-lambda-list))
-							     (make-block ,@body)))))))))
+	      (generator-add-source (make-instance 'defun
+						   :name (make-cgen-symbol ',name :function)
+						   :arglist ',(make-arguments-list typed-lambda-list)
+						   :body (cgen-let (,@(make-bind-list typed-lambda-list))
+							   (make-block ,@body))))))))
 
 (defun burning-cgen-source:setf (place value)
   (make-instance 'setf :place place :value value))
@@ -71,11 +70,10 @@
   (let ((value-sym (gensym)))
     `(progn (defparameter ,name (make-instance 'variable :name ',name))
 	    (let ((,value-sym ,value))
-	      (generator-add-source (named-lambda ,(make-symbol (symbol-name name)) ()
-				      (make-instance 'defvar 
-						     :name (make-cgen-symbol ',name :variable)
-						     :value ,value-sym
-						     :type (expression-type ,value-sym))))))))
+	      (generator-add-source (make-instance 'defvar 
+						   :name (make-cgen-symbol ',name :variable)
+						   :value ,value-sym
+						   :type (expression-type ,value-sym)))))))
 
 (defun burning-cgen-source:cast (expr type)
   (make-instance 'cast :expr expr :type type))

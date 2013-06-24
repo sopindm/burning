@@ -349,18 +349,38 @@
 		  "  }"
 		  "}")))
 
+(def-generator-test no-symbol-function-name
+  (?condition (eval '(burning-cgen-source:defun "a_function" ())) type-error))
 
+(def-generator-test duplicating-function-name
+  (burning-cgen-source:defun a-function ())
+  (?condition (burning-cgen-source:defun a-function (a int b float c int) (cg-+ a b c))
+	      simple-error))
+
+(def-generator-test function-name-already-a-symbol-name
+  (burning-cgen-source:defvar a-name 123)
+  (burning-cgen-source:defun a-name ())
+  (?condition (burning-cgen-source:defun a-name ()) simple-error))
 
 ;defun errors
 ;;name errors
-;;;name isn't a symbol
-;;;name already used (may be a warning
 ;;;name has wrong characters
 ;;arg list errors - wrong lambda lists
 ;;;no type for argument
 ;;;wrong types
+;;;argument names aren't symbols
 ;;body errors
 ;;;body isn't a statment
+
+
+
+
+
+
+
+
+
+
 
 
   

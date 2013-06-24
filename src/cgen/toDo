@@ -1,18 +1,19 @@
+* ; at end of statments
 * errors handling (in generating functions)
 
+* macro's
+* loops
+
 * rename statments to forms, make forms subclasses
-
-* function types (...)
-
-* move types definition to block
-* dispatch by generator too
-* ; at end of statments
 * no generate-symbol in statments.lisp
 * operations priority
 * generate casts in c-style, not c++
-* type generation subsystem
-* macro's
-* loops
 * type-of form
 
+* several languages (functions separated by packages, generators by *generator*)
+* types subsystem
 * printer subsystem
+* symbol table subsystem
+
+* base generators
+* generators for static and dynamic typed languages

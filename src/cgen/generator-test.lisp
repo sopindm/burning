@@ -359,12 +359,14 @@
 
 (def-generator-test function-name-already-a-symbol-name
   (burning-cgen-source:defvar a-name 123)
-  (burning-cgen-source:defun a-name ())
   (?condition (burning-cgen-source:defun a-name ()) simple-error))
 
+(def-generator-test function-name-has-wrong-characters
+  (?condition (burning-cgen-source:defun a_wrong_name ()) simple-error)
+  (?condition (burning-cgen-source:defun @is-wrong@ ()) simple-error)
+  (?condition (burning-cgen-source:defun 0-starts-with-digit ()) simple-error))
+
 ;defun errors
-;;name errors
-;;;name has wrong characters
 ;;arg list errors - wrong lambda lists
 ;;;no type for argument
 ;;;wrong types

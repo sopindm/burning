@@ -37,6 +37,30 @@
   (let ((name (symbol-name (cgen-symbol-symbol symbol))))
     (search-and-replace-all (string-downcase name) "-" "_")))
 
+(defun check-symbol (symbol)
+  (labels ((check-commons (symbol)
+	     (let ((name (symbol-name symbol)))
+	       (flet ((check-first-char (char)
+			(when (and (char>= char #\0) (char<= char #\9))
+			  (error "Symbol ~a starts with digit ~a" symbol char)))
+		      (check-char (char)
+			(unless (or (and (char>= char #\a) (char<= char #\z))
+				    (and (char>= char #\A) (char<= char #\Z))
+				    (and (char>= char #\0) (char<= char #\9))
+				    (member char '(#\- #\* #\% #\$ #\! #\?) :test #'char=))
+			  (error "Symbol ~a contains wrong character ~a" symbol char))))
+		 (check-first-char (char name 0))
+		 (map 'list #'check-char name))))
+	   (check-function (symbol)
+	     (when (symbol-type symbol)
+	       (error "Function with name ~a already defined." (cgen-symbol-symbol symbol)))
+	     (when (symbol-type (make-cgen-symbol (cgen-symbol-symbol symbol) :variable))
+	       (error "~a already a variable's name." symbol))))
+    (check-commons (cgen-symbol-symbol symbol))	   
+    (ecase (cgen-symbol-namespace symbol)
+      (:function (check-function symbol)))
+    t))
+
 ;;
 ;; Statments
 ;;
@@ -146,10 +170,7 @@
 
 (defmethod initialize-instance :after ((obj defun) &key &allow-other-keys)
   (with-slots (name body) obj
-    (when (symbol-type name)
-      (error "Function with name ~a already defined." (cgen-symbol-symbol name)))
-    (when (symbol-type (make-cgen-symbol (cgen-symbol-symbol name) :variable))
-      (error "~a already a variable's name." (cgen-symbol-symbol name)))
+    (check-symbol name)
     (setf (symbol-type name) (return-type body))
     (setf body (make-return-form body))))
 

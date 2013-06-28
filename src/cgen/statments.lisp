@@ -55,10 +55,12 @@
 	     (when (symbol-type symbol)
 	       (error "Function with name ~a already defined." (cgen-symbol-symbol symbol)))
 	     (when (symbol-type (make-cgen-symbol (cgen-symbol-symbol symbol) :variable))
-	       (error "~a already a variable's name." symbol))))
+	       (error "~a already a variable's name." symbol)))
+	   (check-variable (symbol)))
     (check-commons (cgen-symbol-symbol symbol))	   
     (ecase (cgen-symbol-namespace symbol)
-      (:function (check-function symbol)))
+      (:function (check-function symbol))
+      (:variable (check-variable symbol)))
     t))
 
 ;;
@@ -169,8 +171,12 @@
    (body :initarg :body)))
 
 (defmethod initialize-instance :after ((obj defun) &key &allow-other-keys)
-  (with-slots (name body) obj
+  (with-slots (name arglist body) obj
     (check-symbol name)
+    (mapc (lambda (arg)
+	    (dbind (arg type) arg
+	      (check-symbol (make-cgen-symbol arg :variable))))
+	  arglist)
     (setf (symbol-type name) (return-type body))
     (setf body (make-return-form body))))
 

@@ -366,11 +366,15 @@
   (?condition (burning-cgen-source:defun @is-wrong@ ()) simple-error)
   (?condition (burning-cgen-source:defun 0-starts-with-digit ()) simple-error))
 
+(def-generator-test function-lambda-list-without-type
+  (?condition (cg-defun function-with-wrong-lambda-list (a)) error)
+  (?condition (cg-defun other-function-with-wrong-lambda-list (a int b)) error))
+
 ;defun errors
 ;;arg list errors - wrong lambda lists
-;;;no type for argument
 ;;;wrong types
 ;;;argument names aren't symbols
+;;;argument names are wrong symbols
 ;;body errors
 ;;;body isn't a statment
 

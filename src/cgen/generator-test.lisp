@@ -370,6 +370,9 @@
   (?condition (cg-defun function-with-wrong-lambda-list (a)) error)
   (?condition (cg-defun other-function-with-wrong-lambda-list (a int b)) error))
 
+(def-generator-test function-lambda-list-with-wrong-type
+  (?condition (cg-defun funciton-with-wrong-type (a a-wrong-type)) error))
+
 ;defun errors
 ;;arg list errors - wrong lambda lists
 ;;;wrong types

@@ -26,6 +26,13 @@
 		     :parent table)))
 
 ;;
+;; Types
+;;
+
+(defun cg-check-type (type)
+  (check-type type (member burning-cgen-source:int burning-cgen-source:float burning-cgen-source:bool)))
+
+;;
 ;; Symbols
 ;;
 
@@ -175,7 +182,8 @@
     (check-symbol name)
     (mapc (lambda (arg)
 	    (dbind (arg type) arg
-	      (check-symbol (make-cgen-symbol arg :variable))))
+	      (check-symbol (make-cgen-symbol arg :variable))
+	      (cg-check-type type)))
 	  arglist)
     (setf (symbol-type name) (return-type body))
     (setf body (make-return-form body))))

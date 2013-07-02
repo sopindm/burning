@@ -373,9 +373,11 @@
 (def-generator-test function-lambda-list-with-wrong-type
   (?condition (cg-defun funciton-with-wrong-type (a a-wrong-type)) error))
 
+(def-generator-test lambda-list-argument-isnt-a-symbol
+  (?condition (cg-defun wrong-lambda-list-argument ("an arg" int)) error))
+
 ;defun errors
 ;;arg list errors - wrong lambda lists
-;;;wrong types
 ;;;argument names aren't symbols
 ;;;argument names are wrong symbols
 ;;body errors

@@ -379,10 +379,53 @@
 (def-generator-test lambda-list-arguments-are-wrong-symbols
   (?condition (cg-defun wrong-lambda-list-symbols (a_wrong_symbol int)) error))
 
-;;body errors
-;;;body isn't a statment
+(def-generator-test body-isnt-a-statment
+  (?condition (cg-defun function-with-wrong-body () (burning-cgen-source:defvar var 123)) error))
 
+;setf errors
+;;arguments aren't expressions
+;;place isn't a corrent place
+;;place and value have different types
 
+;if errors
+;;form is not a boolean expr
+;;then-form and else form has different return types
+;;then-form or else form isn't a statment
+
+;defvar with explicit type
+
+;defvar errors
+;;name isn't a symbol
+;;name is a wrong symbol
+;;name is already a function
+;;name is already a variable
+;;type is a wrong type
+;;cannot convert value to explicit type
+;;value isn't a expression (check with explicit type too)
+ 
+;cast errors
+;;type is wrong type
+;;expression isn't an expression
+;;cannot cast expression to type
+
+;+, -, *, / errors
+;;wrong type arguments
+;;arguments aren't expressions
+
+;let errors
+;;bindings isn't a list
+;;binding isn't a correct binding
+;;;has no value
+;;; *** check all defvar errors too
+
+;return errors
+;;value isn't an expression
+
+;rename block to progn
+
+;progn errors
+;;subform isn't a statment
+;;forms has different return type
 
 
 

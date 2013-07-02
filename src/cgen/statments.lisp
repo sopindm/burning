@@ -30,7 +30,7 @@
 ;;
 
 (defun cg-check-type (type)
-  (check-type type (member burning-cgen-source:int burning-cgen-source:float burning-cgen-source:bool)))
+  (check-type type (member burning-cgen-source:int burning-cgen-source:float burning-cgen-source:boolean)))
 
 ;;
 ;; Symbols
@@ -129,13 +129,13 @@
 ;;
 
 (defmethod expression-type ((value (eql nil)))
-  'bool)
+  'boolean)
 
 (defmethod generate-statment ((value (eql nil)))
   "false")
 
 (defmethod expression-type ((value (eql t)))
-  'bool)
+  'boolean)
 
 (defmethod generate-statment ((value (eql t)))
   "true")
@@ -148,10 +148,10 @@
   (format nil "~a" value))
 
 (defmethod expression-type ((value integer))
-  'int)
+  'burning-cgen-source:int)
 
 (defmethod expression-type ((value float))
-  'float)
+  'burning-cgen-source:float)
 
 ;;
 ;; Cast
@@ -380,7 +380,7 @@
 (defmethod expression-type ((expr ariphmetic-expression))
   (with-slots (num nums) expr
     (let ((types (cons (expression-type num) (mapcar #'expression-type nums))))
-      (if (some (lambda (x) (eq x 'float)) types) 'float 'int))))
+      (if (some (lambda (x) (eq x 'burning-cgen-source:float)) types) 'burning-cgen-source:float 'burning-cgen-source:int))))
 
 (defclass + (ariphmetic-expression) ())
 
@@ -401,14 +401,14 @@
 
 (defmethod generate-statment ((statment /))
   (with-slots (num nums) statment
-    (if (eq (expression-type num) 'float)
+    (if (eq (expression-type num) 'burning-cgen-source:float)
 	(generate-ariphmetic-statment "/" statment)
 	(generate-ariphmetic-statment "/" (make-instance 'ariphmetic-expression 
 							 :num (make-instance 'cast
 									     :expr num
-									     :type 'float)
+									     :type 'burning-cgen-source:float)
 							 :nums nums)))))
 
 (defmethod expression-type ((expr /))
-  'float)
+  'burning-cgen-source:float)
 

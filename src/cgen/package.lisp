@@ -19,17 +19,19 @@
 
 	   + - * /
 
-	   bool
-	   int
-	   float
-
 	   cast
 
 	   let
 
 	   if
 
-	   in-package))
+	   in-package
+
+	   int
+	   float
+	   boolean))
+
+
 
 
 

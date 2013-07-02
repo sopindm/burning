@@ -59,8 +59,8 @@
   (cg-defvar a-var nil)
   (cg-defvar b-var t)
   (?lines= (generate-code)
-	   (lines "bool a_var = false"
-		  "bool b_var = true")))
+	   (lines "boolean a_var = false"
+		  "boolean b_var = true")))
 
 (def-generator-test defvar-with-variable-value
   (let* ((var1 (cg-defvar a-var 1.23))
@@ -186,12 +186,12 @@
   `(burning-cgen-source:if ,expr ,then-form ,@(aif else-form (list it))))
 
 (def-generator-test generating-if-forms
-  (cg-defun function-with-if (a bool b int)
+  (cg-defun function-with-if (a boolean b int)
     (cg-if a b))
-  (burning-cgen-source:defun function-with-if-and-else (a bool b int c int)
+  (burning-cgen-source:defun function-with-if-and-else (a boolean b int c int)
     (cg-if a (cg-+ b 1) (cg-+ c 2)))
   (?string= (generate-code)
-	    (lines "void function_with_if (bool a, int b)"
+	    (lines "void function_with_if (boolean a, int b)"
 		   "{"
 		   "  if( a )"
 		   "  {"
@@ -199,7 +199,7 @@
 		   "  }"
 		   "}"
 		   ""
-		   "int function_with_if_and_else (bool a, int b, int c)"
+		   "int function_with_if_and_else (boolean a, int b, int c)"
 		   "{"
 		   "  if( a )"
 		   "  {"
@@ -227,12 +227,12 @@
 		   "}")))
 
 (def-generator-test calling-functions-with-arguments
-  (let ((f1 (cg-defun sample-function (a bool b int c int)
+  (let ((f1 (cg-defun sample-function (a boolean b int c int)
 	      (cg-if a b c))))
     (eval `(cg-defun function-calling-function-with-arguments (a int b int)
 	     (,f1 a b 0))))
   (?lines= (generate-code)
-	   (lines "int sample_function (bool a, int b, int c)"
+	   (lines "int sample_function (boolean a, int b, int c)"
 		  "{"
 		  "  if( a )"
 		  "  {"
@@ -312,11 +312,11 @@
   (if value-p (burning-cgen-source:return value) (burning-cgen-source:return)))
 
 (def-generator-test explicit-return
-  (cg-defun function-with-return (a bool b int)
+  (cg-defun function-with-return (a boolean b int)
     (cg-if a (cg-return b))
     0)
   (?lines= (generate-code)
-	   (lines "int function_with_return (bool a, int b)"
+	   (lines "int function_with_return (boolean a, int b)"
 		  "{"
 		  "  if( a )"
 		  "  {"

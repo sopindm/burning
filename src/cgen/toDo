@@ -18,3 +18,10 @@
 
 * base generators
 * generators for static and dynamic typed languages
+
+---
+
+* static typed language with generation to dynamic
+* statments have values
+* object system
+* type inheritance

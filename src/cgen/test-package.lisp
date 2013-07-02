@@ -5,5 +5,6 @@
 	   def-var))
 
 (defpackage #:burning-cgen-test
-  (:use #:burning-lisp #:burning-testing #:burning-cgen #:burning-cgen-test-generated))
+  (:use #:burning-lisp #:burning-testing #:burning-cgen #:burning-cgen-test-generated)
+  (:shadowing-import-from #:burning-cgen-source int float boolean))
 

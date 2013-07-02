@@ -374,12 +374,11 @@
   (?condition (cg-defun funciton-with-wrong-type (a a-wrong-type)) error))
 
 (def-generator-test lambda-list-argument-isnt-a-symbol
-  (?condition (cg-defun wrong-lambda-list-argument ("an arg" int)) error))
+  (?condition (eval '(cg-defun wrong-lambda-list-argument ("an arg" int))) error))
 
-;defun errors
-;;arg list errors - wrong lambda lists
-;;;argument names aren't symbols
-;;;argument names are wrong symbols
+(def-generator-test lambda-list-arguments-are-wrong-symbols
+  (?condition (cg-defun wrong-lambda-list-symbols (a_wrong_symbol int)) error))
+
 ;;body errors
 ;;;body isn't a statment
 

@@ -7,9 +7,6 @@
 
 (defgeneric %protobuf-write (stream value tag type))
 
-(defmethod %protobuf-write :before (stream value tag type)
-  (write-byte (* tag 8) stream))
-
 (defun write-varint (stream value)
   (when (< value 0)
 	(incf value (expt 2 64)))
@@ -21,4 +18,53 @@
 	  (mapc (lambda (x) (write-byte x stream)) bytes))))
 
 (defmethod %protobuf-write (stream value tag (type (eql :int)))
+  (write-byte (* tag 8) stream)
   (write-varint stream value))
+
+(defun write-fixnum (stream value bytes)
+  (when (< value 0)
+    (incf value (expt 2 (* bytes 8))))
+  (if (= bytes 0)
+      t
+      (progn (write-fixnum stream (floor (/ value 256)) (1- bytes))
+	     (write-byte (mod value 256) stream))))
+
+(defmethod %protobuf-write (stream value tag (type (eql :fixnum32)))
+  (write-byte (+ (* tag 8) 5) stream)
+  (write-fixnum stream value 4))
+
+(defmethod %protobuf-write (stream value tag (type (eql :fixnum64)))
+  (write-byte (+ (* tag 8) 1) stream)
+  (write-fixnum stream value 8))
+
+(defun read-varint (stream)
+  (labels ((from-varbytes ()
+	     (let ((value (read-byte stream)))
+	       (if (< value 128)
+		   value
+		   (+ (- value 128) (* (from-varbytes) 128))))))
+    (let ((value (from-varbytes)))
+      (if (>= value (expt 2 63))
+	  (- value (expt 2 64))
+	  value))))
+
+(defun read-fixnum (stream bytes)
+  (labels ((do-read (bytes)
+	     (if (= bytes 0)
+		 0
+		 (let ((value (do-read (1- bytes))))
+		   (+ (* 256 value) (read-byte stream))))))
+    (let ((value (do-read bytes)))
+      (if (>= value (expt 2 (1- (* bytes 8))))
+	  (- value (expt 2 (* 8 bytes)))
+	  value))))
+
+(defun protobuf-read (stream)
+  (let* ((tag-byte (read-byte stream))
+	 (tag (floor (/ tag-byte 8)))
+	 (wire (mod tag-byte 8)))
+    (values (ecase wire
+	      (0 (read-varint stream))
+	      (1 (read-fixnum stream 8))
+	      (5 (read-fixnum stream 4)))
+	    tag)))

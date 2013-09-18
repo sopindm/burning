@@ -17,7 +17,7 @@
 	(let ((bytes (to-varbytes value)))
 	  (mapc (lambda (x) (write-byte x stream)) bytes))))
 
-(defmethod %protobuf-write (stream value tag (type (eql :int)))
+(defmethod %protobuf-write (stream value tag (type (eql :varint)))
   (write-byte (* tag 8) stream)
   (write-varint stream value))
 
@@ -36,6 +36,11 @@
 (defmethod %protobuf-write (stream value tag (type (eql :fixnum64)))
   (write-byte (+ (* tag 8) 1) stream)
   (write-fixnum stream value 8))
+
+(defmethod %protobuf-write (stream value tag (type (eql :length-delimited)))
+  (write-byte (+ (* tag 8) 2) stream)
+  (write-varint stream (length value))
+  (write-sequence value stream))
 
 (defun read-varint (stream)
   (labels ((from-varbytes ()
@@ -59,6 +64,12 @@
 	  (- value (expt 2 (* 8 bytes)))
 	  value))))
 
+(defun read-length-delimited (stream)
+  (let* ((size (read-varint stream))
+		 (seq (make-list size)))
+	(read-sequence seq stream)
+	seq))
+
 (defun protobuf-read (stream)
   (let* ((tag-byte (read-byte stream))
 	 (tag (floor (/ tag-byte 8)))
@@ -66,5 +77,6 @@
     (values (ecase wire
 	      (0 (read-varint stream))
 	      (1 (read-fixnum stream 8))
+	      (2 (read-length-delimited stream))
 	      (5 (read-fixnum stream 4)))
 	    tag)))

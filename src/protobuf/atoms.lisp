@@ -100,17 +100,17 @@
 
 (defun cast-from-protobuf (value slot type)
   (let ((slot-type (message-slot-type type slot)))
-	(if (message-enum-p slot-type type)
-		(values (message-enum-number value slot-type type) :varint)
-		(values value slot-type))))
+	(cond ((message-enum-p slot-type type) (values (message-enum-number value slot-type type) :varint))
+		  ((message-type-p slot-type) (values (with-output-to-sequence (output) (protobuf-write-message output value nil)) :length-delimited))
+		  (t (values value slot-type)))))
 
 (defun cast-to-protobuf (value slot type)
   (let ((slot-type (message-slot-type type slot)))
-	(if (message-enum-p slot-type type)
-		(message-enum-value value slot-type type)
-		(case slot-type
-		  (:float32 (to-float32 value))
-		  (otherwise value)))))
+	(cond ((message-enum-p slot-type type) (message-enum-value value slot-type type))
+		  ((message-type-p slot-type) (with-input-from-sequence (input value) (protobuf-read-message input slot-type (length value))))
+		  (t (case slot-type
+			   (:float32 (to-float32 value))
+			   (otherwise value))))))
 	
 
 

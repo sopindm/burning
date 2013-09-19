@@ -58,6 +58,11 @@
 		 (slot (find slot slots :key #'first)))
 	(if (find :optional slot) t nil)))
 
+(defun message-type-p (type)
+  (if (gethash type *messages*)
+	  t 
+	  nil))
+
 (defun message-enums (message)
   (gethash message *enums*))
 	
@@ -87,12 +92,13 @@
 	(multiple-value-bind (value type) (cast-from-protobuf (slot-value message (first spec)) (first spec) (type-of message))
 	  (protobuf-write stream value (second spec) type))))
 
-(defun protobuf-write-message (stream message)
+(defun protobuf-write-message (stream message &optional (with-length t))
   (check-slots message)
   (let ((seq (with-output-to-sequence (output)
 			   (let ((slots (message-slots (type-of message))))
 				 (mapc (lambda (x) (write-slot output x message)) slots)))))
-	(write-varint stream (length seq)) 
+	(when with-length
+	  (write-varint stream (length seq)))
 	(write-sequence seq stream)))
 
 (defun read-slot (stream message type)
@@ -100,8 +106,8 @@
 	(let ((slot (message-tag-slot type tag)))
 	  (setf (slot-value message slot) (cast-to-protobuf value slot type)))))
 
-(defun protobuf-read-message (stream type)
-  (let* ((length (read-varint stream))
+(defun protobuf-read-message (stream type &optional (length -1 length-p))
+  (let* ((length (if length-p length (read-varint stream)))
 		 (seq (make-array length))
 		 (message (make-instance type)))
 	(read-sequence seq stream)

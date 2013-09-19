@@ -73,7 +73,25 @@
 	(let ((message (protobuf-read-message input 'message-with-enum)))
 	  (?equal (message-with-enum-b message) 'value2))))
 
-;message fields in message
+(defmessage complex-message ()
+  (a 1 :int32)
+  (b 2 simple-message)
+  (c 3 simple-message :optional t))
+
+(deftest complex-messages-test
+  (let ((message (make-instance 'complex-message
+								:a 123
+								:b (make-instance 'simple-message :a 1 :b -2 :c 3))))
+	(?message-write= message
+					 '(13 8 123 18 9 8 1 21 192 0 0 0 24 3)))
+  (let ((message (with-input-from-sequence (input '(13 8 123 18 9 8 1 21 192 0 0 0 24 3))
+				   (protobuf-read-message input 'complex-message))))
+	(?equal (complex-message-a message) 123)
+	(let ((submessage (complex-message-b message)))
+	  (?equal (simple-message-a submessage) 1)
+	  (?equal (simple-message-b submessage) -2.0)
+	  (?equal (simple-message-c submessage) 3))))
+
 ;defining protocols
 
 

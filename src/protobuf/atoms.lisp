@@ -21,6 +21,16 @@
   (write-byte (* tag 8) stream)
   (write-varint stream value))
 
+(defmethod %protobuf-write (stream value tag (type (eql :int32)))
+  (when (or (>= value (expt 2 31)) (< value (- (expt 2 31))))
+	(error "Wrong int32 value ~a" value))
+  (%protobuf-write stream value tag :varint))
+
+(defmethod %protobuf-write (stream value tag (type (eql :int64)))
+  (when (or (>= value (expt 2 63)) (< value (- (expt 2 63))))
+	(error "Wrong int64 value ~a" value))
+  (%protobuf-write stream value tag :varint))
+
 (defun write-fixnum (stream value bytes)
   (when (< value 0)
     (incf value (expt 2 (* bytes 8))))
@@ -32,6 +42,13 @@
 (defmethod %protobuf-write (stream value tag (type (eql :fixnum32)))
   (write-byte (+ (* tag 8) 5) stream)
   (write-fixnum stream value 4))
+
+(make-float-converters from-float32 to-float32 8 23 nil)
+(make-float-converters from-float64 to-float64 11 52 nil)
+
+(defmethod %protobuf-write (stream value tag (type (eql :float32)))
+  (let ((integer (from-float32 (coerce value 'float))))
+	(%protobuf-write stream integer tag :fixnum32)))
 
 (defmethod %protobuf-write (stream value tag (type (eql :fixnum64)))
   (write-byte (+ (* tag 8) 1) stream)

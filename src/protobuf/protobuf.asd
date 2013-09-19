@@ -7,7 +7,8 @@
     :licence "GPL v3"
     :serial t
     :components ((:file "package")
-				 (:file "atoms"))
-	:depends-on (#:burning-lisp))
+				 (:file "atoms")
+				 (:file "message"))
+	:depends-on (#:burning-lisp #:ieee-floats))
 
 

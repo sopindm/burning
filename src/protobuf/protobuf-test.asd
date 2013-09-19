@@ -7,7 +7,8 @@
     :licence "GPL v3"
     :serial t
     :components ((:file "test-package")
-				 (:file "atoms-test"))
+				 (:file "atoms-test")
+				 (:file "message-test"))
 	:depends-on (#:burning-lisp #:burning-testing #:burning-protobuf #:flexi-streams))
 
 

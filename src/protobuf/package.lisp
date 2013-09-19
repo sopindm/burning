@@ -1,5 +1,5 @@
 (defpackage #:burning-protobuf
-  (:use #:burning-lisp #:ieee-floats #:flexi-streams)
+  (:use #:burning-lisp #:ieee-floats #:flexi-streams #:burning-filesystem)
   (:export protobuf-write
 		   protobuf-read
 
@@ -12,4 +12,8 @@
 		   message-slot-tag
 		   message-tag-slot
 		   message-slot-optional-p
-		   message-slot-type))
+		   message-slot-type
+
+		   generate-protocol))
+
+

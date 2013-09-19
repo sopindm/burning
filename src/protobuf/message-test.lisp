@@ -4,7 +4,7 @@
 
 (defmessage simple-message ()
   (a 1 :int32)
-  (b 2 :float32)
+  (b 2 :float)
   (c 3 :int64 :optional t))
 
 (deftest making-message
@@ -26,7 +26,7 @@
 	(?null (message-slot-optional-p 'simple-message 'b))
 	(?t (message-slot-optional-p 'simple-message 'c))
 	(?equal (message-slot-type 'simple-message 'a) :int32)
-	(?equal (message-slot-type 'simple-message 'b) :float32)
+	(?equal (message-slot-type 'simple-message 'b) :float)
 	(?equal (message-slot-type 'simple-message 'c) :int64)))
 
 (defmacro ?message-write= (value result)
@@ -75,22 +75,81 @@
 
 (defmessage complex-message ()
   (a 1 :int32)
-  (b 2 simple-message)
+  (a-b 2 simple-message)
   (c 3 simple-message :optional t))
 
 (deftest complex-messages-test
   (let ((message (make-instance 'complex-message
 								:a 123
-								:b (make-instance 'simple-message :a 1 :b -2 :c 3))))
+								:a-b (make-instance 'simple-message :a 1 :b -2 :c 3))))
 	(?message-write= message
 					 '(13 8 123 18 9 8 1 21 192 0 0 0 24 3)))
   (let ((message (with-input-from-sequence (input '(13 8 123 18 9 8 1 21 192 0 0 0 24 3))
 				   (protobuf-read-message input 'complex-message))))
 	(?equal (complex-message-a message) 123)
-	(let ((submessage (complex-message-b message)))
+	(let ((submessage (complex-message-a-b message)))
 	  (?equal (simple-message-a submessage) 1)
 	  (?equal (simple-message-b submessage) -2.0)
 	  (?equal (simple-message-c submessage) 3))))
+
+(defmessage repeated-message ()
+  (a 1 :int32 :repeated t))
+
+(deftest repeated-messages
+  (let ((message (make-instance 'repeated-message)))
+	(?equal (repeated-message-a message) ())
+	(setf (repeated-message-a message) '(1 2 3))
+	(?message-write= message '(6 8 1 8 2 8 3)))
+  (let ((message (with-input-from-sequence (input '(6 8 1 8 2 8 3))
+				   (protobuf-read-message input 'repeated-message))))
+	(?equal (repeated-message-a message) '(1 2 3))))
+
+(deftest writing-protocol 
+  (let ((*default-filesystem* (make-virtual-filesystem)))
+	(let ((path (path-from-string "output.proto")))
+	  (generate-protocol path 'simple-message)
+	  (?equal (read-file path)
+			  (lines "message SimpleMessage {"
+					 "    required int32 a = 1;"
+					 "    required float b = 2;"
+					 "    optional int64 c = 3;"
+					 "}"
+					 "")))
+	(let ((path (path-from-string "output2.proto")))
+	  (generate-protocol path 'simple-message 'complex-message)
+	  (?equal (read-file path)
+			  (lines "message SimpleMessage {"
+					 "    required int32 a = 1;"
+					 "    required float b = 2;"
+					 "    optional int64 c = 3;"
+					 "}"
+					 ""
+					 "message ComplexMessage {"
+					 "    required int32 a = 1;"
+					 "    required SimpleMessage a_b = 2;"
+					 "    optional SimpleMessage c = 3;"
+					 "}"
+					 "")))
+	(let ((path (path-from-string "output3.proto")))
+	  (generate-protocol path 'repeated-message)
+	  (?equal (read-file path)
+			  (lines "message RepeatedMessage {"
+					 "    repeated int32 a = 1;"
+					 "}"
+					 "")))
+	(let ((path (path-from-string "output4.proto")))
+	  (generate-protocol path 'message-with-enum)
+	  (?lines= (read-file path)
+			   (lines "message MessageWithEnum {"
+					  "    enum E {"
+					  "        VALUE1 = 1;"
+					  "        VALUE2 = 129;"
+					  "        VALUE3 = 4;"
+					  "    }"
+					  "    required int32 a = 1;"
+					  "    required E b = 2;"
+					  "}"
+					  "")))))
 
 ;defining protocols
 

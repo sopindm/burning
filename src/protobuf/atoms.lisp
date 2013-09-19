@@ -46,7 +46,7 @@
 (make-float-converters from-float32 to-float32 8 23 nil)
 (make-float-converters from-float64 to-float64 11 52 nil)
 
-(defmethod %protobuf-write (stream value tag (type (eql :float32)))
+(defmethod %protobuf-write (stream value tag (type (eql :float)))
   (let ((integer (from-float32 (coerce value 'float))))
 	(%protobuf-write stream integer tag :fixnum32)))
 
@@ -109,7 +109,7 @@
 	(cond ((message-enum-p slot-type type) (message-enum-value value slot-type type))
 		  ((message-type-p slot-type) (with-input-from-sequence (input value) (protobuf-read-message input slot-type (length value))))
 		  (t (case slot-type
-			   (:float32 (to-float32 value))
+			   (:float (to-float32 value))
 			   (otherwise value))))))
 	
 

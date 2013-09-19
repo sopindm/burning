@@ -15,7 +15,7 @@
 	(?equal (type-of message) 'simple-message)
 	(?equal (simple-message-a message) 12)
 	(?equal (simple-message-b message) 32.12)
-	(?equal (simple-message-c message) 0)
+	(?null (slot-boundp message 'c))
 	(?equal (message-slot-tag 'simple-message 'a) 1)
 	(?equal (message-slot-tag 'simple-message 'b) 2)
 	(?equal (message-slot-tag 'simple-message 'c) 3)
@@ -36,19 +36,44 @@
 
 (deftest writing-message
   (let ((message (make-instance 'simple-message :a 42 :b -2 :c 15)))
-	(?message-write= message '(8 42 21 192 0 0 0 24 15))))
+	(?message-write= message '(9 8 42 21 192 0 0 0 24 15)))
+  (let ((message (make-instance 'simple-message :a 42 :b -2)))
+	(?message-write= message '(7 8 42 21 192 0 0 0))))
 
-;reading messages
+(deftest reading-message
+  (with-input-from-sequence (input '(9 8 42 21 192 0 0 0 24 15))
+	(let ((message (protobuf-read-message input 'simple-message)))
+	  (?equal (simple-message-a message) 42)
+	  (?equal (simple-message-b message) -2.0)
+	  (?equal (simple-message-c message) 15)))
+  (with-input-from-sequence (input '(8 8 128 1 21 192 0 0 0))
+	(let ((message (protobuf-read-message input 'simple-message)))
+	  (?equal (simple-message-a message) 128)
+	  (?equal (simple-message-b message) -2.0)
+	  (?null (slot-boundp message 'c)))))
 
-;writing message without requered fields
-;reading message without requered fields
+(deftest writing-message-without-required-fields
+  (let ((message (make-instance 'simple-message :c -2)))
+	(?error (protobuf-write-message (make-in-memory-output-stream) message)
+			"Wrong message ~a. Missed required fields ~a, ~a" message 'a 'b)))
 
-;making message with wrong typed fields
-;setting message fields to wrong typed values
+(deftest reading-message-without-required-fields
+  (with-input-from-sequence (input '(7 21 192 0 0 0 24 15))
+	(?condition (protobuf-read-message input 'simple-message) simple-error)))
 
-;enum fields in message
+(defmessage message-with-enum ()
+  (a 1 :int32)
+  (:enum e (value1 1) (value2 129) (value3 4))
+  (b 2 e))
+
+(deftest enum-fields-in-message
+  (?message-write= (make-instance 'message-with-enum :a 123 :b 'value2)
+				   '(5 8 123 16 129 1))
+  (with-input-from-sequence (input '(5 8 123 16 129 1))
+	(let ((message (protobuf-read-message input 'message-with-enum)))
+	  (?equal (message-with-enum-b message) 'value2))))
+
 ;message fields in message
-
 ;defining protocols
 
 

@@ -1,5 +1,5 @@
 (defpackage #:burning-protobuf
-  (:use #:burning-lisp #:ieee-floats)
+  (:use #:burning-lisp #:ieee-floats #:flexi-streams)
   (:export protobuf-write
 		   protobuf-read
 

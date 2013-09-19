@@ -97,3 +97,21 @@
 	      (2 (read-length-delimited stream))
 	      (5 (read-fixnum stream 4)))
 	    tag)))
+
+(defun cast-from-protobuf (value slot type)
+  (let ((slot-type (message-slot-type type slot)))
+	(if (message-enum-p slot-type type)
+		(values (message-enum-number value slot-type type) :varint)
+		(values value slot-type))))
+
+(defun cast-to-protobuf (value slot type)
+  (let ((slot-type (message-slot-type type slot)))
+	(if (message-enum-p slot-type type)
+		(message-enum-value value slot-type type)
+		(case slot-type
+		  (:float32 (to-float32 value))
+		  (otherwise value)))))
+	
+
+
+  

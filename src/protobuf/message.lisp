@@ -177,7 +177,7 @@
 						 tag)))
 			 (generate-message (type)
 			   (format output "message ~a {~%~{~a~}~{~a~}}~%~%"
-					   (translate-string type)
+					   (translate-type type nil)
 					   (mapcar (lambda (x) (generate-enum x type)) (message-enums type))
 					   (mapcar (lambda (x) (generate-slot x type)) (message-slots type)))))
 	  (mapc #'generate-message message-types))))

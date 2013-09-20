@@ -52,12 +52,12 @@
 
 (defmacro with-shared-variable (variable &body body)
   (let ((variable-sym (gensym))
-	(variable-name (if (atom variable) variable (first variable)))
-	(variable-value (if (listp variable) (second variable) variable)))
+		(variable-name (if (atom variable) variable (first variable)))
+		(variable-value (if (listp variable) (second variable) variable)))
     `(with-mutex (shared-variable-lock ,variable-value) 
        (let ((,variable-sym ,variable-value))
-	 (symbol-macrolet ((,variable-name ,`(shared-variable-value ,variable-sym)))
-	   ,@body)))))
+		 (symbol-macrolet ((,variable-name ,`(shared-variable-value ,variable-sym)))
+		   ,@body)))))
 
 (defmacro do-with-shared-variables ((&rest variables) &body body)
   (cond

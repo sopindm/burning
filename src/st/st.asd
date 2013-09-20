@@ -7,7 +7,9 @@
     :licence "GPL v3"
     :serial t
     :components ((:file "package")
-				 (:file "protocol"))
-	:depends-on (#:burning-lisp #:burning-protobuf))
+				 (:file "protocol")
+				 (:file "server")
+				 (:file "game"))
+	:depends-on (#:burning-lisp #:burning-protobuf #:usocket #:burning-threads))
 
 

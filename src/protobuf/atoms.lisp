@@ -67,14 +67,14 @@
 
 (defun read-varint (stream)
   (labels ((from-varbytes ()
-	     (let ((value (read-byte stream)))
-	       (if (< value 128)
-		   value
-		   (+ (- value 128) (* (from-varbytes) 128))))))
+			 (let ((value (read-byte stream)))
+			   (if (< value 128)
+				   value
+				   (+ (- value 128) (* (from-varbytes) 128))))))
     (let ((value (from-varbytes)))
       (if (>= value (expt 2 63))
-	  (- value (expt 2 64))
-	  value))))
+		  (- value (expt 2 64))
+		  value))))
 
 (defun read-fixnum (stream bytes)
   (labels ((do-read (bytes)
@@ -94,15 +94,15 @@
 	seq))
 
 (defun protobuf-read (stream)
-  (let* ((tag-byte (read-byte stream))
-	 (tag (floor (/ tag-byte 8)))
-	 (wire (mod tag-byte 8)))
+  (let* ((tag-info (read-varint stream))
+		 (tag (floor (/ tag-info 8)))
+		 (wire (mod tag-info 8)))
     (values (ecase wire
-	      (0 (read-varint stream))
-	      (1 (read-fixnum stream 8))
-	      (2 (read-length-delimited stream))
-	      (5 (read-fixnum stream 4)))
-	    tag)))
+			  (0 (read-varint stream))
+			  (1 (read-fixnum stream 8))
+			  (2 (read-length-delimited stream))
+			  (5 (read-fixnum stream 4)))
+			tag)))
 
 (defun cast-from-protobuf (value slot type)
   (let ((slot-type (message-slot-type type slot)))

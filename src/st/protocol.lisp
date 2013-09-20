@@ -23,6 +23,7 @@
   (timer 6 timer :optional t)
   (game-state-update 11 game-state-update :optional t)
   (response 15 response :optional t)
+  (game-event 24 game-event :optional t)
   (requests 22 request :repeated t))
 
 (defmessage request ()
@@ -207,7 +208,7 @@
 (defmessage game-state ()
   (title 1 :string)
   (your-id 2 :int32)
-  (min-playerd 3 :int32)
+  (min-players 3 :int32)
   (exit 4 exit)
   (players 6 player :repeated t)
   (buttons 7 button :repeated t)

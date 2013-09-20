@@ -151,5 +151,27 @@
 					  "}"
 					  "")))))
 
+(defmessage message-with-string ()
+  (value 2 :string))
+
+(deftest protobuf-strings
+  (let ((message (make-instance 'message-with-string :value "testing")))
+	(?message-write= message '(9 18 7 116 101 115 116 105 110 103)))
+  (let ((message (with-input-from-sequence (input '(9 18 7 116 101 115 116 105 110 103))
+				   (protobuf-read-message input 'message-with-string))))
+	(?equal (message-with-string-value message) "testing")))
+
+(defmessage message-with-bool ()
+  (value 1 :bool)
+  (value2 2 :bool))
+
+(deftest protobuf-bools
+  (let ((message (make-instance 'message-with-bool :value t :value2 nil)))
+	(?message-write= message '(4 8 1 16 0)))
+  (let ((message (with-input-from-sequence (input '(4 8 0 16 1))
+				   (protobuf-read-message input 'message-with-bool))))
+	(?equal (message-with-bool-value message) nil)
+	(?equal (message-with-bool-value2 message) t)))
+										  
 
 

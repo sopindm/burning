@@ -46,6 +46,4 @@
 
 (deftest length-delimited-reading
   (?read= '(42 8 1 7 2 3 4 3 2 4) 5 '(1 7 2 3 4 3 2 4)))
-
-
   

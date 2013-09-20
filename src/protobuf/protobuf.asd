@@ -9,6 +9,4 @@
     :components ((:file "package")
 				 (:file "atoms")
 				 (:file "message"))
-	:depends-on (#:burning-lisp #:ieee-floats #:flexi-streams #:burning-filesystem))
-
-
+	:depends-on (#:burning-lisp #:ieee-floats #:flexi-streams #:burning-filesystem #:babel))

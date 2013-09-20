@@ -186,6 +186,7 @@
 (defwriter :char (stream value)
   (stream-write-char stream value))
 
+
 ;;
 ;; Arrays
 ;;

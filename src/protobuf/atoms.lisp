@@ -59,6 +59,12 @@
   (write-varint stream (length value))
   (write-sequence value stream))
 
+(defmethod %protobuf-write (stream value tag (type (eql :string)))
+  (protobuf-write stream (string-to-octets value) tag :length-delimited))
+
+(defmethod %protobuf-write (stream value tag (type (eql :bool)))
+  (%protobuf-write stream (if value 1 0) tag :varint))
+
 (defun read-varint (stream)
   (labels ((from-varbytes ()
 	     (let ((value (read-byte stream)))
@@ -109,7 +115,9 @@
 	(cond ((message-enum-p slot-type type) (message-enum-value value slot-type type))
 		  ((message-type-p slot-type) (with-input-from-sequence (input value) (protobuf-read-message input slot-type (length value))))
 		  (t (case slot-type
+			   (:string (octets-to-string value))
 			   (:float (to-float32 value))
+			   (:bool (if (/= value 0) t nil))
 			   (otherwise value))))))
 	
 
